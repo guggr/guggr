@@ -1,0 +1,16 @@
+syntax = "proto3";
+package guggr.job.v1;
+
+import "job/types/http.proto";
+import "job/types/ping.proto";
+
+import "buf/validate/validate.proto";
+
+message Job {
+    string id = 1 [(buf.validate.field).required = true];
+
+    option (buf.validate.message).oneof = { fields: ["http", "ping"], required: true };
+
+    guggr.job.types.v1.HttpJobType http = 16;
+    guggr.job.types.v1.PingJobType ping = 17;
+}
