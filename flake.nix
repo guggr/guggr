@@ -35,7 +35,7 @@
               buf
               trufflehog
               prek
-              helm
+              kubernetes-helm
             ];
           };
         }
