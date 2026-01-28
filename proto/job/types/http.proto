@@ -1,0 +1,8 @@
+syntax = "proto3";
+package guggr.job.types.v1;
+
+import "buf/validate/validate.proto";
+
+message HttpJobType {
+    string url = 1 [(buf.validate.field).required = true];
+}

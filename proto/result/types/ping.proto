@@ -1,0 +1,13 @@
+syntax = "proto3";
+package guggr.job_result.types.v1;
+
+import "google/protobuf/duration.proto";
+
+import "buf/validate/validate.proto";
+
+message PingJobResult {
+    bool reachable = 1 [(buf.validate.field).required = true];
+    // Not required if unreachable
+    bytes ip_address = 2;
+    google.protobuf.Duration latency = 3;
+}
