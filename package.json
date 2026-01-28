@@ -1,0 +1,14 @@
+{
+	"name": "guggr",
+	"version": "0.1.0",
+	"scripts": {
+		"check": "prettier --check .",
+		"format": "prettier --write ."
+	},
+	"devDependencies": {
+		"prettier": "^3.8.1",
+		"prettier-plugin-astro": "^0.14.1",
+		"prettier-plugin-svelte": "^3.4.1",
+		"prettier-plugin-tailwindcss": "^0.7.2"
+	}
+}
