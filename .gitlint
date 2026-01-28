@@ -1,0 +1,13 @@
+[general]
+# Ignore rules, reference them by id or name (comma-separated)
+ignore=body-is-missing
+
+# verbosity should be a value between 1 and 3
+verbosity = 2
+
+### RULE CONFIGURATION ###
+[title-max-length]
+line-length=50
+
+[body-max-line-length]
+line-length=72
