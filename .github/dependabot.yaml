@@ -5,15 +5,16 @@ updates:
     schedule:
       interval: 'weekly'
 
-  - package-ecosystem: 'docker'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
+  # wait till a dockerfile / go.sum exists. Otherwise dependabot complains
+  #  - package-ecosystem: 'docker'
+  #    directory: '/'
+  #    schedule:
+  #      interval: 'weekly'
 
-  - package-ecosystem: 'gomod'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
+  #  - package-ecosystem: 'gomod'
+  #    directory: '/'
+  #    schedule:
+  #      interval: 'weekly'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
