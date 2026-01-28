@@ -15,11 +15,6 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
-  - repo: https://github.com/thoughtworks/talisman
-    rev: v1.37.0
-    hooks:
-      - id: talisman-commit
-
   - repo: https://github.com/crate-ci/typos
     rev: v1.42.3
     hooks:
@@ -56,3 +51,9 @@ repos:
         language: system
         entry: pnpm run check
         pass_filenames: false
+
+      - id: trufflehog
+        name: run trufflehog
+        entry: bash -c  'trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail'
+        language: system
+        stages: ['commit', 'push']
