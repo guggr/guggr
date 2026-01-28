@@ -35,6 +35,7 @@
               buf
               trufflehog
               prek
+              helm
             ];
           };
         }
