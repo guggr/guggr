@@ -1,0 +1,65 @@
+name: basic ci
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pnpm-lint:
+    name: 🐛 formatting & linting - pnpm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+        with:
+          version: 10
+      #   cache: true - key will be available in next action release
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check
+        run: pnpm check
+  #      - name: Build
+  #        run: pnpm build
+
+  go-lint:
+    if: ${{ false }} # wait for go setup so this does not fail
+    name: 🐛 formatting & linting - go
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-go@v6.2.0
+        with:
+          go-version: '1.25'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.8.0
+
+  trufflehog:
+    name: 🔐 secret scanning
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Calculate fetch depth
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "depth=$(($(jq length <<< '${{ toJson(github.event.commits) }}') + 2))" >> $GITHUB_ENV
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "depth=$((${{ github.event.pull_request.commits }}+2))" >> $GITHUB_ENV
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+          fi
+      - uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{env.branch}}
+          fetch-depth: ${{env.depth}}
+      - name: Secret Scanning
+        uses: trufflesecurity/trufflehog@v3.92.5
+        with:
+          extra_args: --results=verified,unknown
