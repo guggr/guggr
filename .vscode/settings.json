@@ -1,5 +1,6 @@
 {
   "protoc": {
     "options": ["--proto_path=${workspaceFolder}/proto"]
-  }
+  },
+  "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
 }
