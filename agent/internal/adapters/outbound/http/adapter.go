@@ -3,10 +3,14 @@ package http
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 
 	job "github.com/guggr/guggr/gen/proto/go/job"
+	jobresult "github.com/guggr/guggr/gen/proto/go/result"
+	types "github.com/guggr/guggr/gen/proto/go/result/types"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Adapter struct {
@@ -17,21 +21,34 @@ func NewAdapter() *Adapter {
 	return &Adapter{client: &http.Client{}}
 }
 
-func (a *Adapter) Execute(ctx context.Context, j *job.Job) error {
+func (a *Adapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetHttp()
 
 	slog.Info("executing http check", "jobid", j.GetId(), "url", config.Url)
 
 	resp, err := a.client.Get(config.Url)
 	if err != nil {
-		return err
+		return jobresult.JobResult{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("received http response %d instead of 200", resp.StatusCode)
+		return jobresult.JobResult{}, fmt.Errorf("received http response %d instead of 200", resp.StatusCode)
 	}
 
+	payload, err := io.ReadAll(resp.Body)
+
 	slog.Info("success for http job", "jobid", j.GetId(), "url", config.Url)
-	return nil
+	return jobresult.JobResult{
+		Id: "",
+		Timestamp: &timestamppb.Timestamp{
+			Seconds: timestamppb.Now().GetSeconds(),
+		},
+		Http: &types.HttpJobResult{
+			Reachable:  true,
+			IpAddress:  []byte(config.Url),
+			StatusCode: int32(resp.StatusCode),
+			Payload:    payload,
+		},
+	}, nil
 }

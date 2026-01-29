@@ -7,7 +7,10 @@ import (
 	"time"
 
 	job "github.com/guggr/guggr/gen/proto/go/job"
+	jobresult "github.com/guggr/guggr/gen/proto/go/result"
+	types "github.com/guggr/guggr/gen/proto/go/result/types"
 	probing "github.com/prometheus-community/pro-bing"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 type Adapter struct {
@@ -17,12 +20,12 @@ func NewAdapter() *Adapter {
 	return &Adapter{}
 }
 
-func (a *Adapter) Execute(ctx context.Context, j *job.Job) error {
+func (a *Adapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetPing()
 
 	pinger, err := probing.NewPinger(config.Host)
 	if err != nil {
-		return fmt.Errorf("error creating pinger for host %s: %w", config.Host, err)
+		return jobresult.JobResult{}, fmt.Errorf("error creating pinger for host %s: %w", config.Host, err)
 	}
 
 	// TODO put this into the JobDetails
@@ -33,14 +36,23 @@ func (a *Adapter) Execute(ctx context.Context, j *job.Job) error {
 
 	err = pinger.Run()
 	if err != nil {
-		return fmt.Errorf("icmp job with id %s failed with error: %w", j.GetId(), err)
+		return jobresult.JobResult{}, fmt.Errorf("icmp job with id %s failed with error: %w", j.GetId(), err)
 	}
 
 	stats := pinger.Statistics()
 	if stats.PacketsRecv == 0 {
-		return fmt.Errorf("icmp job with id %s failed since host is unreachable", config.Host)
+		return jobresult.JobResult{}, fmt.Errorf("icmp job with id %s failed since host is unreachable", config.Host)
 	}
 
 	slog.Info("success for icmp job", "jobid", j.GetId(), "host", config.Host)
-	return nil
+	return jobresult.JobResult{
+		Id: j.GetId(),
+		Ping: &types.PingJobResult{
+			Reachable: true,
+			IpAddress: []byte(config.Host),
+			Latency: &durationpb.Duration{
+				Nanos: int32(stats.MinRtt.Nanoseconds()),
+			},
+		},
+	}, err
 }

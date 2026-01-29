@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/guggr/guggr-agent/internal/adapters/inbound/rabbitmq"
+	inboundRabbit "github.com/guggr/guggr-agent/internal/adapters/inbound/rabbitmq"
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/http"
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/ping"
+	outboundRabbit "github.com/guggr/guggr-agent/internal/adapters/outbound/rabbitmq"
 	"github.com/guggr/guggr-agent/internal/core/services"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -35,21 +36,25 @@ func main() {
 	// Outbound adapter
 	httpAdapter := http.NewAdapter()
 	pingAdapter := ping.NewAdapter()
+	rabbitmqPublisherAdapter, err := outboundRabbit.NewRabbitMQPublisher(conn, "jobresults")
+	if err != nil {
+		slog.Error("error initializing rabbitmq publisher", "error", err)
+	}
 
 	// Core service
-	jobService := services.NewJobService(httpAdapter, pingAdapter)
+	jobService := services.NewJobService(httpAdapter, pingAdapter, rabbitmqPublisherAdapter)
 
 	// Inbound adapter
-	rabbitmqAdapter, err := rabbitmq.NewRabbitMQAdapter(
+	rabbitmqJobsAdapter, err := inboundRabbit.NewRabbitMQAdapter(
 		conn,
 		"jobs",
 		jobService,
 	)
 
 	if err != nil {
-		slog.Error("error initializing rabbitmq adapter")
+		slog.Error("error initializing rabbitmq adapter", "error", err)
 	}
 
-	rabbitmqAdapter.Start(10 * time.Second)
+	rabbitmqJobsAdapter.Start(10 * time.Second)
 
 }
