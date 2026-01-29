@@ -57,3 +57,9 @@ repos:
         entry: bash -c  'trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail'
         language: system
         stages: ['commit', 'push']
+
+      - id: helm-lint
+        name: run helm lint
+        language: system
+        entry: helm lint charts
+        pass_filenames: false

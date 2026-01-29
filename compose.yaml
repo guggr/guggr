@@ -1,0 +1,28 @@
+services:
+  rabbitmq:
+    image: docker.io/rabbitmq:4.2.3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: guggr
+      RABBITMQ_DEFAULT_PASS: guggr
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq/
+    restart: unless-stopped
+  postgres:
+    image: docker.io/postgres:18.1-alpine3.23
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: guggr
+      POSTGRES_PASSWORD: guggr
+      POSTGRES_DB: guggr
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    restart: unless-stopped
+
+volumes:
+  rabbitmq:
+  postgres:
