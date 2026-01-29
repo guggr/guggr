@@ -7,8 +7,22 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
+  commit-pr-lint:
+    name: 🐛 conventional commits & pr
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: webiny/action-conventional-commits@v1.3.1
+      - name: PR Conventional Commit Validation
+        uses: ytanikin/pr-conventional-commits@1.4.0
+        with:
+          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
+        if: github.event_name == 'pull_request'
+
   pnpm-lint:
     name: 🐛 formatting & linting - pnpm
     runs-on: ubuntu-24.04
@@ -39,6 +53,17 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.8.0
+
+  helm-lint:
+    name: 🐛 lint - helm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: igabaydulin/helm-check-action@0.1.4
+        env:
+          CHART_LOCATION: ./charts
+          CHART_VALUES: ./charts/values.yaml
 
   trufflehog:
     name: 🔐 secret scanning
