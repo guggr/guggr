@@ -1,6 +1,6 @@
 
 api-service/	@tametsi
-frontend/	@tametsi
+frontend/		@tametsi
 package.json	@tametsi
 pnpm-lock.yaml	@tametsi
 
