@@ -8,7 +8,7 @@ package job_resultv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	types "github.com/guggr/guggr/internal/gen/proto/go/result/types"
+	types "github.com/guggr/guggr/gen/proto/go/result/types"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"

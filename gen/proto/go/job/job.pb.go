@@ -8,7 +8,7 @@ package jobv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	types "github.com/guggr/guggr/internal/gen/proto/go/job/types"
+	types "github.com/guggr/guggr/gen/proto/go/job/types"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
