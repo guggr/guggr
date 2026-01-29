@@ -11,3 +11,6 @@ package
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+
+# ignore helm charts. See https://github.com/prettier/prettier/issues/6517
+charts/
