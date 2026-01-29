@@ -24,11 +24,13 @@ func main() {
 	// For sending a queue is needed
 	q, err := ch.QueueDeclare(
 		"jobs", // name
-		false,  // durable
+		true,   // durable
 		false,  // delete when unused
 		false,  // exclusive
 		false,  // no wait
-		nil,    // arguments
+		amqp.Table{
+			"x-queue-type": amqp.QueueTypeQuorum,
+		}, // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
