@@ -40,7 +40,7 @@ func (a *Adapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult,
 
 	slog.Info("success for http job", "jobid", j.GetId(), "url", config.Url)
 	return jobresult.JobResult{
-		Id: "",
+		Id: j.GetId(),
 		Timestamp: &timestamppb.Timestamp{
 			Seconds: timestamppb.Now().GetSeconds(),
 		},
