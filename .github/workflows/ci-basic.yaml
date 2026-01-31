@@ -20,6 +20,7 @@ jobs:
         uses: ytanikin/pr-conventional-commits@1.4.0
         with:
           task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
+          custom_labels: '{"feat": "enhancement", "fix": "bug", "docs": "documentation", "test": "test", "ci": "ci", "refactor": "refactor", "perf": "performance", "chore": "chore", "revert": "revert", "wip": "wip"}'
         if: github.event_name == 'pull_request'
 
   pnpm-lint:
