@@ -112,8 +112,8 @@ const file_result_types_http_proto_rawDesc = "" +
 	"\vstatus_code\x18\x03 \x01(\x05R\n" +
 	"statusCode\x123\n" +
 	"\alatency\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\alatency\x12\x18\n" +
-	"\apayload\x18\x05 \x01(\fR\apayloadB\xf2\x01\n" +
-	"\x1dcom.guggr.job_result.types.v1B\tHttpProtoH\x02P\x01ZAgithub.com/guggr/guggr/internal/gen/proto/go/result/types;typesv1\xa2\x02\x03GJT\xaa\x02\x18Guggr.JobResult.Types.V1\xca\x02\x18Guggr\\JobResult\\Types\\V1\xe2\x02$Guggr\\JobResult\\Types\\V1\\GPBMetadata\xea\x02\x1bGuggr::JobResult::Types::V1b\x06proto3"
+	"\apayload\x18\x05 \x01(\fR\apayloadB\xe4\x01\n" +
+	"\x1dcom.guggr.job_result.types.v1B\tHttpProtoH\x02P\x01Z3github.com/guggr/guggr/gen/pkg/result/types;typesv1\xa2\x02\x03GJT\xaa\x02\x18Guggr.JobResult.Types.V1\xca\x02\x18Guggr\\JobResult\\Types\\V1\xe2\x02$Guggr\\JobResult\\Types\\V1\\GPBMetadata\xea\x02\x1bGuggr::JobResult::Types::V1b\x06proto3"
 
 var (
 	file_result_types_http_proto_rawDescOnce sync.Once

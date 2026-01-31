@@ -72,8 +72,8 @@ const file_job_types_http_proto_rawDesc = "" +
 	"\n" +
 	"\x14job/types/http.proto\x12\x12guggr.job.types.v1\x1a\x1bbuf/validate/validate.proto\"'\n" +
 	"\vHttpJobType\x12\x18\n" +
-	"\x03url\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x03urlB\xd0\x01\n" +
-	"\x16com.guggr.job.types.v1B\tHttpProtoH\x02P\x01Z>github.com/guggr/guggr/internal/gen/proto/go/job/types;typesv1\xa2\x02\x03GJT\xaa\x02\x12Guggr.Job.Types.V1\xca\x02\x12Guggr\\Job\\Types\\V1\xe2\x02\x1eGuggr\\Job\\Types\\V1\\GPBMetadata\xea\x02\x15Guggr::Job::Types::V1b\x06proto3"
+	"\x03url\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x03urlB\xc2\x01\n" +
+	"\x16com.guggr.job.types.v1B\tHttpProtoH\x02P\x01Z0github.com/guggr/guggr/gen/pkg/job/types;typesv1\xa2\x02\x03GJT\xaa\x02\x12Guggr.Job.Types.V1\xca\x02\x12Guggr\\Job\\Types\\V1\xe2\x02\x1eGuggr\\Job\\Types\\V1\\GPBMetadata\xea\x02\x15Guggr::Job::Types::V1b\x06proto3"
 
 var (
 	file_job_types_http_proto_rawDescOnce sync.Once

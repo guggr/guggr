@@ -72,8 +72,8 @@ const file_job_types_ping_proto_rawDesc = "" +
 	"\n" +
 	"\x14job/types/ping.proto\x12\x12guggr.job.types.v1\x1a\x1bbuf/validate/validate.proto\")\n" +
 	"\vPingJobType\x12\x1a\n" +
-	"\x04host\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04hostB\xd0\x01\n" +
-	"\x16com.guggr.job.types.v1B\tPingProtoH\x02P\x01Z>github.com/guggr/guggr/internal/gen/proto/go/job/types;typesv1\xa2\x02\x03GJT\xaa\x02\x12Guggr.Job.Types.V1\xca\x02\x12Guggr\\Job\\Types\\V1\xe2\x02\x1eGuggr\\Job\\Types\\V1\\GPBMetadata\xea\x02\x15Guggr::Job::Types::V1b\x06proto3"
+	"\x04host\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x04hostB\xc2\x01\n" +
+	"\x16com.guggr.job.types.v1B\tPingProtoH\x02P\x01Z0github.com/guggr/guggr/gen/pkg/job/types;typesv1\xa2\x02\x03GJT\xaa\x02\x12Guggr.Job.Types.V1\xca\x02\x12Guggr\\Job\\Types\\V1\xe2\x02\x1eGuggr\\Job\\Types\\V1\\GPBMetadata\xea\x02\x15Guggr::Job::Types::V1b\x06proto3"
 
 var (
 	file_job_types_ping_proto_rawDescOnce sync.Once
