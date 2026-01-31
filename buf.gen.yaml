@@ -2,12 +2,12 @@ version: v1
 
 plugins:
   - plugin: buf.build/protocolbuffers/go
-    out: gen/proto/go
+    out: gen/pkg
     opt: paths=source_relative
 managed:
   enabled: true
   optimize_for: CODE_SIZE
   go_package_prefix:
-    default: github.com/guggr/guggr/internal/gen/proto/go
+    default: github.com/guggr/guggr/gen/pkg
     except:
       - buf.build/bufbuild/protovalidate
