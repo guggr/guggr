@@ -84,7 +84,7 @@ func (p *RabbitMQPublisher) PublishResult(ctx context.Context, jobresult *jobres
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "text/plain",
+			ContentType: "application/protobuf",
 			Body:        []byte(body),
 		},
 	)
