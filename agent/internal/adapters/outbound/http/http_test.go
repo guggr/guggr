@@ -33,7 +33,7 @@ func TestExecute(t *testing.T) {
 		t.Errorf("error testing http execute: %v", err)
 	}
 
-	wantedResult := jobresult.JobResult{
+	expectedResult := jobresult.JobResult{
 		Id: sampleJob.GetId(),
 		Timestamp: &timestamppb.Timestamp{
 			Seconds: timestamppb.Now().GetSeconds(),
@@ -46,5 +46,5 @@ func TestExecute(t *testing.T) {
 		},
 	}
 
-	testza.AssertEqualValues(t, result, wantedResult)
+	testza.AssertEqualValues(t, result, expectedResult)
 }
