@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	job "github.com/guggr/guggr/gen/proto/go/job"
 	jobresult "github.com/guggr/guggr/gen/proto/go/result"
@@ -41,7 +42,7 @@ func (a *HTTPAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobRes
 		},
 		Http: &types.HttpJobResult{
 			Reachable:  true,
-			IpAddress:  []byte(config.Url),
+			IpAddress:  []byte(strings.Split(resp.Request.RemoteAddr, ":")[0]),
 			StatusCode: int32(resp.StatusCode),
 			Payload:    payload,
 		},
