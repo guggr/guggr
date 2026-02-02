@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/guggr/guggr-agent/internal/core/ports"
-	job "github.com/guggr/guggr/gen/proto/go/job"
-	jobresult "github.com/guggr/guggr/gen/proto/go/result"
+	job "github.com/guggr/guggr/gen/pkg/job"
+	jobresult "github.com/guggr/guggr/gen/pkg/result"
 )
 
 type options struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gogo/protobuf/proto"
-	jobresult "github.com/guggr/guggr/gen/proto/go/result"
+	jobresult "github.com/guggr/guggr/gen/pkg/result"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

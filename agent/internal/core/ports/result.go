@@ -3,7 +3,7 @@ package ports
 import (
 	"context"
 
-	jobresult "github.com/guggr/guggr/gen/proto/go/result"
+	jobresult "github.com/guggr/guggr/gen/pkg/result"
 )
 
 type ResultPort interface {

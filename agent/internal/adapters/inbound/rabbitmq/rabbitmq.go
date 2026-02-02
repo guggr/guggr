@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/guggr/guggr-agent/internal/core/service"
-	job "github.com/guggr/guggr/gen/proto/go/job"
+	job "github.com/guggr/guggr/gen/pkg/job"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/protobuf/proto"
 )

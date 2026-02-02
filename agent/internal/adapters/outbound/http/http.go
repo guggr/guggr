@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	job "github.com/guggr/guggr/gen/proto/go/job"
-	jobresult "github.com/guggr/guggr/gen/proto/go/result"
-	types "github.com/guggr/guggr/gen/proto/go/result/types"
+	job "github.com/guggr/guggr/gen/pkg/job"
+	jobresult "github.com/guggr/guggr/gen/pkg/result"
+	types "github.com/guggr/guggr/gen/pkg/result/types"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

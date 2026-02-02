@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/MarvinJWendt/testza"
-	job "github.com/guggr/guggr/gen/proto/go/job"
-	types "github.com/guggr/guggr/gen/proto/go/job/types"
-	jobresult "github.com/guggr/guggr/gen/proto/go/result"
-	resulttypes "github.com/guggr/guggr/gen/proto/go/result/types"
+	job "github.com/guggr/guggr/gen/pkg/job"
+	types "github.com/guggr/guggr/gen/pkg/job/types"
+	jobresult "github.com/guggr/guggr/gen/pkg/result"
+	resulttypes "github.com/guggr/guggr/gen/pkg/result/types"
 	"github.com/jarcoal/httpmock"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

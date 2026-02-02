@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
-	job "github.com/guggr/guggr/gen/proto/go/job"
-	types "github.com/guggr/guggr/gen/proto/go/job/types"
+	job "github.com/guggr/guggr/gen/pkg/job"
+	types "github.com/guggr/guggr/gen/pkg/job/types"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
