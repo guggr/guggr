@@ -49,7 +49,7 @@ func (a *PingAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobRes
 		Id: j.GetId(),
 		Ping: &types.PingJobResult{
 			Reachable: true,
-			IpAddress: []byte(config.Host),
+			IpAddress: []byte(stats.IPAddr.IP),
 			Latency: &durationpb.Duration{
 				Nanos: int32(stats.MinRtt.Nanoseconds()),
 			},
