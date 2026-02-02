@@ -13,15 +13,15 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type Adapter struct {
+type HTTPAdapter struct {
 	client *http.Client
 }
 
-func NewAdapter() *Adapter {
-	return &Adapter{client: &http.Client{}}
+func NewAdapter() *HTTPAdapter {
+	return &HTTPAdapter{client: &http.Client{}}
 }
 
-func (a *Adapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
+func (a *HTTPAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetHttp()
 
 	slog.Info("executing http check", "jobid", j.GetId(), "url", config.Url)
