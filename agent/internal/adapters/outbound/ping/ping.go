@@ -41,7 +41,7 @@ func (a *PingAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobRes
 
 	stats := pinger.Statistics()
 	if stats.PacketsRecv == 0 {
-		return jobresult.JobResult{}, fmt.Errorf("icmp job with id %s failed since host is unreachable", config.Host)
+		return jobresult.JobResult{}, fmt.Errorf("icmp job with id %s failed since host %s is unreachable", j.GetId(), config.Host)
 	}
 
 	slog.Info("success for icmp job", "jobid", j.GetId(), "host", config.Host)
