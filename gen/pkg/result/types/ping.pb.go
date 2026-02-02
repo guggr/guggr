@@ -93,8 +93,8 @@ const file_result_types_ping_proto_rawDesc = "" +
 	"\treachable\x18\x01 \x01(\bB\x06\xbaH\x03\xc8\x01\x01R\treachable\x12\x1d\n" +
 	"\n" +
 	"ip_address\x18\x02 \x01(\fR\tipAddress\x123\n" +
-	"\alatency\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\alatencyB\xf2\x01\n" +
-	"\x1dcom.guggr.job_result.types.v1B\tPingProtoH\x02P\x01ZAgithub.com/guggr/guggr/internal/gen/proto/go/result/types;typesv1\xa2\x02\x03GJT\xaa\x02\x18Guggr.JobResult.Types.V1\xca\x02\x18Guggr\\JobResult\\Types\\V1\xe2\x02$Guggr\\JobResult\\Types\\V1\\GPBMetadata\xea\x02\x1bGuggr::JobResult::Types::V1b\x06proto3"
+	"\alatency\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\alatencyB\xe4\x01\n" +
+	"\x1dcom.guggr.job_result.types.v1B\tPingProtoH\x02P\x01Z3github.com/guggr/guggr/gen/pkg/result/types;typesv1\xa2\x02\x03GJT\xaa\x02\x18Guggr.JobResult.Types.V1\xca\x02\x18Guggr\\JobResult\\Types\\V1\xe2\x02$Guggr\\JobResult\\Types\\V1\\GPBMetadata\xea\x02\x1bGuggr::JobResult::Types::V1b\x06proto3"
 
 var (
 	file_result_types_ping_proto_rawDescOnce sync.Once

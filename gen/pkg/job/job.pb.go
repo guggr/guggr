@@ -8,7 +8,7 @@ package jobv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	types "github.com/guggr/guggr/internal/gen/proto/go/job/types"
+	types "github.com/guggr/guggr/gen/pkg/job/types"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -93,8 +93,8 @@ const file_job_job_proto_rawDesc = "" +
 	"\x04http\x18\x10 \x01(\v2\x1f.guggr.job.types.v1.HttpJobTypeR\x04http\x123\n" +
 	"\x04ping\x18\x11 \x01(\v2\x1f.guggr.job.types.v1.PingJobTypeR\x04ping:\x13\xbaH\x10\"\x0e\n" +
 	"\x04http\n" +
-	"\x04ping\x10\x01B\xa8\x01\n" +
-	"\x10com.guggr.job.v1B\bJobProtoH\x02P\x01Z6github.com/guggr/guggr/internal/gen/proto/go/job;jobv1\xa2\x02\x03GJX\xaa\x02\fGuggr.Job.V1\xca\x02\fGuggr\\Job\\V1\xe2\x02\x18Guggr\\Job\\V1\\GPBMetadata\xea\x02\x0eGuggr::Job::V1b\x06proto3"
+	"\x04ping\x10\x01B\x9a\x01\n" +
+	"\x10com.guggr.job.v1B\bJobProtoH\x02P\x01Z(github.com/guggr/guggr/gen/pkg/job;jobv1\xa2\x02\x03GJX\xaa\x02\fGuggr.Job.V1\xca\x02\fGuggr\\Job\\V1\xe2\x02\x18Guggr\\Job\\V1\\GPBMetadata\xea\x02\x0eGuggr::Job::V1b\x06proto3"
 
 var (
 	file_job_job_proto_rawDescOnce sync.Once

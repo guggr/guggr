@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: jobtypes/http.proto
+// source: job/types/http.proto
 
-package jobtypev1
+package typesv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
@@ -31,7 +31,7 @@ type HttpJobType struct {
 
 func (x *HttpJobType) Reset() {
 	*x = HttpJobType{}
-	mi := &file_jobtypes_http_proto_msgTypes[0]
+	mi := &file_job_types_http_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +43,7 @@ func (x *HttpJobType) String() string {
 func (*HttpJobType) ProtoMessage() {}
 
 func (x *HttpJobType) ProtoReflect() protoreflect.Message {
-	mi := &file_jobtypes_http_proto_msgTypes[0]
+	mi := &file_job_types_http_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +56,7 @@ func (x *HttpJobType) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HttpJobType.ProtoReflect.Descriptor instead.
 func (*HttpJobType) Descriptor() ([]byte, []int) {
-	return file_jobtypes_http_proto_rawDescGZIP(), []int{0}
+	return file_job_types_http_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *HttpJobType) GetUrl() string {
@@ -66,32 +66,32 @@ func (x *HttpJobType) GetUrl() string {
 	return ""
 }
 
-var File_jobtypes_http_proto protoreflect.FileDescriptor
+var File_job_types_http_proto protoreflect.FileDescriptor
 
-const file_jobtypes_http_proto_rawDesc = "" +
+const file_job_types_http_proto_rawDesc = "" +
 	"\n" +
-	"\x13jobtypes/http.proto\x12\x10guggr.jobtype.v1\x1a\x1bbuf/validate/validate.proto\"'\n" +
+	"\x14job/types/http.proto\x12\x12guggr.job.types.v1\x1a\x1bbuf/validate/validate.proto\"'\n" +
 	"\vHttpJobType\x12\x18\n" +
-	"\x03url\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x03urlB\xc6\x01\n" +
-	"\x14com.guggr.jobtype.v1B\tHttpProtoH\x02P\x01Z?github.com/guggr/guggr/internal/gen/proto/go/jobtypes;jobtypev1\xa2\x02\x03GJX\xaa\x02\x10Guggr.Jobtype.V1\xca\x02\x10Guggr\\Jobtype\\V1\xe2\x02\x1cGuggr\\Jobtype\\V1\\GPBMetadata\xea\x02\x12Guggr::Jobtype::V1b\x06proto3"
+	"\x03url\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x03urlB\xc2\x01\n" +
+	"\x16com.guggr.job.types.v1B\tHttpProtoH\x02P\x01Z0github.com/guggr/guggr/gen/pkg/job/types;typesv1\xa2\x02\x03GJT\xaa\x02\x12Guggr.Job.Types.V1\xca\x02\x12Guggr\\Job\\Types\\V1\xe2\x02\x1eGuggr\\Job\\Types\\V1\\GPBMetadata\xea\x02\x15Guggr::Job::Types::V1b\x06proto3"
 
 var (
-	file_jobtypes_http_proto_rawDescOnce sync.Once
-	file_jobtypes_http_proto_rawDescData []byte
+	file_job_types_http_proto_rawDescOnce sync.Once
+	file_job_types_http_proto_rawDescData []byte
 )
 
-func file_jobtypes_http_proto_rawDescGZIP() []byte {
-	file_jobtypes_http_proto_rawDescOnce.Do(func() {
-		file_jobtypes_http_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_jobtypes_http_proto_rawDesc), len(file_jobtypes_http_proto_rawDesc)))
+func file_job_types_http_proto_rawDescGZIP() []byte {
+	file_job_types_http_proto_rawDescOnce.Do(func() {
+		file_job_types_http_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_job_types_http_proto_rawDesc), len(file_job_types_http_proto_rawDesc)))
 	})
-	return file_jobtypes_http_proto_rawDescData
+	return file_job_types_http_proto_rawDescData
 }
 
-var file_jobtypes_http_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_jobtypes_http_proto_goTypes = []any{
-	(*HttpJobType)(nil), // 0: guggr.jobtype.v1.HttpJobType
+var file_job_types_http_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_job_types_http_proto_goTypes = []any{
+	(*HttpJobType)(nil), // 0: guggr.job.types.v1.HttpJobType
 }
-var file_jobtypes_http_proto_depIdxs = []int32{
+var file_job_types_http_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -99,26 +99,26 @@ var file_jobtypes_http_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_jobtypes_http_proto_init() }
-func file_jobtypes_http_proto_init() {
-	if File_jobtypes_http_proto != nil {
+func init() { file_job_types_http_proto_init() }
+func file_job_types_http_proto_init() {
+	if File_job_types_http_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_jobtypes_http_proto_rawDesc), len(file_jobtypes_http_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_job_types_http_proto_rawDesc), len(file_job_types_http_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_jobtypes_http_proto_goTypes,
-		DependencyIndexes: file_jobtypes_http_proto_depIdxs,
-		MessageInfos:      file_jobtypes_http_proto_msgTypes,
+		GoTypes:           file_job_types_http_proto_goTypes,
+		DependencyIndexes: file_job_types_http_proto_depIdxs,
+		MessageInfos:      file_job_types_http_proto_msgTypes,
 	}.Build()
-	File_jobtypes_http_proto = out.File
-	file_jobtypes_http_proto_goTypes = nil
-	file_jobtypes_http_proto_depIdxs = nil
+	File_job_types_http_proto = out.File
+	file_job_types_http_proto_goTypes = nil
+	file_job_types_http_proto_depIdxs = nil
 }
