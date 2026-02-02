@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/guggr/guggr-agent/internal/core/services"
+	"github.com/guggr/guggr-agent/internal/core/service"
 	job "github.com/guggr/guggr/gen/proto/go/job"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/protobuf/proto"
@@ -14,7 +14,7 @@ import (
 type options struct {
 	conn      *amqp.Connection
 	queueName *string
-	service   *services.JobService
+	service   *service.JobService
 }
 
 type Option func(options *options) error
@@ -33,7 +33,7 @@ func WithQueueName(queueName *string) Option {
 	}
 }
 
-func WithService(service *services.JobService) Option {
+func WithService(service *service.JobService) Option {
 	return func(options *options) error {
 		options.service = service
 		return nil
@@ -41,7 +41,7 @@ func WithService(service *services.JobService) Option {
 }
 
 type RabbitMQAdapter struct {
-	service services.JobService
+	service service.JobService
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   string

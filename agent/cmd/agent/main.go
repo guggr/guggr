@@ -10,7 +10,7 @@ import (
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/http"
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/ping"
 	outboundRabbit "github.com/guggr/guggr-agent/internal/adapters/outbound/rabbitmq"
-	"github.com/guggr/guggr-agent/internal/core/services"
+	"github.com/guggr/guggr-agent/internal/core/service"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Core service
-	jobService, err := services.NewJobService(services.WithHttpAdapter(httpAdapter), services.WithPingAdapter(pingAdapter), services.WithPublisherAdapter(rabbitmqPublisherAdapter))
+	jobService, err := service.NewJobService(service.WithHttpAdapter(httpAdapter), service.WithPingAdapter(pingAdapter), service.WithPublisherAdapter(rabbitmqPublisherAdapter))
 	if err != nil {
 		slog.Error("error initializing job service")
 	}
