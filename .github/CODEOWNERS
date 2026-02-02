@@ -1,0 +1,26 @@
+
+
+api-service/	@tametsi
+frontend/		@tametsi
+package.json	@tametsi
+pnpm-lock.yaml	@tametsi
+.prettier*		@tametsi
+.editorconfig	@tametsi
+go.work			@tametsi
+
+charts/					@melo-afk
+.github/				@melo-afk
+.pre-commit-config.yaml	@melo-afk
+.gitlint				@melo-afk
+.golangci.yaml			@melo-afk
+
+agent/		@philxws692
+flake.lock	@philxws692
+flake.nix	@philxws692
+.envrc		@philxws692
+
+scheduler/	@niri81
+proto/		@niri81
+gen/		@niri81
+buf.*		@niri81
+README		@niri81
