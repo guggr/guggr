@@ -40,11 +40,10 @@ func TestExecute(t *testing.T) {
 		},
 		Http: &resulttypes.HttpJobResult{
 			Reachable:  true,
-			IpAddress:  []byte(sampleJob.GetHttp().GetUrl()),
 			StatusCode: 200,
 			Payload:    []byte("lorem ipsum"),
 		},
 	}
 
-	testza.AssertEqualValues(t, result, expectedResult)
+	testza.AssertEqualValues(t, expectedResult, result)
 }
