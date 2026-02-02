@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -31,10 +30,6 @@ func (a *HTTPAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobRes
 		return jobresult.JobResult{}, err
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return jobresult.JobResult{}, fmt.Errorf("received http response %d instead of 200", resp.StatusCode)
-	}
 
 	payload, err := io.ReadAll(resp.Body)
 
