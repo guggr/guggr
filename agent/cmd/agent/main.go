@@ -43,14 +43,17 @@ func main() {
 	}
 
 	// Core service
-	jobService := services.NewJobService(httpAdapter, pingAdapter, rabbitmqPublisherAdapter)
+	jobService, err := services.NewJobService(services.WithHttpAdapter(httpAdapter), services.WithPingAdapter(pingAdapter), services.WithPublisherAdapter(rabbitmqPublisherAdapter))
+	if err != nil {
+		slog.Error("error initializing job service")
+	}
 
 	// Inbound adapter
 	jobQueueName := getEnvOrDefault("RABBITMQ_JOB_QUEUE_NAME", "jobs")
 	rabbitmqJobsAdapter, err := inboundRabbit.NewRabbitMQAdapter(
 		inboundRabbit.WithConnection(conn),
 		inboundRabbit.WithQueueName(&jobQueueName),
-		inboundRabbit.WithService(&jobService),
+		inboundRabbit.WithService(jobService),
 	)
 
 	if err != nil {

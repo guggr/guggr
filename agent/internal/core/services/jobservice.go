@@ -4,13 +4,39 @@ import (
 	"context"
 	"errors"
 
-	"github.com/guggr/guggr-agent/internal/adapters/outbound/http"
-	"github.com/guggr/guggr-agent/internal/adapters/outbound/ping"
-	"github.com/guggr/guggr-agent/internal/adapters/outbound/rabbitmq"
 	"github.com/guggr/guggr-agent/internal/core/ports"
 	job "github.com/guggr/guggr/gen/proto/go/job"
 	jobresult "github.com/guggr/guggr/gen/proto/go/result"
 )
+
+type options struct {
+	httpAdapter     ports.MonitorPort
+	pingAdapter     ports.MonitorPort
+	resultPublisher ports.ResultPort
+}
+
+type Option func(options *options) error
+
+func WithHttpAdapter(httpAdapter ports.MonitorPort) Option {
+	return func(options *options) error {
+		options.httpAdapter = httpAdapter
+		return nil
+	}
+}
+
+func WithPingAdapter(pingAdapter ports.MonitorPort) Option {
+	return func(options *options) error {
+		options.pingAdapter = pingAdapter
+		return nil
+	}
+}
+
+func WithPublisherAdapter(publisherAdapter ports.ResultPort) Option {
+	return func(options *options) error {
+		options.resultPublisher = publisherAdapter
+		return nil
+	}
+}
 
 type JobService struct {
 	httpAdapter            ports.MonitorPort
@@ -18,12 +44,21 @@ type JobService struct {
 	resultPublisherAdapter ports.ResultPort
 }
 
-func NewJobService(httpAdapter *http.Adapter, pingAdapter *ping.Adapter, resultPublisherAdapter *rabbitmq.RabbitMQPublisher) JobService {
-	return JobService{
-		httpAdapter:            httpAdapter,
-		pingAdapter:            pingAdapter,
-		resultPublisherAdapter: resultPublisherAdapter,
+func NewJobService(opts ...Option) (*JobService, error) {
+	var options options
+	for _, opt := range opts {
+		err := opt(&options)
+		if err != nil {
+			return nil, err
+		}
+
 	}
+
+	return &JobService{
+		httpAdapter:            options.httpAdapter,
+		pingAdapter:            options.pingAdapter,
+		resultPublisherAdapter: options.resultPublisher,
+	}, nil
 }
 
 func (s *JobService) ProcessJob(ctx context.Context, j *job.Job) error {
