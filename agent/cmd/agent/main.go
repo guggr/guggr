@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	inboundRabbit "github.com/guggr/guggr-agent/internal/adapters/inbound/rabbitmq"
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/http"
@@ -26,9 +27,17 @@ func main() {
 	rabbitmqPort := getEnvOrDefault("RABBITMQ_PORT", "5672")
 
 	connectionString := fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitmqUser, rabbitmqPass, rabbitmqHost, rabbitmqPort)
+	var conn *amqp.Connection
 	conn, err := amqp.Dial(connectionString)
-	if err != nil {
+	var connectionRetries = 0
+	for err != nil {
 		slog.Error("error connecting to rabbitmq", "error", err)
+		connectionRetries++
+		if connectionRetries == 5 {
+			slog.Error("could not connect to rabbitmq after 5 retries, please check your rabbitmq host")
+			os.Exit(1)
+		}
+		time.Sleep(10 * time.Second)
 	}
 	defer conn.Close()
 
