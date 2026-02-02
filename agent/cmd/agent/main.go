@@ -36,7 +36,8 @@ func main() {
 	// Outbound adapter
 	httpAdapter := http.NewAdapter()
 	pingAdapter := ping.NewAdapter()
-	rabbitmqPublisherAdapter, err := outboundRabbit.NewRabbitMQPublisher(conn, "jobresults")
+	jobResultQueueName := getEnvOrDefault("RABBITMQ_JOB_RESULT_QUEUE_NAME", "jobresults")
+	rabbitmqPublisherAdapter, err := outboundRabbit.NewRabbitMQPublisher(outboundRabbit.WithConnection(conn), outboundRabbit.WithQueueName(&jobResultQueueName))
 	if err != nil {
 		slog.Error("error initializing rabbitmq publisher", "error", err)
 	}

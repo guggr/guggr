@@ -9,21 +9,50 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+type options struct {
+	conn      *amqp.Connection
+	queueName *string
+}
+
+type Option func(options *options) error
+
+func WithConnection(conn *amqp.Connection) Option {
+	return func(options *options) error {
+		options.conn = conn
+		return nil
+	}
+}
+
+func WithQueueName(queueName *string) Option {
+	return func(options *options) error {
+		options.queueName = queueName
+		return nil
+	}
+}
+
 type RabbitMQPublisher struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   string
 }
 
-func NewRabbitMQPublisher(conn *amqp.Connection, queueName string) (*RabbitMQPublisher, error) {
-	ch, err := conn.Channel()
+func NewRabbitMQPublisher(opts ...Option) (*RabbitMQPublisher, error) {
+	var options options
+	for _, opt := range opts {
+		err := opt(&options)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	ch, err := options.conn.Channel()
 	if err != nil {
 		return nil, err
 	}
 
 	return &RabbitMQPublisher{
 		channel: ch,
-		queue:   queueName,
+		queue:   *options.queueName,
 	}, nil
 }
 
