@@ -13,14 +13,14 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-type Adapter struct {
+type PingAdapter struct {
 }
 
-func NewAdapter() *Adapter {
-	return &Adapter{}
+func NewAdapter() *PingAdapter {
+	return &PingAdapter{}
 }
 
-func (a *Adapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
+func (a *PingAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetPing()
 
 	pinger, err := probing.NewPinger(config.Host)
