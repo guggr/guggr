@@ -41,10 +41,10 @@ func WithService(service *service.JobService) Option {
 }
 
 type RabbitMQAdapter struct {
-	service service.JobService
-	conn    *amqp.Connection
-	channel *amqp.Channel
-	queue   string
+	service   service.JobService
+	conn      *amqp.Connection
+	channel   *amqp.Channel
+	queueName string
 }
 
 func NewRabbitMQAdapter(opts ...Option) (*RabbitMQAdapter, error) {
@@ -62,27 +62,30 @@ func NewRabbitMQAdapter(opts ...Option) (*RabbitMQAdapter, error) {
 	}
 
 	return &RabbitMQAdapter{
-		channel: ch,
-		queue:   *options.queueName,
-		service: *options.service,
+		channel:   ch,
+		queueName: *options.queueName,
+		service:   *options.service,
 	}, nil
 }
 
-func (a *RabbitMQAdapter) Start(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	for range ticker.C {
-		for {
-			// Get message from queue
-			msg, ok, err := a.channel.Get(a.queue, true)
-			if err != nil {
-				slog.Error("error getting messages from rabbitmq", "error", err)
-			}
-			if !ok {
-				// No message in Queue
-				break
-			}
+func (a *RabbitMQAdapter) Start() {
+	msgs, err := a.channel.Consume(
+		a.queueName,
+		"", // consumer name
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		slog.Error("error getting messages from rabbitmq", "error", err)
+	}
 
-			// create a go routine for every job
+	var infinite chan struct{}
+
+	go func() {
+		for msg := range msgs {
 			go func(d []byte) {
 				// Unmarshal protobuf
 				var j job.Job
@@ -95,10 +98,16 @@ func (a *RabbitMQAdapter) Start(interval time.Duration) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
-				if err := a.service.ProcessJob(ctx, &j); err != nil {
+				err := a.service.ProcessJob(ctx, &j)
+				if err != nil {
 					slog.Error("error executing job", "jobid", j.GetId(), "error", err)
+					return
+				} else {
+					msg.Ack(false)
 				}
 			}(msg.Body)
 		}
-	}
+	}()
+
+	<-infinite
 }

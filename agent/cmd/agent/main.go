@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"time"
 
 	inboundRabbit "github.com/guggr/guggr-agent/internal/adapters/inbound/rabbitmq"
 	"github.com/guggr/guggr-agent/internal/adapters/outbound/http"
@@ -60,7 +59,7 @@ func main() {
 		slog.Error("error initializing rabbitmq adapter", "error", err)
 	}
 
-	rabbitmqJobsAdapter.Start(10 * time.Second)
+	rabbitmqJobsAdapter.Start()
 
 }
 
