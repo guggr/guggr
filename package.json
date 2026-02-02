@@ -1,6 +1,7 @@
 {
 	"name": "guggr",
 	"version": "0.1.0",
+	"packageManager": "pnpm@10.28.0",
 	"scripts": {
 		"check": "prettier --check .",
 		"format": "prettier --write ."
