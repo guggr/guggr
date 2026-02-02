@@ -21,10 +21,10 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	rabbitmqUser := os.Getenv("RABBITMQ_USER")
-	rabbitmqPass := os.Getenv("RABBITMQ_PASS")
-	rabbitmqHost := os.Getenv("RABBITMQ_HOST")
-	rabbitmqPort := os.Getenv("RABBITMQ_PORT")
+	rabbitmqUser := getEnvOrDefault("RABBITMQ_USER", "guggr")
+	rabbitmqPass := getEnvOrDefault("RABBITMQ_PASS", "guggr")
+	rabbitmqHost := getEnvOrDefault("RABBITMQ_HOST", "localhost")
+	rabbitmqPort := getEnvOrDefault("RABBITMQ_PORT", "5672")
 
 	connectionString := fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitmqUser, rabbitmqPass, rabbitmqHost, rabbitmqPort)
 	conn, err := amqp.Dial(connectionString)
@@ -45,10 +45,11 @@ func main() {
 	jobService := services.NewJobService(httpAdapter, pingAdapter, rabbitmqPublisherAdapter)
 
 	// Inbound adapter
+	jobQueueName := getEnvOrDefault("RABBITMQ_JOB_QUEUE_NAME", "jobs")
 	rabbitmqJobsAdapter, err := inboundRabbit.NewRabbitMQAdapter(
-		conn,
-		"jobs",
-		jobService,
+		inboundRabbit.WithConnection(conn),
+		inboundRabbit.WithQueueName(&jobQueueName),
+		inboundRabbit.WithService(&jobService),
 	)
 
 	if err != nil {
@@ -57,4 +58,11 @@ func main() {
 
 	rabbitmqJobsAdapter.Start(10 * time.Second)
 
+}
+
+func getEnvOrDefault(envName string, defaultValue string) string {
+	if value, exists := os.LookupEnv(envName); exists {
+		return value
+	}
+	return defaultValue
 }

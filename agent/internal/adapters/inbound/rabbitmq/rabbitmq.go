@@ -11,6 +11,35 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+type options struct {
+	conn      *amqp.Connection
+	queueName *string
+	service   *services.JobService
+}
+
+type Option func(options *options) error
+
+func WithConnection(conn *amqp.Connection) Option {
+	return func(options *options) error {
+		options.conn = conn
+		return nil
+	}
+}
+
+func WithQueueName(queueName *string) Option {
+	return func(options *options) error {
+		options.queueName = queueName
+		return nil
+	}
+}
+
+func WithService(service *services.JobService) Option {
+	return func(options *options) error {
+		options.service = service
+		return nil
+	}
+}
+
 type RabbitMQAdapter struct {
 	service services.JobService
 	conn    *amqp.Connection
@@ -18,16 +47,24 @@ type RabbitMQAdapter struct {
 	queue   string
 }
 
-func NewRabbitMQAdapter(conn *amqp.Connection, queueName string, service services.JobService) (*RabbitMQAdapter, error) {
-	ch, err := conn.Channel()
+func NewRabbitMQAdapter(opts ...Option) (*RabbitMQAdapter, error) {
+	var options options
+	for _, opt := range opts {
+		err := opt(&options)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	ch, err := options.conn.Channel()
 	if err != nil {
 		return nil, err
 	}
 
 	return &RabbitMQAdapter{
 		channel: ch,
-		queue:   queueName,
-		service: service,
+		queue:   *options.queueName,
+		service: *options.service,
 	}, nil
 }
 
