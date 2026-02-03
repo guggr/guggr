@@ -80,6 +80,7 @@ func (a *RabbitMQAdapter) Start() {
 	)
 	if err != nil {
 		slog.Error("error getting messages from rabbitmq", "error", err)
+		return
 	}
 
 	var infinite chan struct{}
