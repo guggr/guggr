@@ -68,6 +68,8 @@ func NewRabbitMQAdapter(opts ...Option) (*RabbitMQAdapter, error) {
 	}, nil
 }
 
+// Start starts the RabbitMQ Adapter to read incoming messages from the queue
+// and execute the jobs
 func (a *RabbitMQAdapter) Start() {
 	msgs, err := a.channel.Consume(
 		a.queueName,

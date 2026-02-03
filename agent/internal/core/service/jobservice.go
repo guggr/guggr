@@ -61,6 +61,9 @@ func NewJobService(opts ...Option) (*JobService, error) {
 	}, nil
 }
 
+// ProcessJob takes a context and a job to process. It evaluates which job type
+// has been given and calls the corresponding execute function for the relevant
+// adapter
 func (s *JobService) ProcessJob(ctx context.Context, j *job.Job) error {
 	var result jobresult.JobResult
 	var err error

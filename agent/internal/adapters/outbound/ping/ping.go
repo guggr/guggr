@@ -20,6 +20,8 @@ func NewAdapter() *PingAdapter {
 	return &PingAdapter{}
 }
 
+// Execute performs an ICMP ping to the endpoint specified in the job
+// details and returns the result
 func (a *PingAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetPing()
 

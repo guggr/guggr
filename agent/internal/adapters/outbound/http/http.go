@@ -21,6 +21,8 @@ func NewAdapter() *HTTPAdapter {
 	return &HTTPAdapter{client: &http.Client{}}
 }
 
+// Execute makes an HTTP GET request to the endpoint specified in the job
+// details and returns the result
 func (a *HTTPAdapter) Execute(ctx context.Context, j *job.Job) (jobresult.JobResult, error) {
 	config := j.GetHttp()
 

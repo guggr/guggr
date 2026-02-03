@@ -56,6 +56,8 @@ func NewRabbitMQPublisher(opts ...Option) (*RabbitMQPublisher, error) {
 	}, nil
 }
 
+// PublishResult takes a context and a jobresult which gets published to the
+// specified rabbitmq queue
 func (p *RabbitMQPublisher) PublishResult(ctx context.Context, jobresult *jobresult.JobResult) error {
 	q, err := p.channel.QueueDeclare(
 		p.queue, // name
@@ -78,15 +80,15 @@ func (p *RabbitMQPublisher) PublishResult(ctx context.Context, jobresult *jobres
 	}
 
 	err = p.channel.PublishWithContext(
-		ctx,
-		"",
-		q.Name,
-		false,
-		false,
+		ctx,    // context
+		"",     // exchange name
+		q.Name, // routing key
+		false,  // mandatory
+		false,  // immediate
 		amqp.Publishing{
 			ContentType: "application/protobuf",
 			Body:        []byte(body),
-		},
+		}, // message
 	)
 	if err != nil {
 		return fmt.Errorf("error publishing job result: %v", err)
