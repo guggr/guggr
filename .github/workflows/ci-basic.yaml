@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
-      - uses: igabaydulin/helm-check-action@0.1.4
+      - uses: igabaydulin/helm-check-action@0.2.1
         env:
           CHART_LOCATION: ./charts
           CHART_VALUES: ./charts/values.yaml
