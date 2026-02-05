@@ -8,7 +8,7 @@ pub struct Config {
     rabbitmq_host: String,
     rabbitmq_port: String,
 
-    rabbitmq_queue_name: Vec<String>,
+    rabbitmq_queue_names: Vec<String>,
 }
 
 impl Config {
@@ -31,7 +31,7 @@ impl Config {
             rabbitmq_host: host,
             rabbitmq_port: port,
 
-            rabbitmq_queue_name: queue_names,
+            rabbitmq_queue_names: queue_names,
         })
     }
 
@@ -49,5 +49,13 @@ impl Config {
 
     pub fn rabbitmq_port(&self) -> String {
         self.rabbitmq_port.clone()
+    }
+
+    pub fn rabbitmq_queue_names(&self) -> Vec<String> {
+        self.rabbitmq_queue_names.clone()
+    }
+
+    pub fn rabbitmq_queue_name(&self, idx: usize) -> Option<String> {
+        self.rabbitmq_queue_names.get(idx).cloned()
     }
 }
