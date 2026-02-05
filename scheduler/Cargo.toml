@@ -5,4 +5,8 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-lapin = "3.7.2"
+anyhow = { workspace = true }
+deadpool-lapin = { workspace = true }
+gen-proto-types.workspace = true
+lapin = { workspace = true }
+prost.workspace = true
