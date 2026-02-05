@@ -1,6 +1,6 @@
 use std::{fs, path::PathBuf};
 
-use protocheck_build::{compile_protos_with_validators};
+use protocheck_build::compile_protos_with_validators;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=../../proto/");
@@ -24,13 +24,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let proto_ping_result_type = proto_dir.join("result").join("types").join("ping.proto");
 
     let proto_files = &[
-            proto_job,
-            proto_http_job_type,
-            proto_ping_job_type,
-            proto_result,
-            proto_http_result_type,
-            proto_ping_result_type,
-        ];
+        proto_job,
+        proto_http_job_type,
+        proto_ping_job_type,
+        proto_result,
+        proto_http_result_type,
+        proto_ping_result_type,
+    ];
 
     compile_protos_with_validators(
         &mut config,
