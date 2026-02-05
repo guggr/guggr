@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "crates/guggr-protobuf"
+    "gen/proto_types"
 ]
 
 resolver = "3"
@@ -13,4 +13,4 @@ authors = ["Guggr"]
 [workspace.dependencies]
 prost = "0.14"
 validator = { version = "0.20", features = ["derive"] }
-guggr-protobuf = { path = "crates/guggr-protobuf" }
+guggr-protobuf = { path = "gen/proto_types" }
