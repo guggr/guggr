@@ -58,11 +58,11 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - run: sudo apt update && sudo apt install protobuf-compiler
       - run: rustup update stable && rustup default stable
+      - uses: cargo-bins/cargo-binstall@v1.9.0
+      - run: cargo binstall cargo-nextest
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - uses: cargo-bins/cargo-binstall@v1.9.0
-      - run: cargo binstall cargo-nextest
       - run: cargo nextest run --no-tests warn
       - run: cargo clippy
 
