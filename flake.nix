@@ -36,6 +36,7 @@
               trufflehog
               prek
               kubernetes-helm
+              cargo-nextest
             ];
           };
         }
