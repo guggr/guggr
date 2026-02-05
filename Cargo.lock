@@ -293,13 +293,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "guggr-agent"
-version = "0.1.0"
-dependencies = [
- "guggr-protobuf",
-]
-
-[[package]]
 name = "guggr-protobuf"
 version = "0.1.0"
 dependencies = [
