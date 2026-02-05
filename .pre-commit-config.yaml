@@ -63,3 +63,21 @@ repos:
         language: system
         entry: helm lint charts
         pass_filenames: false
+
+      - id: cargo-fmt
+        name: run cargo fmt
+        language: system
+        entry: cargo +nightly fmt --check
+        pass_filenames: false
+
+      - id: cargo-clippy
+        name: run clippy
+        language: system
+        entry: cargo clippy
+        pass_filenames: false
+
+      - id: cargo-nextest
+        name: run cargo nextest
+        language: system
+        entry: cargo nextest run --no-tests warn
+        pass_filenames: false
