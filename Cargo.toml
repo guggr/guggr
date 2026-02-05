@@ -14,3 +14,6 @@ authors = ["Guggr"]
 prost = "0.14"
 validator = { version = "0.20", features = ["derive"] }
 guggr-protobuf = { path = "gen/proto_types" }
+prost-build = "0.14"
+protocheck = "0.1"
+protocheck-build = "0.1"

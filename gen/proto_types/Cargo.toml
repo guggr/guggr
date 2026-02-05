@@ -5,9 +5,8 @@ edition.workspace = true
 
 [dependencies]
 prost.workspace = true
-validator.workspace = true
-protocheck = "0.1"
+protocheck = { workspace = true }
 
 [build-dependencies]
-prost-build = "0.14"
-protocheck-build = "0.1"
+prost-build = { workspace = true }
+protocheck-build = { workspace = true }

@@ -1,0 +1,8 @@
+# We need to enable this explicitly, since it is not stable yet
+# https://github.com/rust-lang/rustfmt/issues/3349
+wrap_comments = true
+
+error_on_unformatted = true
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+format_code_in_doc_comments = true

@@ -36,6 +36,9 @@
               trufflehog
               prek
               kubernetes-helm
+              cargo-nextest
+              cargo-autoinherit
+              cargo-machete
             ];
           };
         }

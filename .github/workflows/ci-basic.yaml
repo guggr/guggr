@@ -10,19 +10,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  commit-pr-lint:
-    name: 🐛 conventional commits & pr
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: webiny/action-conventional-commits@v1.3.1
-      - name: PR Conventional Commit Validation
-        uses: ytanikin/pr-conventional-commits@1.5.1
-        with:
-          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
-          custom_labels: '{"feat": "enhancement", "fix": "bug", "docs": "documentation", "test": "test", "ci": "ci", "refactor": "refactor", "perf": "performance", "chore": "chore", "revert": "revert", "wip": "wip"}'
-        if: github.event_name == 'pull_request'
-
   pnpm-lint:
     name: 🐛 formatting & linting - pnpm
     runs-on: ubuntu-24.04
@@ -52,6 +39,32 @@ jobs:
         with:
           version-file: .tool-versions
 
+  cargo-fmt:
+    name: 🐛 formatting - cargo nightly
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - run: rustup update nightly && rustup default nightly
+      - run: rustup component add rustfmt --toolchain nightly
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - run: cargo +nightly fmt --check
+
+  cargo-lint:
+    name: 🐛 formatting & linting - cargo
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: protobuf-compiler
+      - run: rustup update stable && rustup default stable
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - run: cargo clippy
+
   helm-lint:
     name: 🐛 lint - helm
     runs-on: ubuntu-24.04
@@ -62,6 +75,25 @@ jobs:
         env:
           CHART_LOCATION: ./charts
           CHART_VALUES: ./charts/values.yaml
+
+  cargo-nextest:
+    name: 🧐 testing - cargo
+    runs-on: ubuntu-24.04
+    needs:
+      - cargo-lint
+      - cargo-fmt
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: protobuf-compiler
+      - run: rustup update stable && rustup default stable
+      - uses: cargo-bins/cargo-binstall@v1.9.0
+      - run: cargo binstall cargo-nextest
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - run: cargo nextest run --no-tests warn
 
   trufflehog:
     name: 🔐 secret scanning
