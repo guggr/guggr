@@ -1,7 +1,5 @@
 [workspace]
-members = [
-    "gen/proto_types"
-]
+members = ["gen/proto_types", "config"]
 
 resolver = "3"
 
@@ -17,3 +15,4 @@ gen-proto-types = { path = "gen/proto_types" }
 prost-build = "0.14"
 protocheck = "0.1"
 protocheck-build = "0.1"
+anyhow = "1.0.100"
