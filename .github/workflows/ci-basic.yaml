@@ -56,7 +56,7 @@ jobs:
       - run: rustup update stable && rustup default stable
       - uses: taiki-e/install-action@v2.9.4
         with:
-          tool: cargo-nextest
+          tool: cargo-nextest@0.9.126
       - run: cargo nextest run --no-tests warn
       - run: cargo clippy
       - run: cargo build --release
