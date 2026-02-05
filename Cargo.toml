@@ -1,0 +1,19 @@
+[workspace]
+members = [
+    "gen/proto_types"
+]
+
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Guggr"]
+
+[workspace.dependencies]
+prost = "0.14"
+validator = { version = "0.20", features = ["derive"] }
+guggr-protobuf = { path = "gen/proto_types" }
+prost-build = "0.14"
+protocheck = "0.1"
+protocheck-build = "0.1"

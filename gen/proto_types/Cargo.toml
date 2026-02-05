@@ -1,0 +1,12 @@
+[package]
+name = "guggr-protobuf"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+prost.workspace = true
+protocheck = { workspace = true }
+
+[build-dependencies]
+prost-build = { workspace = true }
+protocheck-build = { workspace = true }

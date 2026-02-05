@@ -25,3 +25,8 @@ updates:
     directory: '/charts'
     schedule:
       interval: 'weekly'
+
+  - package-ecosystem: 'rust-toolchain'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
