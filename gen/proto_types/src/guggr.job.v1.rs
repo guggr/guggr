@@ -3,8 +3,12 @@
 pub struct Job {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(enumeration = "JobType", tag = "16")]
+    #[prost(enumeration = "JobType", tag = "2")]
     pub job_type: i32,
+    #[prost(message, optional, tag = "16")]
+    pub http: ::core::option::Option<super::types::v1::HttpJobType>,
+    #[prost(message, optional, tag = "17")]
+    pub ping: ::core::option::Option<super::types::v1::PingJobType>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
