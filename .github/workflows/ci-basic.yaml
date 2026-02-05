@@ -27,8 +27,6 @@ jobs:
             rust:
               - agent/**
               - scheduler/**
-              - dispatcher/**
-              - notifier/**
               - evaluator/**
               - gen/**
               - Cargo.toml
@@ -41,7 +39,9 @@ jobs:
               - '**/*.yaml'
               - '**/*.json'
               - '!charts/**'
-            go: backend/**
+            go:
+              - api-service/**
+              - '**/*.go'
             helm: charts/**
 
   pnpm-lint:
