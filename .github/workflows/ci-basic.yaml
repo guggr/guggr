@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
-      - run: apt update && apt install protobuf-compiler
+      - run: sudo apt update && sudo apt install protobuf-compiler
       - run: rustup update stable && rustup default stable
       - uses: cargo-bins/cargo-binstall@v1.9.0
       - run: cargo binstall cargo-nextest
