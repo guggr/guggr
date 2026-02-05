@@ -56,7 +56,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
-      - run: sudo apt update && sudo apt install protobuf-compiler
+      - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
       - uses: Swatinem/rust-cache@v2.8.2
         with:
@@ -82,7 +84,9 @@ jobs:
       - cargo-fmt
     steps:
       - uses: actions/checkout@v6.0.2
-      - run: sudo apt update && sudo apt install protobuf-compiler
+      - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
       - uses: cargo-bins/cargo-binstall@v1.9.0
       - run: cargo binstall cargo-nextest
