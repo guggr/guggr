@@ -1,0 +1,90 @@
+@help:
+	just --list
+
+alias c := check
+alias f := fmt
+alias l := lint
+alias t := test
+alias r := rust
+alias clippy := lint-rust
+alias nextest := test-rust
+
+# Format the source code
+[group('bundle')]
+[parallel]
+check: fmt lint test
+
+# Format the source code
+[group('bundle')]
+[parallel]
+fmt: fmt-rust fmt-pnpm fmt-go
+
+# Lint the source code
+[group('bundle')]
+[parallel]
+lint: lint-rust lint-go
+
+# Test the source code
+[group('bundle')]
+[parallel]
+test: test-rust
+
+# Run all rust recipes
+[group('bundle')]
+rust: fmt-rust lint-rust test-rust autoinherit machete
+
+# Run prettier
+[group('pnpm')]
+[group('format')]
+fmt-pnpm:
+	pnpm prettier . -w --log-level warn
+
+# Run golangci-lint fmt
+[group('go')]
+[group('format')]
+fmt-go:
+	golangci-lint fmt .
+
+# Run golangci-lint
+[group('go')]
+[group('lint')]
+lint-go:
+	golangci-lint run .
+
+# Run rustfmt
+[group('rust')]
+[group('format')]
+fmt-rust:
+	cargo +nightly fmt
+
+# Run clippy
+[group('rust')]
+[group('lint')]
+lint-rust:
+	cargo clippy
+
+# Run nextest
+[group('rust')]
+[group('test')]
+test-rust:
+	cargo nextest run --no-tests warn
+
+# Run machete
+[group('rust')]
+machete:
+	cargo machete
+
+# Run autoinherit
+[group('rust')]
+autoinherit:
+	cargo autoinherit
+
+# Run clippy with pedantic settings
+[group('rust')]
+bashme:
+	cargo clippy -- -W clippy::nursery -W clippy::pedantic
+
+# Compile the docs and open them
+[group('rust')]
+docs:
+	cargo doc --document-private-items --open
