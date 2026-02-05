@@ -58,12 +58,9 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - run: sudo apt update && sudo apt install protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: cargo-bins/cargo-binstall@v1.9.0
-      - run: cargo binstall cargo-nextest
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo nextest run --no-tests warn
       - run: cargo clippy
 
   helm-lint:
@@ -76,6 +73,23 @@ jobs:
         env:
           CHART_LOCATION: ./charts
           CHART_VALUES: ./charts/values.yaml
+
+  cargo-nextest:
+    name: 🧐 testing - cargo
+    runs-on: ubuntu-24.04
+    needs:
+      - cargo-lint
+      - cargo-fmt
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - run: sudo apt update && sudo apt install protobuf-compiler
+      - run: rustup update stable && rustup default stable
+      - uses: cargo-bins/cargo-binstall@v1.9.0
+      - run: cargo binstall cargo-nextest
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - run: cargo nextest run --no-tests warn
 
   trufflehog:
     name: 🔐 secret scanning
