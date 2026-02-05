@@ -1,6 +1,7 @@
 use std::env;
 
 use anyhow::{Context, Result};
+use urlencoding::encode;
 
 #[derive(Debug, PartialEq)]
 pub struct Config {
@@ -50,6 +51,19 @@ impl Config {
 
     pub fn rabbitmq_port(&self) -> String {
         self.rabbitmq_port.clone()
+    }
+
+    pub fn connection_url(&self, tls: bool) -> String {
+        let protocol = if tls { "amqps" } else { "amqp" };
+
+        format!(
+            "{}://{}:{}@{}:{}/%2f",
+            protocol,
+            encode(&self.rabbitmq_user()),
+            encode(&self.rabbitmq_password()),
+            self.rabbitmq_host(),
+            self.rabbitmq_port()
+        )
     }
 
     pub fn rabbitmq_queue_names(&self) -> Vec<String> {
@@ -128,6 +142,64 @@ mod tests {
             assert_eq!(config.rabbitmq_password(), "password");
             assert_eq!(config.rabbitmq_host(), "host");
             assert_eq!(config.rabbitmq_port(), "port");
+            assert_eq!(
+                config.connection_url(false),
+                "amqp://user:password@host:port/%2f"
+            );
+            assert_eq!(
+                config.connection_url(true),
+                "amqps://user:password@host:port/%2f"
+            );
+
+            assert_eq!(
+                config.rabbitmq_queue_names(),
+                vec!["a".to_owned(), "b".to_owned()]
+            );
+            assert_eq!(config.rabbitmq_queue_name(0), Some("a".to_owned()));
+            assert_eq!(config.rabbitmq_queue_name(1), Some("b".to_owned()));
+            assert_eq!(config.rabbitmq_queue_name(2), None);
+            assert_eq!(config.rabbitmq_queue_name(3), None);
+            assert_eq!(config.rabbitmq_queue_name(99), None);
+        })
+    }
+
+    #[test]
+    fn special_characters() {
+        let env_vars = vec![
+            ("RABBITMQ_USER", Some("us:r")),
+            ("RABBITMQ_PASSWORD", Some("p@ssword")),
+            ("RABBITMQ_HOST", Some("host")),
+            ("RABBITMQ_PORT", Some("port")),
+            ("queue_a", Some("a")),
+            ("queue_b", Some("b")),
+        ];
+
+        temp_env::with_vars(env_vars, || {
+            let config = Config::from_env(&["queue_a", "queue_b"]).unwrap();
+            assert_eq!(
+                config,
+                Config {
+                    rabbitmq_user: "us:r".to_owned(),
+                    rabbitmq_password: "p@ssword".to_owned(),
+                    rabbitmq_host: "host".to_owned(),
+                    rabbitmq_port: "port".to_owned(),
+
+                    rabbitmq_queue_names: vec!["a".to_owned(), "b".to_owned()]
+                }
+            );
+
+            assert_eq!(config.rabbitmq_user(), "us:r");
+            assert_eq!(config.rabbitmq_password(), "p@ssword");
+            assert_eq!(config.rabbitmq_host(), "host");
+            assert_eq!(config.rabbitmq_port(), "port");
+            assert_eq!(
+                config.connection_url(false),
+                "amqp://us%3Ar:p%40ssword@host:port/%2f"
+            );
+            assert_eq!(
+                config.connection_url(true),
+                "amqps://us%3Ar:p%40ssword@host:port/%2f"
+            );
 
             assert_eq!(
                 config.rabbitmq_queue_names(),
