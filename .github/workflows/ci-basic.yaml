@@ -7,11 +7,13 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   changes:
+    name: 🎯 identify changes
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
     outputs:
       rust: ${{ steps.filter.outputs.rust }}
       pnpm: ${{ steps.filter.outputs.pnpm }}
