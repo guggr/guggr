@@ -1,6 +1,5 @@
 [workspace]
-members = ["gen/proto_types", "config"]
-
+members = ["gen/proto_types", "config", "scheduler"]
 resolver = "3"
 
 [workspace.package]

@@ -1,0 +1,8 @@
+[package]
+name = "scheduler"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+lapin = "3.7.2"
