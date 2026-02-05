@@ -59,7 +59,6 @@ jobs:
       - run: cargo binstall cargo-nextest
       - run: cargo nextest run --no-tests warn
       - run: cargo clippy
-      - run: cargo build --release
 
   helm-lint:
     name: 🐛 lint - helm
