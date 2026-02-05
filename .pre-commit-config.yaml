@@ -81,3 +81,15 @@ repos:
         language: system
         entry: cargo nextest run --no-tests warn
         pass_filenames: false
+
+      - id: cargo-autoinherit
+        name: run cargo autoinherit
+        language: system
+        entry: cargo autoinherit
+        pass_filenames: false
+
+      - id: cargo-machete
+        name: run cargo machete
+        language: system
+        entry: cargo machete
+        pass_filenames: false
