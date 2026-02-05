@@ -9,8 +9,11 @@ import "buf/validate/validate.proto";
 message Job {
     string id = 1 [(buf.validate.field).required = true];
 
-    option (buf.validate.message).oneof = { fields: ["http", "ping"], required: true };
+    JobType job_type = 16;
+}
 
-    guggr.job.types.v1.HttpJobType http = 16;
-    guggr.job.types.v1.PingJobType ping = 17;
+enum JobType {
+    JOB_TYPE_UNSPECIFIED = 0;
+    JOB_TYPE_HTTP = 1;
+    JOB_TYPE_PING = 2;
 }
