@@ -6,44 +6,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=../../proto/");
     let mut config = prost_build::Config::default();
 
-    // // Validations
-
-    // // Derive validator
-    // config.type_attribute(".", "#[derive(validator::Validate)]");
-
-    // // HttpJobType validation
-    // config.field_attribute("guggr.job.types.v1.HttpJobType.url", "#[validate(url)]");
-
-    // // PingJobType validation
-    // config.field_attribute(
-    //     "guggr.job.types.v1.PingJobType.url",
-    //     "#[validate(length(min = 1))]",
-    // );
-
-    // // Job validation
-    // config.field_attribute("guggr.job.v1.Job.id", "#[validate(length(min = 1))]");
-    // // Nested validation
-    // config.field_attribute("guggr.job.v1.Job.http", "#[validate(nested)]");
-    // config.field_attribute("guggr.job.v1.Job.ping", "#[validate(nested)]");
-
-    // // JobResult validation
-    // config.field_attribute(
-    //     "guggr.job_result.v1.JobResult.id",
-    //     "#[validate(length(min = 1))]",
-    // );
-    // config.field_attribute("guggr.job_result.v1.JobResult.http", "#[validate(nested)]");
-    // config.field_attribute("guggr.job_result.v1.JobResult.ping", "#[validate(nested)]");
-
-    // // PingJobResult & HttpJobResult validation
-    // config.field_attribute(
-    //     "guggr.job_result.types.v1.PingJobResult.reachable",
-    //     "#[validate(length(min = 1))]",
-    // );
-    // config.field_attribute(
-    //     "guggr.job_result.types.v1.HttpJobResult.reachable",
-    //     "#[validate(length(min = 1))]",
-    // );
-
     config.out_dir("src/gen/proto");
 
     // Create output directory
