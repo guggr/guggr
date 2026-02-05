@@ -6,10 +6,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=../../proto/");
     let mut config = prost_build::Config::default();
 
-    config.out_dir("src/gen/proto");
+    config.out_dir("src");
 
     // Create output directory
-    fs::create_dir_all("src/gen/proto").expect("could not create `src/gen/proto` folder");
+    fs::create_dir_all("src").expect("could not create `src` folder");
 
     let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     let proto_dir = root.join("../../proto");
