@@ -54,9 +54,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - run: rustup update stable && rustup default stable
-      - uses: taiki-e/install-action@v2.9.4
-        with:
-          tool: cargo-nextest@0.9.126
+      - uses: cargo-bins/cargo-binstall@v1.9.0
+      - run: cargo binstall cargo-nextest
       - run: cargo nextest run --no-tests warn
       - run: cargo clippy
       - run: cargo build --release
