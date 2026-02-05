@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - run: rustup update stable && rustup default stable
-      - uses: taiki-e/install-action@nextest@v2.9.4
+      - uses: taiki-e/install-action@v2.9.4
         with:
           tool: nextest
       - run: cargo nextest run --no-tests warn

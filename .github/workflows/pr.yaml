@@ -1,4 +1,4 @@
-name: basic ci
+name: conventional-pr
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
