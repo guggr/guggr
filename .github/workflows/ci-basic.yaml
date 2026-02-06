@@ -40,6 +40,7 @@ jobs:
               - frontend/**
               - '**/*.yaml'
               - '**/*.json'
+              - '**/*.sql'
               - '!charts/**'
             go:
               - api-service/**
