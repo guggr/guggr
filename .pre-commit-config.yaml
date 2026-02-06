@@ -44,7 +44,7 @@ repos:
         name: run golangci-lint
         types: [go]
         language: system
-        entry: golangci-lint run backend
+        entry: golangci-lint run api-service
         pass_filenames: false
 
       - id: prettier-check
