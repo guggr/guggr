@@ -8,3 +8,8 @@ authors.workspace = true
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 gen-proto-types.workspace = true
+tracing = { workspace = true }
+protocheck = { workspace = true }
+rand = { workspace = true }
+surge-ping = { workspace = true }
+reqwest = { workspace = true }
