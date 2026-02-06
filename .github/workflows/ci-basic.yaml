@@ -20,6 +20,7 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
     steps:
+      - uses: actions/checkout@v6.0.2
       - uses: dorny/paths-filter@v3.0.2
         id: filter
         with:
