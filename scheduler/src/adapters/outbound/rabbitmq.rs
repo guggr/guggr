@@ -18,11 +18,10 @@ pub struct RabbitMQPublisher {
 
 impl RabbitMQPublisher {
     pub fn new(connection_url: &str, queue_name: String) -> Result<Self> {
-        let mut config = deadpool_lapin::Config {
+        let config = deadpool_lapin::Config {
             url: Some(connection_url.into()),
             ..Default::default()
         };
-        config.url = Some(connection_url.into());
 
         let pool = config.create_pool(Some(Runtime::Tokio1))?;
 
