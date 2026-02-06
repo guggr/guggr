@@ -7,11 +7,49 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
+  changes:
+    name: 🎯 identify changes
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      pnpm: ${{ steps.filter.outputs.pnpm }}
+      go: ${{ steps.filter.outputs.go }}
+      helm: ${{ steps.filter.outputs.helm }}
+    steps:
+      - uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          filters: |
+            rust:
+              - agent/**
+              - scheduler/**
+              - evaluator/**
+              - gen/**
+              - '**/Cargo.toml'
+              - '**/Cargo.lock'
+              - '**/*.rs'
+            pnpm:
+              - pnpm-lock.yaml
+              - package.json
+              - frontend/**
+              - '**/*.yaml'
+              - '**/*.json'
+              - '!charts/**'
+            go:
+              - api-service/**
+              - '**/*.go'
+              - '**/go.sum'
+              - '**/go.mod'
+            helm: charts/**
+
   pnpm-lint:
     name: 🐛 formatting & linting - pnpm
+    needs: changes
+    if: ${{ needs.changes.outputs.pnpm == 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
@@ -28,6 +66,8 @@ jobs:
   go-lint:
     if: ${{ false }} # wait for go setup so this does not fail
     name: 🐛 formatting & linting - go
+    # needs: changes
+    # if: ${{ needs.changes.outputs.go == 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
@@ -42,6 +82,8 @@ jobs:
   cargo-fmt:
     name: 🐛 formatting - cargo nightly
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
       - run: rustup update nightly && rustup default nightly
@@ -54,6 +96,8 @@ jobs:
   cargo-lint:
     name: 🐛 formatting & linting - cargo
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
@@ -68,6 +112,8 @@ jobs:
   helm-lint:
     name: 🐛 lint - helm
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.helm == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
 
@@ -82,6 +128,8 @@ jobs:
     needs:
       - cargo-lint
       - cargo-fmt
+      - changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: awalsh128/cache-apt-pkgs-action@v1.6.0
