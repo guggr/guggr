@@ -1,11 +1,3 @@
 # guggr
 
-## Protobuf Definitions
-
-Require [`buf`](https://github.com/bufbuild/buf) to be installed.
-
-For regeneration of go proto package, run:
-
-```sh
-buf generate
-```
+_guggr_ (from Swabian "gucken", English: "looking") aims to be your one-stop shop for monitoring your workloads via a high-availability solution.
