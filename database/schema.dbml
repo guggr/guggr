@@ -23,11 +23,15 @@ Table group [headercolor: #175e7a] {
 Table user_group_mapping [headercolor: #175e7a] {
 	user_id text [ pk, not null ]
 	group_id text [ pk, not null ]
-	role_id smallint [ not null, default: 1 ]
+	role_id text [ not null, default: '''user''' ]
+
+	indexes {
+		(user_id, group_id) [ name: 'user_group_mapping_index_0' ]
+	}
 }
 
 Table role [headercolor: #175e7a] {
-	id smallint [ pk, increment, not null, unique ]
+	id text [ pk, not null, unique ]
 	name text [ not null ]
 }
 
@@ -40,7 +44,7 @@ Table result [headercolor: #175e7a] {
 }
 
 Ref fk_user_group_mapping_role_id_role {
-	user_group_mapping.role_id > role.id [ delete: set default, update: cascade ]
+	user_group_mapping.role_id > role.id [ delete: set default, update: set default ]
 }
 
 Ref fk_user_group_mapping_group_id_group {
