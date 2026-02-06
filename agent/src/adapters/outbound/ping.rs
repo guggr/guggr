@@ -1,6 +1,5 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use SurgeError::Timeout;
 use anyhow::bail;
 use async_trait::async_trait;
 use gen_proto_types::{
@@ -9,8 +8,8 @@ use gen_proto_types::{
 };
 use protocheck::{types, types::Timestamp};
 use rand::random;
-use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence, SurgeError};
-use tracing::{info, trace};
+use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
+use tracing::info;
 
 use crate::core::ports::monitor::MonitorPort;
 
@@ -18,7 +17,7 @@ pub struct PingAdapter {}
 
 impl PingAdapter {
     pub fn new() -> Self {
-        return PingAdapter {};
+        PingAdapter {}
     }
 }
 

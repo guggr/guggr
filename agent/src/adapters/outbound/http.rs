@@ -17,9 +17,9 @@ pub struct HttpAdapter {
 
 impl HttpAdapter {
     pub fn new() -> Self {
-        return HttpAdapter {
+        HttpAdapter {
             client: reqwest::Client::new(),
-        };
+        }
     }
 }
 
@@ -62,7 +62,7 @@ impl MonitorPort for HttpAdapter {
             http: Some(HttpJobResult {
                 reachable: true,
                 ip_address: remote_ip,
-                status_code: status_code,
+                status_code,
                 latency: Some(protocheck_latency),
                 payload: payload.to_vec(),
             }),
