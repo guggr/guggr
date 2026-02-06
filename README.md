@@ -1,6 +1,6 @@
 # guggr
 
-_guggr_ (from Swabian "gucken", English: "looking") aims to be your one-stop shop for monitoring your workloads via a high-availability solution.
+guggr (Swabian for "looker") is a high-availability solution that keeps a constant eye on your workloads so you don't have to.
 
 ## Differences to Common Monitoring Solutions
 
