@@ -1,0 +1,77 @@
+CREATE TABLE IF NOT EXISTS "job" (
+	-- Nano ID
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT NOT NULL,
+	"job_type_id" TEXT NOT NULL,
+	"group_id" TEXT NOT NULL,
+	"notify_users" BOOLEAN NOT NULL,
+	"custom_notification" TEXT,
+	"run_every" INTERVAL NOT NULL,
+	"last_scheduled" TIMESTAMP,
+	PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "job"."id" IS 'Nano ID';
+
+CREATE TABLE IF NOT EXISTS "user" (
+	-- Nano ID
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT NOT NULL,
+	"email" TEXT NOT NULL,
+	"password" TEXT NOT NULL,
+	PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "user"."id" IS 'Nano ID';
+
+CREATE TABLE IF NOT EXISTS "group" (
+	-- Nano ID
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT NOT NULL,
+	PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "group"."id" IS 'Nano ID';
+
+CREATE TABLE IF NOT EXISTS "user_group_mapping" (
+	"user_id" TEXT NOT NULL,
+	"group_id" TEXT NOT NULL,
+	"role_id" TEXT NOT NULL DEFAULT 'user',
+	PRIMARY KEY ("user_id", "group_id")
+);
+
+CREATE TABLE IF NOT EXISTS "role" (
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT NOT NULL,
+	PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "result" (
+	-- Nano ID
+	"id" TEXT NOT NULL UNIQUE,
+	"job_id" TEXT NOT NULL,
+	"timestamp" TIMESTAMP NOT NULL,
+	"triggered_notification" BOOLEAN NOT NULL,
+	"result" TEXT,
+	PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "result"."id" IS 'Nano ID';
+
+CREATE TABLE IF NOT EXISTS "job_type" (
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT,
+	PRIMARY KEY ("id")
+);
+
+ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("role_id") REFERENCES "role" ("id") ON UPDATE CASCADE ON DELETE SET DEFAULT;
+
+ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("group_id") REFERENCES "group" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE "result" ADD FOREIGN KEY ("job_id") REFERENCES "job" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "job" ADD FOREIGN KEY ("group_id") REFERENCES "group" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "job" ADD FOREIGN KEY ("job_type_id") REFERENCES "job_type" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
