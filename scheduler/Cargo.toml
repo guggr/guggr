@@ -13,5 +13,4 @@ gen-proto-types.workspace = true
 lapin = { workspace = true }
 prost.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["json"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }

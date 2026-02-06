@@ -4,21 +4,13 @@ use anyhow::{Context, Result};
 use config::Config;
 use gen_proto_types::job::v1::{Job, JobType};
 use scheduler::{
-    adapters::outbound::rabbitmq::RabbitMQPublisher, core::ports::publisher::Publisher,
+    adapters::outbound::rabbitmq::RabbitMQPublisher, core::ports::publisher::Publisher, telemetry,
 };
 use tokio::time::sleep;
-use tracing_subscriber::FmtSubscriber;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let subscriber = FmtSubscriber::builder()
-        .with_file(true)
-        .with_line_number(true)
-        .with_level(true)
-        .json()
-        .finish();
-
-    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+    telemetry::init_tracing();
 
     let config = Config::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
         .context("while loading config from environment")?;
