@@ -29,8 +29,8 @@ jobs:
               - scheduler/**
               - evaluator/**
               - gen/**
-              - Cargo.toml
-              - Cargo.lock
+              - '**/Cargo.toml'
+              - '**/Cargo.lock'
               - '**/*.rs'
             pnpm:
               - pnpm-lock.yaml
@@ -42,6 +42,8 @@ jobs:
             go:
               - api-service/**
               - '**/*.go'
+              - '**/go.sum'
+              - '**/go.mod'
             helm: charts/**
 
   pnpm-lint:
