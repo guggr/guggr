@@ -4,7 +4,9 @@ use config::Config;
 use lapin::{Connection, ConnectionProperties};
 use tokio::time::sleep;
 use tracing::{error, info, warn};
-use tracing_subscriber::FmtSubscriber;
+use tracing_subscriber::{
+    EnvFilter, FmtSubscriber, fmt, layer::SubscriberExt, util::SubscriberInitExt,
+};
 
 use crate::{
     adapters::{
@@ -20,9 +22,8 @@ mod core;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::from_filename(".env.sample").ok();
-    let subscriber = FmtSubscriber::builder().finish();
 
-    tracing::subscriber::set_global_default(subscriber).expect("error setting global subscriber");
+    init_tracing();
 
     let config = Config::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
 
@@ -76,4 +77,17 @@ async fn main() -> anyhow::Result<()> {
     rabbitmq_driver.start().await?;
 
     Ok(())
+}
+
+pub fn init_tracing() {
+    let fmt_layer = fmt::layer().with_file(true).with_line_number(true).json(); // Keep JSON for production logs
+
+    let filter_layer = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new("info"))
+        .unwrap();
+
+    tracing_subscriber::registry()
+        .with(filter_layer)
+        .with(fmt_layer)
+        .init(); // .init() is shorthand for set_global_default
 }
