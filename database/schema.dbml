@@ -1,6 +1,7 @@
 Table job [headercolor: #175e7a] {
 	id text [ pk, not null, unique, note: 'Nano ID' ]
 	name text [ not null ]
+	job_type_id text [ not null ]
 	group_id text [ not null ]
 	notify_users boolean [ not null ]
 	custom_notification text
@@ -23,11 +24,7 @@ Table group [headercolor: #175e7a] {
 Table user_group_mapping [headercolor: #175e7a] {
 	user_id text [ pk, not null ]
 	group_id text [ pk, not null ]
-	role_id text [ not null, default: '''user''' ]
-
-	indexes {
-		(user_id, group_id) [ name: 'user_group_mapping_index_0' ]
-	}
+	role_id text [ not null, default: 'user' ]
 }
 
 Table role [headercolor: #175e7a] {
@@ -41,6 +38,11 @@ Table result [headercolor: #175e7a] {
 	timestamp timestamp [ not null ]
 	triggered_notification boolean [ not null ]
 	result text
+}
+
+Table job_type [headercolor: #175e7a] {
+	id text [ pk, not null, unique ]
+	name text
 }
 
 Ref fk_user_group_mapping_role_id_role {
@@ -61,4 +63,8 @@ Ref fk_result_job_id_job {
 
 Ref fk_job_group_id_group {
 	job.group_id > group.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_job_job_type_id_job_type {
+	job.job_type_id > job_type.id [ delete: restrict, update: cascade ]
 }

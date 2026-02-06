@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS "job" (
 	-- Nano ID
 	"id" TEXT NOT NULL UNIQUE,
 	"name" TEXT NOT NULL,
+	"job_type_id" TEXT NOT NULL,
 	"group_id" TEXT NOT NULL,
 	"notify_users" BOOLEAN NOT NULL,
 	"custom_notification" TEXT,
@@ -57,6 +58,12 @@ CREATE TABLE IF NOT EXISTS "result" (
 
 COMMENT ON COLUMN "result"."id" IS 'Nano ID';
 
+CREATE TABLE IF NOT EXISTS "job_type" (
+	"id" TEXT NOT NULL UNIQUE,
+	"name" TEXT,
+	PRIMARY KEY ("id")
+);
+
 ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("role_id") REFERENCES "role" ("id") ON UPDATE CASCADE ON DELETE SET DEFAULT;
 
 ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("group_id") REFERENCES "group" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -66,3 +73,5 @@ ALTER TABLE "user_group_mapping" ADD FOREIGN KEY ("user_id") REFERENCES "user" (
 ALTER TABLE "result" ADD FOREIGN KEY ("job_id") REFERENCES "job" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "job" ADD FOREIGN KEY ("group_id") REFERENCES "group" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE "job" ADD FOREIGN KEY ("job_type_id") REFERENCES "job_type" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
