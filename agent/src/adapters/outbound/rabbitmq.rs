@@ -26,6 +26,7 @@ impl RabbitMQPublisher {
             "x-queue-type".into(),
             AMQPValue::LongString("quorum".into()),
         );
+        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5.into()));
 
         channel
             .queue_declare(
