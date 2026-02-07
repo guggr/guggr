@@ -1,15 +1,16 @@
 use std::sync::Arc;
 
-use anyhow::bail;
 use gen_proto_types::job::v1::Job;
 use thiserror::Error;
 
 use crate::core::ports::{monitor::MonitorPort, publisher::PublisherPort};
 
 #[derive(Debug, Error)]
-enum JobServiceError {
+pub enum JobServiceError {
     #[error("unknown job type supplied")]
     UnknownJobType,
+    #[error("issue with the agent: {0}")]
+    AgentIssue(anyhow::Error),
 }
 
 pub struct JobService {
@@ -41,12 +42,12 @@ impl JobService {
         }
     }
 
-    pub async fn process_job(&self, job: &Job) -> anyhow::Result<()> {
+    pub async fn process_job(&self, job: &Job) -> anyhow::Result<(), JobServiceError> {
         let result = match job.job_type() {
             gen_proto_types::job::v1::JobType::Http => self.http_adapter.execute(job).await?,
             gen_proto_types::job::v1::JobType::Ping => self.ping_adapter.execute(job).await?,
             gen_proto_types::job::v1::JobType::Unspecified => {
-                bail!(JobServiceError::UnknownJobType)
+                return Err(JobServiceError::UnknownJobType);
             }
         };
 

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use async_trait::async_trait;
 use gen_proto_types::job_result::v1::JobResult;
 use lapin::{
@@ -10,7 +11,7 @@ use lapin::{
 use prost::Message;
 use tracing::debug;
 
-use crate::core::ports::publisher::PublisherPort;
+use crate::core::{ports::publisher::PublisherPort, service::jobservice::JobServiceError};
 
 pub struct RabbitMQPublisher {
     channel: Channel,
@@ -26,7 +27,7 @@ impl RabbitMQPublisher {
             "x-queue-type".into(),
             AMQPValue::LongString("quorum".into()),
         );
-        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5.into()));
+        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5));
 
         channel
             .queue_declare(
@@ -48,7 +49,7 @@ impl RabbitMQPublisher {
 
 #[async_trait]
 impl PublisherPort for RabbitMQPublisher {
-    async fn publish_result(&self, job_result: &JobResult) -> anyhow::Result<()> {
+    async fn publish_result(&self, job_result: &JobResult) -> anyhow::Result<(), JobServiceError> {
         let encoded_job = job_result.encode_to_vec();
 
         // TODO possibly exchange configuration via ENV
@@ -61,8 +62,10 @@ impl PublisherPort for RabbitMQPublisher {
                 &encoded_job,
                 BasicProperties::default(),
             )
-            .await?
-            .await?;
+            .await
+            .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?
+            .await
+            .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?;
 
         debug!(
             "published message for job result with id {}: confirmation = {:?}",

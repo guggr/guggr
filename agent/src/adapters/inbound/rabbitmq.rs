@@ -4,6 +4,7 @@ use futures_lite::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
     Channel, Connection,
+    message::Delivery,
     options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, QueueDeclareOptions},
     types::{AMQPValue, FieldTable},
 };
@@ -12,7 +13,7 @@ use thiserror::Error;
 use tokio::select;
 use tracing::{error, info};
 
-use crate::core::service::jobservice::JobService;
+use crate::core::service::jobservice::{JobService, JobServiceError};
 
 #[derive(Debug, Error)]
 enum RabbitMQDriverError {
@@ -40,7 +41,7 @@ impl RabbitMQDriver {
             "x-queue-type".into(),
             AMQPValue::LongString("quorum".into()),
         );
-        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5.into()));
+        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5));
 
         channel
             .queue_declare(
@@ -94,20 +95,24 @@ impl RabbitMQDriver {
                                                 delivery.ack(BasicAckOptions { multiple: false }).await.expect("error while ack'ing delivery");
                                             },
                                             Err(error) => {
-                                                error!("error executing job with id {}: {}", &job.id, error);
-                                                delivery.nack(BasicNackOptions {
-                                                    requeue: true,
-                                                    ..Default::default()
-                                                }).await.expect("error while nack'ing delivery");
+                                                match error {
+                                                    JobServiceError::UnknownJobType => {
+                                                        error!("executing job {} failed because an unknown job type has been supplied.", &job.id);
+                                                        nack_delivery(&delivery, false).await;
+                                                    }
+                                                    JobServiceError::AgentIssue(e) => {
+                                                        error!("executing job {} failed because of an agent issue: {}", &job.id, e);
+                                                        nack_delivery(&delivery, true).await;
+                                                        error!("exiting agent due to agent issues in previous jobs");
+                                                        std::process::exit(1);
+                                                    }
+                                                }
                                             },
                                         }
                                     },
                                     Err(e) => {
                                         error!("{}", RabbitMQDriverError::JobDecodeError(e));
-                                        delivery.nack(BasicNackOptions {
-                                            requeue: true,
-                                            ..Default::default()
-                                        }).await.expect("error while nack'ing delivery");
+                                        nack_delivery(&delivery, true).await;
                                     },
                                 }
                             });
@@ -126,4 +131,14 @@ impl RabbitMQDriver {
 
         Ok(())
     }
+}
+
+async fn nack_delivery(delivery: &Delivery, requeue: bool) {
+    delivery
+        .nack(BasicNackOptions {
+            requeue,
+            ..Default::default()
+        })
+        .await
+        .expect("error while sending nack");
 }

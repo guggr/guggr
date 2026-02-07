@@ -4,9 +4,7 @@ use config::Config;
 use lapin::{Connection, ConnectionProperties};
 use tokio::time::sleep;
 use tracing::{error, info, warn};
-use tracing_subscriber::{
-    EnvFilter, FmtSubscriber, fmt, layer::SubscriberExt, util::SubscriberInitExt,
-};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     adapters::{
