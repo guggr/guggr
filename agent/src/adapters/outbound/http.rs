@@ -1,4 +1,7 @@
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::{
+    net::IpAddr,
+    time::{Instant, SystemTime, UNIX_EPOCH},
+};
 
 use anyhow::{Context, anyhow};
 use async_trait::async_trait;
@@ -62,10 +65,11 @@ impl MonitorPort for HttpAdapter {
                     .remote_addr()
                     .context("receiving remote address")
                     .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?
-                    .ip()
-                    .to_string()
-                    .as_bytes()
-                    .to_vec();
+                    .ip();
+                let ip_bytes = match remote_ip {
+                    IpAddr::V4(ipv4) => ipv4.octets().to_vec(),
+                    IpAddr::V6(ipv6) => ipv6.octets().to_vec(),
+                };
                 let status_code = response.status().as_u16() as i32;
                 let payload = response
                     .bytes()
@@ -80,7 +84,7 @@ impl MonitorPort for HttpAdapter {
                     }),
                     http: Some(HttpJobResult {
                         reachable,
-                        ip_address: remote_ip,
+                        ip_address: ip_bytes,
                         status_code,
                         latency: Some(protocheck_latency),
                         payload: payload.to_vec(),
@@ -106,5 +110,91 @@ impl MonitorPort for HttpAdapter {
         };
 
         Ok(job_result)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use gen_proto_types::job::{types::v1::HttpJobType, v1::JobType};
+    use httpmock::{Method::HEAD, MockServer};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_http_success() {
+        let server = MockServer::start();
+
+        let mock = server.mock(|when, then| {
+            when.method(HEAD).path("/");
+            then.status(200);
+        });
+
+        let job = Job {
+            id: "GyLQDBZm1JYP7f_eJ24iH".to_string(),
+            job_type: JobType::Http.into(),
+            http: Some(HttpJobType {
+                url: server.url("/"),
+            }),
+            ping: None,
+        };
+
+        let http_adapter = HttpAdapter::new();
+        let res = http_adapter.execute(&job).await.unwrap();
+        mock.assert();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "GyLQDBZm1JYP7f_eJ24iH".to_string(),
+                timestamp: get_current_timestamp(),
+                http: Some(HttpJobResult {
+                    reachable: true,
+                    ip_address: vec![127, 0, 0, 1],
+                    status_code: 200,
+                    latency: res.http.as_ref().unwrap().latency,
+                    payload: vec![],
+                }),
+                ping: None,
+            }
+        )
+    }
+
+    #[tokio::test]
+    async fn test_http_failure() {
+        let job = Job {
+            id: "S3tqA6Gb-eY-jMIcGo7Is".to_string(),
+            job_type: JobType::Http.into(),
+            http: Some(HttpJobType {
+                url: "http://example.lol".to_string(),
+            }),
+            ping: None,
+        };
+
+        let http_adapter = HttpAdapter::new();
+        let res = http_adapter.execute(&job).await.unwrap();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "S3tqA6Gb-eY-jMIcGo7Is".to_string(),
+                timestamp: get_current_timestamp(),
+                http: Some(HttpJobResult {
+                    reachable: false,
+                    ip_address: vec![],
+                    status_code: 0,
+                    latency: res.http.as_ref().unwrap().latency,
+                    payload: vec![],
+                }),
+                ping: None,
+            }
+        )
+    }
+
+    fn get_current_timestamp() -> Option<Timestamp> {
+        Some(Timestamp {
+            seconds: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as i64,
+            nanos: 0,
+        })
     }
 }
