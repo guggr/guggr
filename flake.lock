@@ -16,9 +16,26 @@
         "type": "github"
       }
     },
+    "nixpkgs-diesel-cli-ext-fix": {
+      "locked": {
+        "lastModified": 1770475998,
+        "narHash": "sha256-3ZIb/0g4C57H0w4lEz/wNkWmRnXAZOZUg2pmUz6KTD0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6be684b80e0db0ae3d75b3d4599fa216f94d7664",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "refs/pull/487982/head",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-diesel-cli-ext-fix": "nixpkgs-diesel-cli-ext-fix"
       }
     }
   },

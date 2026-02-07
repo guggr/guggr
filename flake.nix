@@ -3,10 +3,15 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-diesel-cli-ext-fix.url = "github:NixOS/nixpkgs/refs/pull/487982/head";
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      nixpkgs-diesel-cli-ext-fix,
+    }:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -15,7 +20,17 @@
 
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
 
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      nixpkgsFor = forAllSystems (
+        system:
+        import nixpkgs {
+          inherit system;
+          overlays = [
+            (final: prev: {
+              diesel-cli-ext = (import nixpkgs-diesel-cli-ext-fix { inherit system; }).diesel-cli-ext;
+            })
+          ];
+        }
+      );
     in
     {
       devShells = forAllSystems (
@@ -39,6 +54,8 @@
               cargo-nextest
               cargo-autoinherit
               cargo-machete
+              diesel-cli
+              diesel-cli-ext
             ];
           };
         }
