@@ -30,12 +30,12 @@
    just db migrate
    ```
 
-   > [!IMPORTANT]
-   > If this command fails with the following error:
-   >
-   > ```log
-   > thread 'main' (122899) panicked at src/main.rs:143:19:
-   > Unrecognized option: 'insertable'
-   > ```
-   >
-   > You are using an outdated `diesel_ext` version. For `nixpkgs`, a PR exists to update `diesel_ext` to the latest version ([nixpkgs#487982](https://github.com/NixOS/nixpkgs/pull/487982)). Until it is merged, an overlay has been added to the Nix flake to use the updated version from the PR.
+> [!IMPORTANT]
+> If this command fails with the following error:
+>
+> ```log
+> thread 'main' (122899) panicked at src/main.rs:143:19:
+> Unrecognized option: 'insertable'
+> ```
+>
+> You are using an outdated `diesel_ext` version. For `nixpkgs`, a PR exists to update `diesel_ext` to the latest version ([nixpkgs#487982](https://github.com/NixOS/nixpkgs/pull/487982)). Until it is merged, an overlay has been added to the Nix flake to use the updated version from the PR.
