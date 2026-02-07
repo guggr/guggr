@@ -30,6 +30,7 @@ jobs:
               - agent/**
               - scheduler/**
               - evaluator/**
+              - database/database-client/**
               - gen/**
               - '**/Cargo.toml'
               - '**/Cargo.lock'
