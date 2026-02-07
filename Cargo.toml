@@ -1,5 +1,5 @@
 [workspace]
-members = ["gen/proto_types", "config"]
+members = ["gen/proto_types", "config", "database/database-client"]
 
 resolver = "3"
 
