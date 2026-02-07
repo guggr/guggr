@@ -32,12 +32,12 @@ Table role [headercolor: #175e7a] {
 	name text [ not null ]
 }
 
-Table result [headercolor: #175e7a] {
+Table job_runs [headercolor: #175e7a] {
 	id text [ pk, not null, unique, note: 'Nano ID' ]
 	job_id text [ not null ]
 	timestamp timestamp [ not null ]
 	triggered_notification boolean [ not null ]
-	result text
+	output text
 }
 
 Table job_type [headercolor: #175e7a] {

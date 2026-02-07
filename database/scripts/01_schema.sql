@@ -46,17 +46,17 @@ CREATE TABLE IF NOT EXISTS "role" (
 	PRIMARY KEY ("id")
 );
 
-CREATE TABLE IF NOT EXISTS "result" (
+CREATE TABLE IF NOT EXISTS "job_runs" (
 	-- Nano ID
 	"id" TEXT NOT NULL UNIQUE,
 	"job_id" TEXT NOT NULL,
 	"timestamp" TIMESTAMP NOT NULL,
 	"triggered_notification" BOOLEAN NOT NULL,
-	"result" TEXT,
+	"output" TEXT,
 	PRIMARY KEY ("id")
 );
 
-COMMENT ON COLUMN "result"."id" IS 'Nano ID';
+COMMENT ON COLUMN "job_runs"."id" IS 'Nano ID';
 
 CREATE TABLE IF NOT EXISTS "job_type" (
 	"id" TEXT NOT NULL UNIQUE,
@@ -73,7 +73,7 @@ ADD FOREIGN KEY ("group_id") REFERENCES "group" ("id") ON UPDATE CASCADE ON DELE
 ALTER TABLE "user_group_mapping"
 ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;
 
-ALTER TABLE "result"
+ALTER TABLE "job_runs"
 ADD FOREIGN KEY ("job_id") REFERENCES "job" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "job"
