@@ -19,6 +19,7 @@ list-migrations:
 [group('migration')]
 _run-migrations:
     diesel migration run
+    diesel print-schema > {{ schema_file }}
 
 # Perform database migrations and regenerate models
 [group('migration')]
