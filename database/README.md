@@ -30,13 +30,7 @@
    just db migrate
    ```
 
-5. Regenerate models for Rust
-
-   ```sh
-   just db models
-   ```
-
-   > [!IMPORTANT] Failure
+   > [!IMPORTANT]
    > If this command fails with the following error:
    >
    > ```log
