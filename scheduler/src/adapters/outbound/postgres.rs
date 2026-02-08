@@ -47,10 +47,12 @@ pub enum PostgresFetcherError {
 impl From<PostgresFetcherError> for JobRepositoryError {
     fn from(value: PostgresFetcherError) -> Self {
         match value {
-            PostgresFetcherError::ConnectionError(_) => Self::Unavailable,
-            PostgresFetcherError::PoolGetConnectionError(_) => Self::Unavailable,
+            PostgresFetcherError::ConnectionError(_)
+            | PostgresFetcherError::PoolGetConnectionError(_) => Self::Unavailable,
 
-            other => Self::Internal(other.to_string()),
+            other @ PostgresFetcherError::FetchJobsError { .. } => {
+                Self::Internal(other.to_string())
+            }
         }
     }
 }
@@ -104,8 +106,8 @@ impl TryFrom<database_client::models::Job> for domain::models::Job {
 
         // Months in Postgres are fuzzy, so this is more of a best guess
         let total_micros = value.run_every.microseconds
-            + (value.run_every.days as i64 * MICROSECONDS_PER_DAY)
-            + (value.run_every.months as i64 * MICROSECONDS_PER_DAY * 30);
+            + (i64::from(value.run_every.days) * MICROSECONDS_PER_DAY)
+            + (i64::from(value.run_every.months) * MICROSECONDS_PER_DAY * 30);
 
         if total_micros < 0 {
             return Err(JobRepositoryError::Internal(
