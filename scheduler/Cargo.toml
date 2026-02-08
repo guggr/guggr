@@ -12,5 +12,6 @@ deadpool-lapin = { workspace = true }
 gen-proto-types.workspace = true
 lapin = { workspace = true }
 prost.workspace = true
+thiserror.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }

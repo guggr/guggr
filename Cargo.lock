@@ -2124,6 +2124,7 @@ dependencies = [
  "gen-proto-types",
  "lapin",
  "prost",
+ "thiserror 2.0.18",
  "tokio",
  "tracing-subscriber",
 ]
