@@ -43,14 +43,5 @@ models:
         --map "Interval PgInterval" \
         > {{ models_file }}
 
-    # This may fail if diesel_ext is not up to date
-    diesel_ext --insertable \
-        --import-types "diesel::prelude::*" \
-        --import-types "crate::schema::*" \
-        --import-types "diesel::data_types::PgInterval" \
-        --add-table-name \
-        --schema-file {{ schema_file }} \
-        --map "Interval PgInterval" \
-        > {{ insertable_file }}
-
+    sed -i 's/Identifiable/Identifiable, Insertable/' {{ models_file }}
     @just fmt-rust
