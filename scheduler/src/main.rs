@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use config::Config;
+use config::RabbitMQConfig;
 use gen_proto_types::job::v1::{Job, JobType};
 use scheduler::{
     adapters::outbound::rabbitmq::RabbitMQPublisher, core::ports::publisher::Publisher, telemetry,
@@ -12,11 +12,11 @@ use tokio::time::sleep;
 async fn main() -> Result<()> {
     telemetry::init_tracing();
 
-    let config = Config::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
+    let config = RabbitMQConfig::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
         .context("while loading config from environment")?;
 
     let publisher = RabbitMQPublisher::new(
-        &config.connection_url(false),
+        &config.rabbitmq_connection_url(false),
         config
             .rabbitmq_queue_name(0)
             .context("while getting scheduler queue name")?,
