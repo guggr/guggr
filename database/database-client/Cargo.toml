@@ -6,6 +6,6 @@ authors.workspace = true
 
 [dependencies]
 chrono = { workspace = true }
-diesel = { workspace = true, features = ["chrono", "postgres"] }
+diesel = { workspace = true, features = ["chrono", "postgres", "r2d2"] }
 diesel_migrations = { workspace = true, features = ["postgres"] }
 thiserror = { workspace = true }
