@@ -65,7 +65,7 @@ impl Config {
         self.rabbitmq_vhost.clone()
     }
 
-    pub fn connection_url(&self, tls: bool) -> String {
+    pub fn rabbitmq_connection_url(&self, tls: bool) -> String {
         let protocol = if tls { "amqps" } else { "amqp" };
         let encoded_vhost = match self.rabbitmq_vhost.as_deref() {
             None | Some("/") => "%2f".to_string(), // Treat both as the default vhost
@@ -163,11 +163,11 @@ mod tests {
             assert_eq!(config.rabbitmq_port(), "port");
             assert_eq!(config.rabbitmq_vhost(), Some("/".to_owned()));
             assert_eq!(
-                config.connection_url(false),
+                config.rabbitmq_connection_url(false),
                 "amqp://user:password@host:port/%2f"
             );
             assert_eq!(
-                config.connection_url(true),
+                config.rabbitmq_connection_url(true),
                 "amqps://user:password@host:port/%2f"
             );
 
@@ -216,11 +216,11 @@ mod tests {
             assert_eq!(config.rabbitmq_port(), "port");
             assert_eq!(config.rabbitmq_vhost(), None);
             assert_eq!(
-                config.connection_url(false),
+                config.rabbitmq_connection_url(false),
                 "amqp://user:password@host:port/%2f"
             );
             assert_eq!(
-                config.connection_url(true),
+                config.rabbitmq_connection_url(true),
                 "amqps://user:password@host:port/%2f"
             );
 
@@ -269,11 +269,11 @@ mod tests {
             assert_eq!(config.rabbitmq_port(), "port");
             assert_eq!(config.rabbitmq_vhost(), Some("vh@st".to_owned()));
             assert_eq!(
-                config.connection_url(false),
+                config.rabbitmq_connection_url(false),
                 "amqp://us%3Ar:p%40ssword@host:port/vh%40st"
             );
             assert_eq!(
-                config.connection_url(true),
+                config.rabbitmq_connection_url(true),
                 "amqps://us%3Ar:p%40ssword@host:port/vh%40st"
             );
 
