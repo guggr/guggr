@@ -126,7 +126,7 @@ mod tests {
 
         temp_env::with_vars(env_vars, || {
             assert_eq!(
-                Config::from_env(&["test"])
+                Config::from_env(&["queue_a", "queue_b"])
                     .unwrap_err()
                     .source()
                     .unwrap()
