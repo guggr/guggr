@@ -1,6 +1,9 @@
 @help:
 	just --list
 
+# Contains database-specific recipes
+mod db 'database/db.just'
+
 alias c := check
 alias f := fmt
 alias l := lint
@@ -88,3 +91,13 @@ bashme:
 [group('rust')]
 docs:
 	cargo doc --document-private-items --open
+
+# Asks for confirmation
+_confirmation:
+	#!/usr/bin/env bash
+	read -p "Are you sure? [y/N] " -n 1 -r
+	echo ""
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+		echo "Aborting."
+		exit 1
+	fi
