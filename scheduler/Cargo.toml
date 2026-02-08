@@ -8,6 +8,7 @@ authors.workspace = true
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 config = { workspace = true }
+database-client = { workspace = true }
 deadpool-lapin = { workspace = true }
 gen-proto-types.workspace = true
 lapin = { workspace = true }
