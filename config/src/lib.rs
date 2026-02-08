@@ -16,31 +16,32 @@ pub struct Config {
 
 impl Config {
     pub fn from_env(queue_name_keys: &[&'static str]) -> Result<Self> {
-        let user = env::var("RABBITMQ_USER").context("reading RABBITMQ_USER env var")?;
-        let password =
+        let rabbitmq_user = env::var("RABBITMQ_USER").context("reading RABBITMQ_USER env var")?;
+        let rabbitmq_password =
             env::var("RABBITMQ_PASSWORD").context("reading RABBITMQ_PASSWORD env var")?;
-        let host = env::var("RABBITMQ_HOST").context("reading RABBITMQ_HOST env var")?;
-        let port = env::var("RABBITMQ_PORT").context("reading RABBITMQ_PORT env var")?;
-        let vhost = match env::var("RABBITMQ_VHOST") {
+        let rabbitmq_host = env::var("RABBITMQ_HOST").context("reading RABBITMQ_HOST env var")?;
+        let rabbitmq_port = env::var("RABBITMQ_PORT").context("reading RABBITMQ_PORT env var")?;
+        let rabbitmq_vhost = match env::var("RABBITMQ_VHOST") {
             Ok(v) => Some(v),
             Err(VarError::NotPresent) => None,
             Err(e) => return Err(e).context("reading RABBITMQ_VHOST env var"),
         };
 
-        let mut queue_names = Vec::with_capacity(queue_name_keys.len());
+        let mut rabbitmq_queue_names = Vec::with_capacity(queue_name_keys.len());
 
         for key in queue_name_keys {
-            queue_names.push(env::var(key).context("reading RABBITMQ_QUEUE_NAME env var")?);
+            rabbitmq_queue_names
+                .push(env::var(key).context("reading RABBITMQ_QUEUE_NAME env var")?);
         }
 
         Ok(Self {
-            rabbitmq_user: user,
-            rabbitmq_password: password,
-            rabbitmq_host: host,
-            rabbitmq_port: port,
-            rabbitmq_vhost: vhost,
+            rabbitmq_user,
+            rabbitmq_password,
+            rabbitmq_host,
+            rabbitmq_port,
+            rabbitmq_vhost,
 
-            rabbitmq_queue_names: queue_names,
+            rabbitmq_queue_names,
         })
     }
 
