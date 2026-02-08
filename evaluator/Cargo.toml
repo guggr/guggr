@@ -1,0 +1,25 @@
+[package]
+name = "evaluator"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+gen-proto-types.workspace = true
+protocheck = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
+thiserror = { workspace = true }
+config = { workspace = true }
+dotenv = { workspace = true }
+prost = { workspace = true }
+database-client = {workspace = true}
+diesel = { workspace = true, features = ["r2d2"] }
+pq-sys = { workspace = true, features = ["bundled"] }
+openssl-sys = { workspace = true, features = ["vendored"] }
+chrono = { workspace = true }
+nanoid = { workspace = true }
+
+[package.metadata.cargo-machete]
+ignored = ["pq-sys", "openssl-sys"]

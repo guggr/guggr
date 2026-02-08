@@ -1,5 +1,5 @@
 [workspace]
-members = ["gen/proto_types", "config", "database/database-client"]
+members = ["gen/proto_types", "config", "database/database-client", "evaluator"]
 
 resolver = "3"
 
@@ -19,3 +19,15 @@ diesel = "2.3.6"
 chrono = "0.4.43"
 diesel_migrations = "2.3.1"
 thiserror = "2.0.18"
+validator = { version = "0.20", features = ["derive"] }
+gen-proto-types = { path = "gen/proto_types" }
+database-client = { path = "database/database-client" }
+config = { path = "config" }
+async-trait = "0.1.89"
+tokio = "1.49.0"
+dotenv = "0.15.0"
+rand = "0.9.2"
+anyhow = "1.0.100"
+openssl-sys = "0.9.100"
+pq-sys = "0.6"
+nanoid = "0.4.0"
