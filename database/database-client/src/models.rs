@@ -7,14 +7,14 @@ use chrono::NaiveDateTime;
 use diesel::{data_types::PgInterval, prelude::*};
 
 use crate::schema::*;
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = group)]
 pub struct Group {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = job)]
 pub struct Job {
     pub id: String,
@@ -27,7 +27,7 @@ pub struct Job {
     pub last_scheduled: Option<NaiveDateTime>,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = job_runs)]
 pub struct JobRun {
     pub id: String,
@@ -37,21 +37,21 @@ pub struct JobRun {
     pub output: Option<String>,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = job_type)]
 pub struct JobType {
     pub id: String,
     pub name: Option<String>,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = role)]
 pub struct Role {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = user)]
 pub struct User {
     pub id: String,
@@ -60,7 +60,7 @@ pub struct User {
     pub password: String,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(primary_key(user_id, group_id))]
 #[diesel(table_name = user_group_mapping)]
 pub struct UserGroupMapping {
