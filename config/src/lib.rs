@@ -1,6 +1,6 @@
 use std::env::{self, VarError};
 
-use anyhow::{Context, Result};
+use thiserror::Error;
 use urlencoding::encode;
 
 #[derive(Debug, PartialEq)]
@@ -14,23 +14,26 @@ pub struct Config {
     rabbitmq_queue_names: Vec<String>,
 }
 
+#[derive(Error, Debug)]
+#[error("Error while loading config variable")]
+pub struct ConfigError(#[from] env::VarError);
+
 impl Config {
-    pub fn from_env(queue_name_keys: &[&'static str]) -> Result<Self> {
-        let user = env::var("RABBITMQ_USER").context("reading RABBITMQ_USER env var")?;
-        let password =
-            env::var("RABBITMQ_PASSWORD").context("reading RABBITMQ_PASSWORD env var")?;
-        let host = env::var("RABBITMQ_HOST").context("reading RABBITMQ_HOST env var")?;
-        let port = env::var("RABBITMQ_PORT").context("reading RABBITMQ_PORT env var")?;
+    pub fn from_env(queue_name_keys: &[&'static str]) -> Result<Self, ConfigError> {
+        let user = env::var("RABBITMQ_USER")?;
+        let password = env::var("RABBITMQ_PASSWORD")?;
+        let host = env::var("RABBITMQ_HOST")?;
+        let port = env::var("RABBITMQ_PORT")?;
         let vhost = match env::var("RABBITMQ_VHOST") {
             Ok(v) => Some(v),
             Err(VarError::NotPresent) => None,
-            Err(e) => return Err(e).context("reading RABBITMQ_VHOST env var"),
+            Err(e) => return Err(e.into()),
         };
 
         let mut queue_names = Vec::with_capacity(queue_name_keys.len());
 
         for key in queue_name_keys {
-            queue_names.push(env::var(key).context("reading RABBITMQ_QUEUE_NAME env var")?);
+            queue_names.push(env::var(key)?);
         }
 
         Ok(Self {
@@ -93,7 +96,7 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use std::env::VarError;
+    use std::{env::VarError, error::Error};
 
     use super::*;
 
@@ -102,8 +105,11 @@ mod tests {
         assert_eq!(
             Config::from_env(&["test"])
                 .unwrap_err()
-                .downcast::<VarError>()
-                .unwrap(),
+                .source()
+                .unwrap()
+                .downcast_ref::<VarError>()
+                .unwrap()
+                .to_owned(),
             VarError::NotPresent
         )
     }
@@ -122,8 +128,11 @@ mod tests {
             assert_eq!(
                 Config::from_env(&["queue_a", "queue_b"])
                     .unwrap_err()
-                    .downcast::<VarError>()
-                    .unwrap(),
+                    .source()
+                    .unwrap()
+                    .downcast_ref::<VarError>()
+                    .unwrap()
+                    .to_owned(),
                 VarError::NotPresent
             )
         })
