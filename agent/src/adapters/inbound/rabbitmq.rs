@@ -66,57 +66,45 @@ impl RabbitMQDriver {
         info!("starting consume");
 
         loop {
-            select! {
-                msg = consumer.next() => {
-                    match msg {
-                        Some(delivery_result) => {
-                            let delivery = delivery_result?;
-                            let service = self.service.clone();
-                            let task_result = tokio::spawn(async move {
-                                match Job::decode(&delivery.data[..]) {
-                                    Ok(job) => {
-                                        info!("received job: {:?}", &job);
-                                        match service.process_job(&job).await {
-                                            Ok(_) => {
-                                                info!("successfully executed job with id {}", &job.id);
-                                                delivery.ack(BasicAckOptions { multiple: false }).await?;
-                                            },
-                                            Err(error) => {
-                                                match error {
-                                                    JobServiceError::UnknownJobType => {
-                                                        error!("executing job {} failed because an unknown job type has been supplied.", &job.id);
-                                                        nack_delivery(&delivery, false).await;
-                                                    }
-                                                    JobServiceError::AgentIssue(e) => {
-                                                        error!("executing job {} failed because of an agent issue: {}", &job.id, e);
-                                                        nack_delivery(&delivery, true).await;
-                                                        return Err(e);
-                                                    }
-                                                }
-                                            },
+            match consumer.next().await {
+                Some(delivery_result) => {
+                    let delivery = delivery_result?;
+                    let service = self.service.clone();
+                    tokio::spawn(async move {
+                        match Job::decode(&delivery.data[..]) {
+                            Ok(job) => {
+                                info!("received job: {:?}", &job);
+                                match service.process_job(&job).await {
+                                    Ok(_) => {
+                                        info!("successfully executed job with id {}", &job.id);
+                                        delivery.ack(BasicAckOptions { multiple: false }).await?;
+                                    }
+                                    Err(error) => {
+                                        match error {
+                                            JobServiceError::UnknownJobType => {
+                                                error!("executing job {} failed because an unknown job type has been supplied.", &job.id);
+                                                nack_delivery(&delivery, false).await;
+                                            }
+                                            JobServiceError::AgentIssue(e) => {
+                                                error!("executing job {} failed because of an agent issue: {}", &job.id, e);
+                                                nack_delivery(&delivery, true).await;
+                                                return Err(e);
+                                            }
                                         }
-                                    },
-                                    Err(e) => {
-                                        error!("{}", RabbitMQDriverError::JobDecodeError(e));
-                                        nack_delivery(&delivery, true).await;
-                                    },
+                                    }
                                 }
-                                Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-                            }).await??;
-
-                        },
-                        None => break,
-                    }
+                            }
+                            Err(e) => {
+                                error!("{}", RabbitMQDriverError::JobDecodeError(e));
+                                nack_delivery(&delivery, true).await;
+                            }
+                        }
+                        Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+                    }).await??;
                 }
-
-                _ = tokio::signal::ctrl_c() => {
-                    info!("received ctrl-c signal. exiting agent");
-                    self.connection.close(0, "consumer closed connection due to exit").await?;
-                }
+                None => continue,
             }
         }
-
-        Ok(())
     }
 }
 

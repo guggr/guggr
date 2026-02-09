@@ -70,17 +70,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-    match rabbitmq_driver.start().await {
-        Ok(_) => {}
-        Err(err) if err.downcast_ref::<AgentError>().is_some() => {
-            error!("exiting agent due to agent issues in previous jobs");
-            connection
-                .close(1, "connection closed due to agent issue")
-                .await?;
-            std::process::exit(1);
+    select! {
+        res = rabbitmq_driver.start() => {
+            match res {
+                Ok(_) => {}
+                Err(err) if err.downcast_ref::<AgentError>().is_some() => {
+                    error!("exiting agent due to agent issues in previous jobs");
+                    connection
+                        .close(1, "connection closed due to agent issue")
+                        .await?;
+                    std::process::exit(1);
+                }
+                Err(err) => {
+                    error!("error happened while executing agent: {}", err)
+                }
+            }
         }
-        Err(err) => {
-            error!("error happened while executing agent: {}", err)
+        _ = tokio::signal::ctrl_c() => {
+            info!("received ctrl-c signal. exiting agent");
+            connection.close(0, "consumer closed connection due to exit").await?;
         }
     }
 
