@@ -37,9 +37,9 @@ impl Ticker for SchedulerTicker {
                 match service.run().await {
                     Ok(_) => tracing::debug!("Batch processed successfully."),
 
-                    Err(JobSchedulerError::DatabaseUnavailable) => {
+                    Err(JobSchedulerError::DatabaseUnavailable(e)) => {
                         // We use WARN here because it's a transient infra issue
-                        tracing::warn!("Postgres is unreachable. Skipping this tick.");
+                        tracing::warn!("Postgres is unreachable. Skipping this tick. {e}");
                     }
 
                     Err(JobSchedulerError::QueueUnavailable(e)) => {

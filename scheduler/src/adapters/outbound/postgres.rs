@@ -49,8 +49,10 @@ pub enum PostgresFetcherError {
 impl From<PostgresFetcherError> for JobSchedulerError {
     fn from(value: PostgresFetcherError) -> Self {
         match value {
-            PostgresFetcherError::ConnectionError(_)
-            | PostgresFetcherError::PoolGetConnectionError(_) => Self::DatabaseUnavailable,
+            PostgresFetcherError::ConnectionError(e) => Self::DatabaseUnavailable(e.to_string()),
+            PostgresFetcherError::PoolGetConnectionError(e) => {
+                Self::DatabaseUnavailable(e.to_string())
+            }
 
             other @ PostgresFetcherError::FetchJobsError { .. } => {
                 Self::Internal(other.to_string())

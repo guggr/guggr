@@ -3,7 +3,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum JobSchedulerError {
     #[error("Database is currently unavailable")]
-    DatabaseUnavailable,
+    DatabaseUnavailable(String),
     #[error("Queue is currently unavailable: {0}")]
     QueueUnavailable(String),
     #[error("Internal storage error: {0}")]
