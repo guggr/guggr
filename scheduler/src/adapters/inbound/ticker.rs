@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use async_trait::async_trait;
 use tokio::time::{Interval, MissedTickBehavior};
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::core::{
     domain::errors::JobSchedulerError,
@@ -44,6 +44,7 @@ impl Ticker for SchedulerTicker {
                 _ = interval.tick() => {
                     let service = Arc::clone(&self.service);
 
+                    debug!("triggered service run in own task");
                     self.task_tracker.spawn(async move {
                         match service.run().await {
                             Ok(_) => tracing::debug!("Batch processed successfully."),

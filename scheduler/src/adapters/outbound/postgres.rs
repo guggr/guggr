@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use database_client::{
     DbError,
     schema::{
-        job::{self, id},
+        job::{self, id, last_scheduled},
         job_details_http, job_details_ping,
     },
 };
@@ -15,7 +15,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
 };
 use thiserror::Error;
-use tracing::error;
+use tracing::{debug, error};
 
 use crate::core::{
     domain::{errors::JobSchedulerError, type_mapper::DatabaseJobResult},
@@ -80,7 +80,10 @@ impl PostgresFetcher {
     /// Checks for unset [`last_scheduled`] field or where the [`run_every`]
     /// interval is exceeded.
     fn run_fetch_jobs_query(&self) -> Result<Vec<DatabaseJobResult>, PostgresFetcherError> {
+        debug!("getting db connection");
         let mut conn = self.pool.get()?;
+
+        debug!("loading ids to lock from db");
 
         // TODO: This is scaling extraordinary bad, maybe come up with sth better here?
         let ids_to_lock: Vec<String> = job::table
@@ -94,8 +97,9 @@ impl PostgresFetcher {
             .skip_locked()
             .load(&mut conn)?;
 
+        debug!("loading job details from db");
         let db_jobs: Vec<DatabaseJobResult> = job::table
-            .filter(id.eq_any(ids_to_lock))
+            .filter(id.eq_any(&ids_to_lock))
             .left_join(job_details_http::table)
             .left_join(job_details_ping::table)
             .load(&mut conn)?;

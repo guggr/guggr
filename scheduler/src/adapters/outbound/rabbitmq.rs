@@ -9,7 +9,7 @@ use lapin::{
 };
 use prost::Message;
 use thiserror::Error;
-use tracing::error;
+use tracing::{debug, error};
 
 use crate::core::{domain::errors::JobSchedulerError, ports::publisher::Publisher};
 
@@ -83,6 +83,7 @@ impl RabbitMQPublisher {
     }
 
     async fn publish_to_queue(&self, job: Job) -> Result<(), RabbitMQPublisherError> {
+        debug!("getting connection and channel for rabbitmq");
         let connection = self.pool.get().await?;
         let channel = connection.create_channel().await?;
 
@@ -90,6 +91,7 @@ impl RabbitMQPublisher {
             .with_content_type("application/protobuf".into())
             .with_delivery_mode(1); // Transient, i.e. not written to disk and not surviving broker restarts
 
+        debug!("publishing to channel");
         channel
             .basic_publish(
                 "",

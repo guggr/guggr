@@ -18,22 +18,26 @@ use tokio::{
     signal::unix::SignalKind,
     time::{Interval, sleep},
 };
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     telemetry::init_tracing();
 
+    debug!("Loading rabbitmq config from env");
     let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
         .context("while loading RabbitMQ config from environment")?;
+    debug!("Loading db config from env");
     let db_config =
         PostgresConfig::from_env().context("while loading database config from environment")?;
 
     let shutdown_token = tokio_util::sync::CancellationToken::new();
 
+    debug!("initializing postgres fetcher");
     let fetcher = PostgresFetcher::new(&db_config.postgres_connection_url())
         .context("while initializing postgres fetcher")?;
 
+    debug!("initializing publisher");
     let publisher = RabbitMQPublisher::new(
         &rabbitmq_config.rabbitmq_connection_url(false),
         rabbitmq_config
@@ -41,22 +45,30 @@ async fn main() -> Result<()> {
             .context("while getting scheduler queue name")?,
     )
     .context("while initializing rabbitmq publisher")?;
+    debug!("setting schema up and running migrations");
     publisher
         .setup_schema()
         .await
         .context("while setting up rabbitmq publisher schema")?;
 
+    debug!("initializing service");
     let service = SchedulerService::new(Arc::from(fetcher), Arc::from(publisher));
 
+    debug!("initializing ticker");
     let ticker = SchedulerTicker::new(
         Arc::from(service),
         Duration::from_secs(1),
         shutdown_token.clone(),
     );
 
+    info!("adapters and service setup completed");
+
+    debug!("starting ticker in own task");
     let mut ticker_handle = tokio::spawn(async move {
         ticker.start().await;
     });
+
+    info!("ticker started");
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate())?;
 
