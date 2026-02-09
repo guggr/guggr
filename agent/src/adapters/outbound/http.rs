@@ -61,7 +61,8 @@ impl MonitorPort for HttpAdapter {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| JobServiceError::AgentIssue(e.into()))?;
-        let job_result = match res {
+
+        let http_job_result = match res {
             Some(response) => {
                 let remote_ip = response
                     .remote_addr()
@@ -77,37 +78,28 @@ impl MonitorPort for HttpAdapter {
                     .await
                     .map_err(|e| JobServiceError::AgentIssue(AgentError::Http(e).into()))?;
 
-                JobResult {
-                    id: job.id.clone(),
-                    timestamp: Some(Timestamp {
-                        seconds: timestamp.as_secs() as i64,
-                        ..Default::default()
-                    }),
-                    http: Some(HttpJobResult {
-                        reachable,
-                        ip_address: ip_bytes,
-                        status_code,
-                        latency: Some(protocheck_latency),
-                        payload: payload.to_vec(),
-                    }),
-                    ..Default::default()
+                HttpJobResult {
+                    reachable,
+                    ip_address: ip_bytes,
+                    status_code,
+                    latency: Some(protocheck_latency),
+                    payload: payload.to_vec(),
                 }
             }
-            None => JobResult {
-                id: job.id.clone(),
-                timestamp: Some(Timestamp {
-                    seconds: timestamp.as_secs() as i64,
-                    ..Default::default()
-                }),
-                http: Some(HttpJobResult {
-                    reachable,
-                    ip_address: vec![],
-                    status_code: 0,
-                    latency: None,
-                    payload: vec![],
-                }),
+            None => HttpJobResult {
+                reachable,
                 ..Default::default()
             },
+        };
+
+        let job_result = JobResult {
+            id: job.id.clone(),
+            timestamp: Some(Timestamp {
+                seconds: timestamp.as_secs() as i64,
+                ..Default::default()
+            }),
+            http: Some(http_job_result),
+            ..Default::default()
         };
 
         Ok(job_result)
@@ -116,7 +108,6 @@ impl MonitorPort for HttpAdapter {
 
 #[cfg(test)]
 mod tests {
-    use futures_lite::StreamExt;
     use gen_proto_types::job::{types::v1::HttpJobType, v1::JobType};
     use httpmock::{Method::HEAD, MockServer};
 
@@ -137,7 +128,7 @@ mod tests {
             http: Some(HttpJobType {
                 url: server.url("/"),
             }),
-            ping: None,
+            ..Default::default()
         };
 
         let http_adapter = HttpAdapter::new();
@@ -155,7 +146,7 @@ mod tests {
                     latency: res.http.as_ref().unwrap().latency,
                     payload: vec![],
                 }),
-                ping: None,
+                ..Default::default()
             }
         )
     }
@@ -168,7 +159,7 @@ mod tests {
             http: Some(HttpJobType {
                 url: "http://example.lol".to_string(),
             }),
-            ping: None,
+            ..Default::default()
         };
 
         let http_adapter = HttpAdapter::new();
@@ -182,10 +173,10 @@ mod tests {
                     reachable: false,
                     ip_address: vec![],
                     status_code: 0,
-                    latency: res.http.as_ref().unwrap().latency,
                     payload: vec![],
+                    ..Default::default()
                 }),
-                ping: None,
+                ..Default::default()
             }
         )
     }
