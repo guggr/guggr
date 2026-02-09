@@ -21,6 +21,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    job_details_http (id) {
+        id -> Text,
+        url -> Text,
+    }
+}
+
+diesel::table! {
+    job_details_ping (id) {
+        id -> Text,
+        host -> Text,
+    }
+}
+
+diesel::table! {
     job_runs (id) {
         id -> Text,
         job_id -> Text,
@@ -61,16 +75,14 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(job -> group (group_id));
-diesel::joinable!(job -> job_type (job_type_id));
-diesel::joinable!(job_runs -> job (job_id));
-diesel::joinable!(user_group_mapping -> group (group_id));
-diesel::joinable!(user_group_mapping -> role (role_id));
-diesel::joinable!(user_group_mapping -> user (user_id));
+diesel::joinable!(job_details_http -> job (id));
+diesel::joinable!(job_details_ping -> job (id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     group,
     job,
+    job_details_http,
+    job_details_ping,
     job_runs,
     job_type,
     role,

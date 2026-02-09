@@ -28,6 +28,20 @@ pub struct Job {
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_details_http)]
+pub struct JobDetailsHttp {
+    pub id: String,
+    pub url: String,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_details_ping)]
+pub struct JobDetailsPing {
+    pub id: String,
+    pub host: String,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = job_runs)]
 pub struct JobRun {
     pub id: String,
