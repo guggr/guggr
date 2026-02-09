@@ -7,6 +7,8 @@ pub struct JobResult {
     pub timestamp: ::core::option::Option<::protocheck::types::Timestamp>,
     #[prost(string, tag = "3")]
     pub batch_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub run_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "16")]
     pub http: ::core::option::Option<super::types::v1::HttpJobResult>,
     #[prost(message, optional, tag = "17")]

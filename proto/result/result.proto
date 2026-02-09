@@ -12,6 +12,7 @@ message JobResult {
     string id = 1 [(buf.validate.field).required = true];
     google.protobuf.Timestamp timestamp = 2 [(buf.validate.field).required = true];
     string batch_id = 3 [(buf.validate.field).required = true];
+    string run_id = 4 [(buf.validate.field).required = true];
 
     option (buf.validate.message).oneof = { fields: ["http", "ping"], required: true };
 
