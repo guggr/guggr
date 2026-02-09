@@ -3,8 +3,11 @@
 use async_trait::async_trait;
 use database_client::{
     DbError,
-    models::Job,
-    schema::job::dsl::{job, last_scheduled, run_every},
+    models::{Job, JobDetailsHttp, JobDetailsPing},
+    schema::{
+        job::dsl::{job, last_scheduled, run_every},
+        job_details_http, job_details_ping,
+    },
 };
 use diesel::{
     PgConnection,
@@ -74,15 +77,19 @@ impl PostgresFetcher {
     /// interval is exceeded.
     fn run_fetch_jobs_query(
         &self,
-    ) -> Result<Vec<database_client::models::Job>, PostgresFetcherError> {
+    ) -> Result<Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>, PostgresFetcherError>
+    {
         let mut conn = self.pool.get()?;
 
-        let db_jobs: Vec<database_client::models::Job> = job
+        // TODO: This is scaling extraordinary bad, maybe come up with sth better here?
+        let db_jobs: Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)> = job
             .filter(
                 last_scheduled
                     .is_null()
                     .or((last_scheduled.assume_not_null() + run_every).le(now)),
             )
+            .left_join(job_details_http::table)
+            .left_join(job_details_ping::table)
             .for_update()
             .skip_locked()
             .load(&mut conn)?;
@@ -93,7 +100,10 @@ impl PostgresFetcher {
 
 #[async_trait]
 impl JobFetcher for PostgresFetcher {
-    async fn fetch_jobs_batch(&self) -> Result<Vec<Job>, JobRepositoryError> {
+    async fn fetch_jobs_batch(
+        &self,
+    ) -> Result<Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>, JobRepositoryError>
+    {
         Ok(self.run_fetch_jobs_query().map_err(|err| {
             error!("Database Error: {:?}", err);
             JobRepositoryError::from(err)
