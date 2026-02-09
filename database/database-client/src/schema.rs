@@ -41,6 +41,7 @@ diesel::table! {
         timestamp -> Timestamp,
         triggered_notification -> Bool,
         output -> Nullable<Text>,
+        batch_id -> Text,
     }
 }
 

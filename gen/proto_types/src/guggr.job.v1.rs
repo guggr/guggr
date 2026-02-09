@@ -5,6 +5,8 @@ pub struct Job {
     pub id: ::prost::alloc::string::String,
     #[prost(enumeration = "JobType", tag = "2")]
     pub job_type: i32,
+    #[prost(string, tag = "3")]
+    pub batch_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "16")]
     pub http: ::core::option::Option<super::types::v1::HttpJobType>,
     #[prost(message, optional, tag = "17")]
