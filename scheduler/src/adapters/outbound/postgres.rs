@@ -19,7 +19,7 @@ use thiserror::Error;
 use tracing::error;
 
 use crate::core::{
-    domain::{errors::JobRepositoryError, type_mapper::DatabaseJobResult},
+    domain::{errors::JobSchedulerError, type_mapper::DatabaseJobResult},
     ports::job_fetcher::JobFetcher,
 };
 
@@ -47,7 +47,7 @@ pub enum PostgresFetcherError {
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
-impl From<PostgresFetcherError> for JobRepositoryError {
+impl From<PostgresFetcherError> for JobSchedulerError {
     fn from(value: PostgresFetcherError) -> Self {
         match value {
             PostgresFetcherError::ConnectionError(_)
@@ -100,10 +100,10 @@ impl PostgresFetcher {
 
 #[async_trait]
 impl JobFetcher for PostgresFetcher {
-    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobRepositoryError> {
+    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobSchedulerError> {
         Ok(self.run_fetch_jobs_query().map_err(|err| {
             error!("Database Error: {:?}", err);
-            JobRepositoryError::from(err)
+            JobSchedulerError::from(err)
         })?)
     }
 }
