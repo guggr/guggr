@@ -36,10 +36,15 @@ pub type DatabaseJobResult = (
     Option<db_models::JobDetailsPing>,
 );
 
-impl FromDatabaseType<DatabaseJobResult> for Job {
-    fn from_database_type(value: DatabaseJobResult) -> Self {
+pub trait JobFromDatabaseJobResult {
+    fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self;
+}
+
+impl JobFromDatabaseJobResult for Job {
+    fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self {
         Self {
             id: value.0.id,
+            batch_id: batch_id.to_owned(),
             job_type: JobType::from_database_type(value.0.job_type_id).into(),
             http: value.1.map(FromDatabaseType::from_database_type),
             ping: value.2.map(FromDatabaseType::from_database_type),

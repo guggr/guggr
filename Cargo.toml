@@ -30,3 +30,4 @@ gen-proto-types = { version = "0.1.0", path = "gen/proto_types" }
 anyhow = "1.0.101"
 database-client = { version = "0.1.0", path = "database/database-client" }
 tokio-util = "0.7.18"
+nanoid = "0.4.0"

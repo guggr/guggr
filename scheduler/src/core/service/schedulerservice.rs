@@ -1,11 +1,15 @@
 use std::sync::Arc;
 
 use gen_proto_types::job::v1::{Job, JobType};
+use nanoid::nanoid;
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::core::{
-    domain::{errors::JobSchedulerError, type_mapper::FromDatabaseType},
+    domain::{
+        errors::JobSchedulerError,
+        type_mapper::{FromDatabaseType, JobFromDatabaseJobResult},
+    },
     ports::{job_fetcher::JobFetcher, publisher::Publisher},
 };
 
@@ -29,13 +33,15 @@ impl SchedulerService {
         }
 
         let batch_tracker = tokio_util::task::TaskTracker::new();
+        let batch_id = nanoid!();
 
-        debug!("processing {} jobs", jobs.len());
+        debug!("processing {} jobs with batch id {}", jobs.len(), batch_id);
         for job in jobs {
             let publisher = self.publisher.clone();
+            let batch_id = batch_id.clone();
 
             batch_tracker.spawn(async move {
-                let job = Job::from_database_type(job);
+                let job = Job::from_database_type(job, batch_id);
 
                 if job.job_type() == JobType::Unspecified {
                     error!("Encountered unknown job type in job id {}", job.id);
