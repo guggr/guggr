@@ -52,8 +52,7 @@ impl PublisherPort for RabbitMQPublisher {
         let encoded_job = job_result.encode_to_vec();
 
         // TODO possibly exchange configuration via ENV
-        let confirm = self
-            .channel
+        self.channel
             .basic_publish(
                 "",
                 &self.queue_name,
@@ -66,10 +65,7 @@ impl PublisherPort for RabbitMQPublisher {
             .await
             .map_err(|e| JobServiceError::AgentIssue(e.into()))?;
 
-        debug!(
-            "published message for job result with id {}: confirmation = {:?}",
-            job_result.id, confirm
-        );
+        debug!("published message for job result with id {}", job_result.id);
 
         Ok(())
     }
