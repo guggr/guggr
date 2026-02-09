@@ -9,6 +9,7 @@ import "buf/validate/validate.proto";
 message Job {
     string id = 1 [(buf.validate.field).required = true];
     JobType job_type = 2;
+    string batch_id = 3 [(buf.validate.field).required = true];
 
     option (buf.validate.message).oneof = { fields: ["http", "ping"], required: true };
 
