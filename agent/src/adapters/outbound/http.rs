@@ -3,7 +3,6 @@ use std::{
     time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
-use anyhow::{Context, anyhow};
 use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
@@ -12,7 +11,10 @@ use gen_proto_types::{
 use protocheck::types::{Duration, Timestamp};
 use tracing::info;
 
-use crate::core::{ports::monitor::MonitorPort, service::jobservice::JobServiceError};
+use crate::core::{
+    ports::monitor::MonitorPort,
+    service::jobservice::{AgentError, JobServiceError},
+};
 
 pub struct HttpAdapter {
     client: reqwest::Client,
@@ -28,7 +30,7 @@ impl HttpAdapter {
 
 #[async_trait]
 impl MonitorPort for HttpAdapter {
-    async fn execute(&self, job: &Job) -> anyhow::Result<JobResult, JobServiceError> {
+    async fn execute(&self, job: &Job) -> Result<JobResult, JobServiceError> {
         let http_details = job.http.as_ref().unwrap();
 
         info!(
@@ -49,7 +51,7 @@ impl MonitorPort for HttpAdapter {
             Err(error) => {
                 if self.client.head("http://gug.gr").send().await.is_err() {
                     // Error on agent side return agent error
-                    return Err(JobServiceError::AgentIssue(anyhow!(error)));
+                    return Err(JobServiceError::AgentIssue(AgentError::Http(error).into()));
                 } else {
                     (None, false)
                 }
@@ -58,13 +60,12 @@ impl MonitorPort for HttpAdapter {
 
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?;
+            .map_err(|e| JobServiceError::AgentIssue(e.into()))?;
         let job_result = match res {
             Some(response) => {
                 let remote_ip = response
                     .remote_addr()
-                    .context("receiving remote address")
-                    .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?
+                    .ok_or_else(|| JobServiceError::AgentIssue(AgentError::RemoteAddress.into()))?
                     .ip();
                 let ip_bytes = match remote_ip {
                     IpAddr::V4(ipv4) => ipv4.octets().to_vec(),
@@ -74,7 +75,7 @@ impl MonitorPort for HttpAdapter {
                 let payload = response
                     .bytes()
                     .await
-                    .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?;
+                    .map_err(|e| JobServiceError::AgentIssue(AgentError::Http(e).into()))?;
 
                 JobResult {
                     id: job.id.clone(),
@@ -115,6 +116,7 @@ impl MonitorPort for HttpAdapter {
 
 #[cfg(test)]
 mod tests {
+    use futures_lite::StreamExt;
     use gen_proto_types::job::{types::v1::HttpJobType, v1::JobType};
     use httpmock::{Method::HEAD, MockServer};
 
@@ -139,7 +141,7 @@ mod tests {
         };
 
         let http_adapter = HttpAdapter::new();
-        let res = http_adapter.execute(&job).await.unwrap();
+        let res: JobResult = http_adapter.execute(&job).await.unwrap();
         mock.assert();
         assert_eq!(
             res,

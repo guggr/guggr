@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{error::Error, sync::Arc};
 
 use gen_proto_types::job::v1::Job;
 use thiserror::Error;
@@ -9,8 +9,18 @@ use crate::core::ports::{monitor::MonitorPort, publisher::PublisherPort};
 pub enum JobServiceError {
     #[error("unknown job type supplied")]
     UnknownJobType,
-    #[error("issue with the agent: {0}")]
-    AgentIssue(anyhow::Error),
+    #[error("issue with the agent")]
+    AgentIssue(#[from] Box<dyn Error + Send + Sync>),
+}
+
+#[derive(Debug, Error)]
+pub enum AgentError {
+    #[error("error with http request")]
+    Http(#[from] reqwest::Error),
+    #[error("could not retrieve remote address")]
+    RemoteAddress,
+    #[error("error with icmp request")]
+    Ping(#[from] Box<dyn Error + Send + Sync>),
 }
 
 pub struct JobService {
@@ -42,7 +52,7 @@ impl JobService {
         }
     }
 
-    pub async fn process_job(&self, job: &Job) -> anyhow::Result<(), JobServiceError> {
+    pub async fn process_job(&self, job: &Job) -> Result<(), JobServiceError> {
         let result = match job.job_type() {
             gen_proto_types::job::v1::JobType::Http => self.http_adapter.execute(job).await?,
             gen_proto_types::job::v1::JobType::Ping => self.ping_adapter.execute(job).await?,

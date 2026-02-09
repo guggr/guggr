@@ -1,1 +1,1 @@
-pub(crate) mod rabbitmq;
+pub mod rabbitmq;

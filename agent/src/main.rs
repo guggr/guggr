@@ -1,6 +1,6 @@
-use std::{sync::Arc, time::Duration};
+use std::{error::Error, sync::Arc, time::Duration};
 
-use config::Config;
+use config::RabbitMQConfig;
 use lapin::{Connection, ConnectionProperties};
 use tokio::time::sleep;
 use tracing::{error, info, warn};
@@ -18,18 +18,16 @@ mod adapters;
 mod core;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    dotenv::from_filename(".env.sample").ok();
-
+async fn main() -> Result<(), Box<dyn Error>> {
     init_tracing();
 
-    let config = Config::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
+    let config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
 
     let mut retry_count = 0;
 
     let connection = loop {
         match Connection::connect(
-            &config.connection_url(false),
+            &config.rabbitmq_connection_url(false),
             ConnectionProperties::default(),
         )
         .await

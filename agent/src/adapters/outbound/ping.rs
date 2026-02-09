@@ -3,7 +3,6 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use anyhow::anyhow;
 use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
@@ -14,7 +13,10 @@ use rand::random;
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
 use tracing::info;
 
-use crate::core::{ports::monitor::MonitorPort, service::jobservice::JobServiceError};
+use crate::core::{
+    ports::monitor::MonitorPort,
+    service::jobservice::{AgentError, JobServiceError},
+};
 
 pub struct PingAdapter {}
 
@@ -26,7 +28,7 @@ impl PingAdapter {
 
 #[async_trait]
 impl MonitorPort for PingAdapter {
-    async fn execute(&self, job: &Job) -> anyhow::Result<JobResult, JobServiceError> {
+    async fn execute(&self, job: &Job) -> Result<JobResult, JobServiceError> {
         let ping_details = job.ping.as_ref().unwrap();
 
         info!(
@@ -34,14 +36,14 @@ impl MonitorPort for PingAdapter {
             job.id, ping_details.host
         );
 
-        let client =
-            Client::new(&Config::default()).map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?;
+        let client = Client::new(&Config::default())
+            .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
         let mut pinger = client
             .pinger(
                 ping_details
                     .host
                     .parse::<IpAddr>()
-                    .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?,
+                    .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?,
                 PingIdentifier(random()),
             )
             .await;
@@ -86,9 +88,11 @@ impl MonitorPort for PingAdapter {
             Err(e) => {
                 pinger.host = "1.1.1.1"
                     .parse::<IpAddr>()
-                    .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?;
+                    .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
                 if pinger.ping(PingSequence(0), &[0; 8]).await.is_err() {
-                    return Err(JobServiceError::AgentIssue(anyhow!(e)));
+                    return Err(JobServiceError::AgentIssue(
+                        AgentError::Ping(e.into()).into(),
+                    ));
                 } else {
                     JobResult {
                         id: job.id.clone(),
@@ -108,11 +112,11 @@ impl MonitorPort for PingAdapter {
     }
 }
 
-fn get_timestamp() -> anyhow::Result<Timestamp, JobServiceError> {
+fn get_timestamp() -> Result<Timestamp, JobServiceError> {
     Ok(Timestamp {
         seconds: SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map_err(|e| JobServiceError::AgentIssue(anyhow!(e)))?
+            .map_err(|e| JobServiceError::AgentIssue(e.into()))?
             .as_secs() as i64,
         ..Default::default()
     })

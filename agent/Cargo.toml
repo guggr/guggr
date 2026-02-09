@@ -15,7 +15,6 @@ reqwest = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
 thiserror = { workspace = true }
 config = { workspace = true }
-dotenv = { workspace = true }
 lapin = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 prost = { workspace = true }

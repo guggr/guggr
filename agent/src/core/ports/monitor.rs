@@ -5,5 +5,5 @@ use crate::core::service::jobservice::JobServiceError;
 
 #[async_trait]
 pub trait MonitorPort {
-    async fn execute(&self, job: &Job) -> anyhow::Result<JobResult, JobServiceError>;
+    async fn execute(&self, job: &Job) -> Result<JobResult, JobServiceError>;
 }

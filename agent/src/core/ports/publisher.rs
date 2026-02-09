@@ -5,5 +5,5 @@ use crate::core::service::jobservice::JobServiceError;
 
 #[async_trait]
 pub trait PublisherPort {
-    async fn publish_result(&self, job_result: &JobResult) -> anyhow::Result<(), JobServiceError>;
+    async fn publish_result(&self, job_result: &JobResult) -> Result<(), JobServiceError>;
 }

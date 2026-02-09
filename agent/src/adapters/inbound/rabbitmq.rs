@@ -3,10 +3,10 @@ use std::sync::Arc;
 use futures_lite::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
-    Channel, Connection,
+    Channel, Connection, Error,
     message::Delivery,
-    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, QueueDeclareOptions},
-    types::{AMQPValue, FieldTable},
+    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions},
+    types::FieldTable,
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
@@ -16,9 +16,11 @@ use tracing::{error, info};
 use crate::core::service::jobservice::{JobService, JobServiceError};
 
 #[derive(Debug, Error)]
-enum RabbitMQDriverError {
-    #[error("error decoding job {0}")]
-    JobDecodeError(DecodeError),
+pub enum RabbitMQDriverError {
+    #[error("error decoding job")]
+    JobDecodeError(#[from] DecodeError),
+    #[error("connection error")]
+    ConnectionError(#[from] Error),
 }
 
 pub struct RabbitMQDriver {
@@ -33,26 +35,11 @@ impl RabbitMQDriver {
         connection: Arc<Connection>,
         queue_name: String,
         service: JobService,
-    ) -> anyhow::Result<Self> {
-        let channel = connection.create_channel().await?;
-
-        let mut args = FieldTable::default();
-        args.insert(
-            "x-queue-type".into(),
-            AMQPValue::LongString("quorum".into()),
-        );
-        args.insert("x-delivery-limit".into(), AMQPValue::LongInt(5));
-
-        channel
-            .queue_declare(
-                &queue_name,
-                QueueDeclareOptions {
-                    durable: true,
-                    ..Default::default()
-                },
-                args,
-            )
-            .await?;
+    ) -> Result<Self, RabbitMQDriverError> {
+        let channel = connection
+            .create_channel()
+            .await
+            .map_err(RabbitMQDriverError::ConnectionError)?;
 
         Ok(RabbitMQDriver {
             service,
@@ -62,7 +49,7 @@ impl RabbitMQDriver {
         })
     }
 
-    pub async fn start(&self) -> anyhow::Result<()> {
+    pub async fn start(&self) -> Result<(), RabbitMQDriverError> {
         let mut consumer = self
             .channel
             .basic_consume(
