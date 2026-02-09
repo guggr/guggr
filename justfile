@@ -3,6 +3,8 @@
 
 # Contains database-specific recipes
 mod db 'database/db.just'
+# Contains scheduler-specific recipes
+mod scheduler 'scheduler/scheduler.just'
 
 alias c := check
 alias f := fmt
