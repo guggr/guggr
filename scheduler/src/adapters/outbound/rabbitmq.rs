@@ -4,7 +4,7 @@ use deadpool_lapin::Runtime;
 use gen_proto_types::job::v1::Job;
 use lapin::{
     self, BasicProperties,
-    options::QueueDeclareOptions,
+    options::{BasicPublishOptions, QueueDeclareOptions},
     types::{AMQPValue::LongString, FieldTable},
 };
 use prost::Message;
@@ -96,7 +96,7 @@ impl RabbitMQPublisher {
             .basic_publish(
                 "",
                 &self.queue_name,
-                Default::default(),
+                BasicPublishOptions::default(),
                 &job.encode_to_vec(),
                 properties,
             )

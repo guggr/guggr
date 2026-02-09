@@ -2,22 +2,15 @@ use std::{sync::Arc, time::Duration};
 
 use anyhow::{Context, Result};
 use config::{PostgresConfig, RabbitMQConfig};
-use gen_proto_types::job::v1::{Job, JobType};
 use scheduler::{
     adapters::{
         inbound::ticker::SchedulerTicker,
         outbound::{postgres::PostgresFetcher, rabbitmq::RabbitMQPublisher},
     },
-    core::{
-        ports::{job_fetcher::JobFetcher, publisher::Publisher, ticker::Ticker},
-        service::{self, schedulerservice::SchedulerService},
-    },
+    core::{ports::ticker::Ticker, service::schedulerservice::SchedulerService},
     telemetry,
 };
-use tokio::{
-    signal::unix::SignalKind,
-    time::{Interval, sleep},
-};
+use tokio::signal::unix::SignalKind;
 use tracing::{debug, info, warn};
 
 #[tokio::main]
@@ -74,7 +67,7 @@ async fn main() -> Result<()> {
 
     tokio::select! {
         _ = &mut ticker_handle => {
-            warn!("ticker exited prematurely")
+            warn!("ticker exited prematurely");
         }
         _ = tokio::signal::ctrl_c() => {
             info!("received ctrl-c. exiting scheduler");

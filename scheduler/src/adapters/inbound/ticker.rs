@@ -6,9 +6,8 @@ use tokio_util::{sync::CancellationToken, task::TaskTracker};
 use tracing::{debug, info};
 
 use crate::core::{
-    domain::errors::JobSchedulerError,
-    ports::ticker::Ticker,
-    service::{self, schedulerservice::SchedulerService},
+    domain::errors::JobSchedulerError, ports::ticker::Ticker,
+    service::schedulerservice::SchedulerService,
 };
 
 pub struct SchedulerTicker {
@@ -19,6 +18,7 @@ pub struct SchedulerTicker {
 }
 
 impl SchedulerTicker {
+    #[must_use]
     pub fn new(
         service: Arc<SchedulerService>,
         run_every: Duration,
@@ -35,6 +35,7 @@ impl SchedulerTicker {
 
 #[async_trait]
 impl Ticker for SchedulerTicker {
+    #[allow(clippy::ignored_unit_patterns)]
     async fn start(self) {
         let mut interval = self.interval;
         interval.set_missed_tick_behavior(MissedTickBehavior::Skip);
@@ -47,7 +48,7 @@ impl Ticker for SchedulerTicker {
                     debug!("triggered service run in own task");
                     self.task_tracker.spawn(async move {
                         match service.run().await {
-                            Ok(_) => tracing::debug!("Batch processed successfully."),
+                            Ok(()) => tracing::debug!("Batch processed successfully."),
 
                             Err(JobSchedulerError::DatabaseUnavailable(e)) => {
                                 // We use WARN here because it's a transient infra issue
@@ -78,6 +79,6 @@ impl Ticker for SchedulerTicker {
         info!("Waiting for in-flight jobs to complete...");
         self.task_tracker.wait().await;
 
-        info!("all jobs finished")
+        info!("all jobs finished");
     }
 }

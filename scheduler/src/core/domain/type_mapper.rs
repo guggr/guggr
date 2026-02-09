@@ -11,9 +11,9 @@ pub trait FromDatabaseType<F> {
 impl FromDatabaseType<String> for JobType {
     fn from_database_type(job_type_id: String) -> Self {
         match job_type_id.as_str() {
-            "http" => JobType::Http,
-            "ping" => JobType::Ping,
-            _ => JobType::Unspecified,
+            "http" => Self::Http,
+            "ping" => Self::Ping,
+            _ => Self::Unspecified,
         }
     }
 }
@@ -44,7 +44,7 @@ impl JobFromDatabaseJobResult for Job {
     fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self {
         Self {
             id: value.0.id,
-            batch_id: batch_id.to_owned(),
+            batch_id: batch_id,
             job_type: JobType::from_database_type(value.0.job_type_id).into(),
             http: value.1.map(FromDatabaseType::from_database_type),
             ping: value.2.map(FromDatabaseType::from_database_type),

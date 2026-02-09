@@ -2,14 +2,10 @@ use std::sync::Arc;
 
 use gen_proto_types::job::v1::{Job, JobType};
 use nanoid::nanoid;
-use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::core::{
-    domain::{
-        errors::JobSchedulerError,
-        type_mapper::{FromDatabaseType, JobFromDatabaseJobResult},
-    },
+    domain::{errors::JobSchedulerError, type_mapper::JobFromDatabaseJobResult},
     ports::{job_fetcher::JobFetcher, publisher::Publisher},
 };
 
