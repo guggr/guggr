@@ -39,8 +39,8 @@ pub enum PostgresFetcherError {
     ConnectionError(#[from] DbError),
     #[error("Pool exhausted or timeout: {0}")]
     PoolGetConnectionError(#[from] diesel::r2d2::PoolError),
-    #[error("Failed to fetch jobs for scheduling: {source}")]
-    FetchJobsError { source: diesel::result::Error },
+    #[error("Failed to fetch jobs for scheduling: {0}")]
+    FetchJobsError(#[from] diesel::result::Error),
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
@@ -88,8 +88,7 @@ impl PostgresFetcher {
             )
             .for_update()
             .skip_locked()
-            .load(&mut conn)
-            .map_err(|e| PostgresFetcherError::FetchJobsError { source: e })?;
+            .load(&mut conn)?;
 
         Ok(db_jobs)
     }
