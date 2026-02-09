@@ -1,9 +1,9 @@
 //! Postgres adapter for fetching jobs from the database.
 
 use async_trait::async_trait;
-use chrono::Duration;
 use database_client::{
     DbError,
+    models::Job,
     schema::job::dsl::{job, last_scheduled, run_every},
 };
 use diesel::{
@@ -15,10 +15,7 @@ use diesel::{
 use thiserror::Error;
 use tracing::error;
 
-use crate::core::{
-    domain::{self, errors::JobRepositoryError},
-    ports::job_fetcher::JobFetcher,
-};
+use crate::core::{domain::errors::JobRepositoryError, ports::job_fetcher::JobFetcher};
 
 pub struct PostgresFetcher {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -94,52 +91,12 @@ impl PostgresFetcher {
     }
 }
 
-impl TryFrom<database_client::models::Job> for domain::models::Job {
-    type Error = JobRepositoryError;
-
-    /// Converts database model [`database_client::models::Job`] to domain
-    /// model. Mainly converts [`diesel::data_types::PgInterval`] to
-    /// [`chrono::Duration`].
-    fn try_from(value: database_client::models::Job) -> Result<Self, Self::Error> {
-        const MICROSECONDS_PER_DAY: i64 = 24 * 60 * 60 * 1_000_000;
-
-        // Months in Postgres are fuzzy, so this is more of a best guess
-        let total_micros = value.run_every.microseconds
-            + (i64::from(value.run_every.days) * MICROSECONDS_PER_DAY)
-            + (i64::from(value.run_every.months) * MICROSECONDS_PER_DAY * 30);
-
-        if total_micros < 0 {
-            return Err(JobRepositoryError::Internal(
-                "Negative interval found in database".into(),
-            ));
-        }
-
-        Ok(Self {
-            id: value.id,
-            group_id: value.group_id,
-            name: value.name,
-            job_type_id: value.job_type_id,
-            notify_users: value.notify_users,
-            run_every: Duration::microseconds(total_micros),
-            custom_notification: value.custom_notification,
-            last_scheduled: value.last_scheduled,
-        })
-    }
-}
-
 #[async_trait]
 impl JobFetcher for PostgresFetcher {
-    async fn fetch_jobs_batch(&self) -> Result<Vec<domain::models::Job>, JobRepositoryError> {
-        let db_jobs = self.run_fetch_jobs_query().map_err(|err| {
+    async fn fetch_jobs_batch(&self) -> Result<Vec<Job>, JobRepositoryError> {
+        Ok(self.run_fetch_jobs_query().map_err(|err| {
             error!("Database Error: {:?}", err);
             JobRepositoryError::from(err)
-        })?;
-
-        let domain_jobs: Vec<domain::models::Job> = db_jobs
-            .into_iter()
-            .map(domain::models::Job::try_from)
-            .collect::<Result<Vec<_>, _>>()?;
-
-        Ok(domain_jobs)
+        })?)
     }
 }
