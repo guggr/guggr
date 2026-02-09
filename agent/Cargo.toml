@@ -5,7 +5,6 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
 async-trait = { workspace = true }
 gen-proto-types.workspace = true
 tracing = { workspace = true }

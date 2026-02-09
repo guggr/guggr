@@ -1,5 +1,5 @@
 [workspace]
-members = ["gen/proto_types", "config", "database/database-client"]
+members = ["agent", "gen/proto_types", "config", "database/database-client"]
 
 resolver = "3"
 
@@ -10,6 +10,7 @@ authors = ["Guggr"]
 
 [workspace.dependencies]
 prost = "0.14"
+gen-proto-types = { path = "gen/proto_types" }
 config = { path = "config" }
 prost-build = "0.14"
 protocheck = "0.1"
