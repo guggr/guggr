@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use async_trait::async_trait;
 use deadpool_lapin::Runtime;
 use gen_proto_types::job::v1::Job;

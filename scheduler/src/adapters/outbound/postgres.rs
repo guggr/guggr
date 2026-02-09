@@ -3,7 +3,6 @@
 use async_trait::async_trait;
 use database_client::{
     DbError,
-    models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::{
         job::dsl::{job, last_scheduled, run_every},
         job_details_http, job_details_ping,
