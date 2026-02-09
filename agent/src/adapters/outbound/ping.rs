@@ -113,3 +113,75 @@ fn get_timestamp() -> Result<Timestamp, JobServiceError> {
         ..Default::default()
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use gen_proto_types::job::{types::v1::PingJobType, v1::JobType};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_ping_success() {
+        let job = Job {
+            id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
+            job_type: JobType::Ping.into(),
+            ping: Some(PingJobType {
+                host: "1.0.0.1".to_string(),
+            }),
+            ..Default::default()
+        };
+
+        let ping_adapter = PingAdapter::new();
+        let res = ping_adapter.execute(&job).await.unwrap();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
+                timestamp: get_current_timestamp(),
+                ping: Some(PingJobResult {
+                    reachable: true,
+                    ip_address: vec![1, 0, 0, 1],
+                    latency: res.ping.as_ref().unwrap().latency
+                }),
+                ..Default::default()
+            }
+        )
+    }
+
+    #[tokio::test]
+    async fn test_ping_error() {
+        let job = Job {
+            id: "CQybHx0FnQpv0SxRoVNou".to_string(),
+            job_type: JobType::Ping.into(),
+            ping: Some(PingJobType {
+                host: "169.254.0.0".to_string(),
+            }),
+            ..Default::default()
+        };
+
+        let ping_adapter = PingAdapter::new();
+        let res = ping_adapter.execute(&job).await.unwrap();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "CQybHx0FnQpv0SxRoVNou".to_string(),
+                timestamp: get_current_timestamp(),
+                ping: Some(PingJobResult {
+                    reachable: false,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        )
+    }
+
+    fn get_current_timestamp() -> Option<Timestamp> {
+        Some(Timestamp {
+            seconds: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as i64,
+            nanos: 0,
+        })
+    }
+}
