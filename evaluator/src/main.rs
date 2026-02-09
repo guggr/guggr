@@ -16,6 +16,8 @@ async fn main() -> anyhow::Result<()> {
     let eval_service = EvalService::new(postgres_adapter);
     let test_result = JobResult {
         id: "L5tboqyp3NGfq-ZYlWEFg".to_string(),
+        batch_id: "b".to_string(),
+        run_id: "a".to_string(),
         timestamp: None,
         http: None,
         ping: None,

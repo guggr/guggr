@@ -11,7 +11,6 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
 };
 use gen_proto_types::job_result::v1::JobResult;
-use nanoid::nanoid;
 use thiserror::Error;
 use tracing::error;
 
@@ -85,8 +84,9 @@ impl PostgresAdapter {
         let mut conn = self.pool.get()?;
 
         let job_run = JobRun {
-            id: nanoid!(),
+            id: job_result.run_id.clone(),
             job_id: job_result.id.clone(),
+            batch_id: job_result.batch_id.clone(),
             triggered_notification: notified,
             timestamp: Utc::now().naive_utc(), //TODO
             output: None,
