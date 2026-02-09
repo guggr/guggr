@@ -1,23 +1,42 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use anyhow::{Context, Result};
-use config::RabbitMQConfig;
+use config::{PostgresConfig, RabbitMQConfig};
 use gen_proto_types::job::v1::{Job, JobType};
 use scheduler::{
-    adapters::outbound::rabbitmq::RabbitMQPublisher, core::ports::publisher::Publisher, telemetry,
+    adapters::{
+        inbound::ticker::SchedulerTicker,
+        outbound::{postgres::PostgresFetcher, rabbitmq::RabbitMQPublisher},
+    },
+    core::{
+        ports::{job_fetcher::JobFetcher, publisher::Publisher, ticker::Ticker},
+        service::{self, schedulerservice::SchedulerService},
+    },
+    telemetry,
 };
-use tokio::time::sleep;
+use tokio::{
+    signal::unix::SignalKind,
+    time::{Interval, sleep},
+};
+use tracing::{info, warn};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     telemetry::init_tracing();
 
-    let config = RabbitMQConfig::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
-        .context("while loading config from environment")?;
+    let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
+        .context("while loading RabbitMQ config from environment")?;
+    let db_config =
+        PostgresConfig::from_env().context("while loading database config from environment")?;
+
+    let shutdown_token = tokio_util::sync::CancellationToken::new();
+
+    let fetcher = PostgresFetcher::new(&db_config.postgres_connection_url())
+        .context("while initializing postgres fetcher")?;
 
     let publisher = RabbitMQPublisher::new(
-        &config.rabbitmq_connection_url(false),
-        config
+        &rabbitmq_config.rabbitmq_connection_url(false),
+        rabbitmq_config
             .rabbitmq_queue_name(0)
             .context("while getting scheduler queue name")?,
     )
@@ -27,18 +46,36 @@ async fn main() -> Result<()> {
         .await
         .context("while setting up rabbitmq publisher schema")?;
 
-    publisher
-        .publish(Job {
-            id: "123".into(),
-            job_type: JobType::Http.into(),
-            http: Some(gen_proto_types::job::types::v1::HttpJobType {
-                url: "test.de".into(),
-            }),
-            ping: None,
-        })
-        .await?;
+    let service = SchedulerService::new(Arc::from(fetcher), Arc::from(publisher));
 
-    sleep(Duration::from_secs(30));
+    let ticker = SchedulerTicker::new(
+        Arc::from(service),
+        Duration::from_secs(1),
+        shutdown_token.clone(),
+    );
+
+    let mut ticker_handle = tokio::spawn(async move {
+        ticker.start().await;
+    });
+
+    let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate())?;
+
+    tokio::select! {
+        _ = &mut ticker_handle => {
+            warn!("ticker exited prematurely")
+        }
+        _ = tokio::signal::ctrl_c() => {
+            info!("received ctrl-c. exiting scheduler");
+        }
+        _ = sigterm.recv() => {
+            info!("received SIGTERM. exiting scheduler");
+        }
+    }
+
+    info!("exiting scheduler");
+    shutdown_token.cancel();
+
+    let _ = ticker_handle.await;
 
     Ok(())
 }
