@@ -1,6 +1,8 @@
-use std::{error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
 use config::RabbitMQConfig;
+use gen_proto_types::job::v1::JobType;
+use surge_ping::ping;
 use tokio::select;
 use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -10,7 +12,10 @@ use crate::{
         inbound::rabbitmq::RabbitMQDriver,
         outbound::{http::HttpAdapter, ping::PingAdapter, rabbitmq::RabbitMQPublisher},
     },
-    core::service::jobservice::{AgentError, JobService},
+    core::{
+        ports::monitor::MonitorPort,
+        service::jobservice::{AgentError, JobService},
+    },
 };
 
 mod adapters;
@@ -31,8 +36,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         RabbitMQPublisher::new(&connection, config.rabbitmq_queue_name(1).unwrap()).await?,
     );
 
+    let mut processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>> =
+        HashMap::new();
+    processing_adapter.insert(JobType::Http, http_adapter);
+    processing_adapter.insert(JobType::Ping, ping_adapter);
+
     // Service
-    let job_service = JobService::new(http_adapter, ping_adapter, rabbitmq_publisher);
+    let job_service = JobService::new(processing_adapter, rabbitmq_publisher);
 
     // Inbound adapter
     let rabbitmq_driver = RabbitMQDriver::new(

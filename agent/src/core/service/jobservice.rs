@@ -1,6 +1,6 @@
-use std::{error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
-use gen_proto_types::job::v1::Job;
+use gen_proto_types::job::v1::{Job, JobType};
 use thiserror::Error;
 
 use crate::core::ports::{monitor::MonitorPort, publisher::PublisherPort};
@@ -24,16 +24,14 @@ pub enum AgentError {
 }
 
 pub struct JobService {
-    http_adapter: Arc<dyn MonitorPort + Send + Sync>,
-    ping_adapter: Arc<dyn MonitorPort + Send + Sync>,
+    processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>>,
     publisher_adapter: Arc<dyn PublisherPort + Send + Sync>,
 }
 
 impl Clone for JobService {
     fn clone(&self) -> Self {
         Self {
-            http_adapter: Arc::clone(&self.http_adapter),
-            ping_adapter: Arc::clone(&self.ping_adapter),
+            processing_adapter: self.processing_adapter.clone(),
             publisher_adapter: Arc::clone(&self.publisher_adapter),
         }
     }
@@ -41,24 +39,19 @@ impl Clone for JobService {
 
 impl JobService {
     pub fn new(
-        http_adapter: Arc<dyn MonitorPort + Send + Sync>,
-        ping_adapter: Arc<dyn MonitorPort + Send + Sync>,
+        processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>>,
         publisher_adapter: Arc<dyn PublisherPort + Send + Sync>,
     ) -> Self {
         JobService {
-            http_adapter,
-            ping_adapter,
+            processing_adapter,
             publisher_adapter,
         }
     }
 
     pub async fn process_job(&self, job: &Job) -> Result<(), JobServiceError> {
-        let result = match job.job_type() {
-            gen_proto_types::job::v1::JobType::Http => self.http_adapter.execute(job).await?,
-            gen_proto_types::job::v1::JobType::Ping => self.ping_adapter.execute(job).await?,
-            gen_proto_types::job::v1::JobType::Unspecified => {
-                return Err(JobServiceError::UnknownJobType);
-            }
+        let result = match self.processing_adapter.get(&job.job_type()) {
+            None => return Err(JobServiceError::UnknownJobType),
+            Some(processing_adapter) => processing_adapter.execute(job).await?,
         };
 
         self.publisher_adapter.publish_result(&result).await
