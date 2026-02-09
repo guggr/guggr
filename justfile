@@ -4,6 +4,8 @@
 # Contains database-specific recipes
 mod db 'database/db.just'
 
+mod agent 'agent/agent.just'
+
 alias c := check
 alias f := fmt
 alias l := lint
