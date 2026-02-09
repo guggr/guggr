@@ -8,10 +8,10 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 
 use crate::{
     adapters::{
-        inbound::rabbitmq::{RabbitMQDriver, RabbitMQDriverError},
+        inbound::rabbitmq::RabbitMQDriver,
         outbound::{http::HttpAdapter, ping::PingAdapter, rabbitmq::RabbitMQPublisher},
     },
-    core::service::jobservice::{AgentError, JobService, JobServiceError},
+    core::service::jobservice::{AgentError, JobService},
 };
 
 mod adapters;
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         {
             Ok(conn) => {
                 info!("successfully connected to rabbitmq host");
-                break Arc::new(conn);
+                break conn;
             }
             Err(e) => {
                 retry_count += 1;
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let http_adapter = Arc::new(HttpAdapter::new());
     let ping_adapter = Arc::new(PingAdapter::new());
     let rabbitmq_publisher = Arc::new(
-        RabbitMQPublisher::new(connection.clone(), config.rabbitmq_queue_name(1).unwrap()).await?,
+        RabbitMQPublisher::new(&connection, config.rabbitmq_queue_name(1).unwrap()).await?,
     );
 
     // Service
@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Inbound adapter
     let rabbitmq_driver = RabbitMQDriver::new(
-        connection.clone(),
+        &connection,
         config.rabbitmq_queue_name(0).unwrap(),
         job_service,
     )

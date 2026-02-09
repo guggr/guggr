@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use gen_proto_types::job_result::v1::JobResult;
 use lapin::{
@@ -26,7 +24,7 @@ pub enum RabbitMQPublisherError {
 
 impl RabbitMQPublisher {
     pub async fn new(
-        connection: Arc<Connection>,
+        connection: &Connection,
         queue_name: String,
     ) -> Result<Self, RabbitMQPublisherError> {
         let channel = connection

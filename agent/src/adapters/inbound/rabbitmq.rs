@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use futures_lite::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
@@ -10,7 +8,6 @@ use lapin::{
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
-use tokio::select;
 use tracing::{error, info};
 
 use crate::core::service::jobservice::{JobService, JobServiceError};
@@ -25,14 +22,13 @@ pub enum RabbitMQDriverError {
 
 pub struct RabbitMQDriver {
     service: JobService,
-    connection: Arc<Connection>,
     channel: Channel,
     queue_name: String,
 }
 
 impl RabbitMQDriver {
     pub async fn new(
-        connection: Arc<Connection>,
+        connection: &Connection,
         queue_name: String,
         service: JobService,
     ) -> Result<Self, RabbitMQDriverError> {
@@ -43,7 +39,6 @@ impl RabbitMQDriver {
 
         Ok(RabbitMQDriver {
             service,
-            connection,
             channel,
             queue_name,
         })
@@ -83,11 +78,11 @@ impl RabbitMQDriver {
                                         match error {
                                             JobServiceError::UnknownJobType => {
                                                 error!("executing job {} failed because an unknown job type has been supplied.", &job.id);
-                                                nack_delivery(&delivery, false).await;
+                                                nack_delivery(&delivery, false).await?;
                                             }
                                             JobServiceError::AgentIssue(e) => {
                                                 error!("executing job {} failed because of an agent issue: {}", &job.id, e);
-                                                nack_delivery(&delivery, true).await;
+                                                nack_delivery(&delivery, true).await?;
                                                 return Err(e);
                                             }
                                         }
@@ -96,7 +91,7 @@ impl RabbitMQDriver {
                             }
                             Err(e) => {
                                 error!("{}", RabbitMQDriverError::JobDecodeError(e));
-                                nack_delivery(&delivery, true).await;
+                                nack_delivery(&delivery, true).await?;
                             }
                         }
                         Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
@@ -108,12 +103,12 @@ impl RabbitMQDriver {
     }
 }
 
-async fn nack_delivery(delivery: &Delivery, requeue: bool) {
+async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, RabbitMQDriverError> {
     delivery
         .nack(BasicNackOptions {
             requeue,
             ..Default::default()
         })
         .await
-        .expect("error while sending nack");
+        .map_err(RabbitMQDriverError::ConnectionError)
 }
