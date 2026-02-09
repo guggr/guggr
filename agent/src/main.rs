@@ -1,9 +1,8 @@
-use std::{error::Error, sync::Arc, time::Duration};
+use std::{error::Error, sync::Arc};
 
 use config::RabbitMQConfig;
-use lapin::{Connection, ConnectionProperties};
-use tokio::{select, time::sleep};
-use tracing::{error, info, warn};
+use tokio::select;
+use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
