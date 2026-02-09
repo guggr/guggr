@@ -2,16 +2,16 @@ use std::{error::Error, sync::Arc, time::Duration};
 
 use config::RabbitMQConfig;
 use lapin::{Connection, ConnectionProperties};
-use tokio::time::sleep;
+use tokio::{select, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     adapters::{
-        inbound::rabbitmq::RabbitMQDriver,
+        inbound::rabbitmq::{RabbitMQDriver, RabbitMQDriverError},
         outbound::{http::HttpAdapter, ping::PingAdapter, rabbitmq::RabbitMQPublisher},
     },
-    core::service::jobservice::JobService,
+    core::service::jobservice::{AgentError, JobService, JobServiceError},
 };
 
 mod adapters;
@@ -70,7 +70,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-    rabbitmq_driver.start().await?;
+    match rabbitmq_driver.start().await {
+        Ok(_) => {}
+        Err(err) if err.downcast_ref::<AgentError>().is_some() => {
+            error!("exiting agent due to agent issues in previous jobs");
+            connection
+                .close(1, "connection closed due to agent issue")
+                .await?;
+            std::process::exit(1);
+        }
+        Err(err) => {
+            error!("error happened while executing agent: {}", err)
+        }
+    }
 
     Ok(())
 }

@@ -49,7 +49,7 @@ impl RabbitMQDriver {
         })
     }
 
-    pub async fn start(&self) -> Result<(), RabbitMQDriverError> {
+    pub async fn start(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut consumer = self
             .channel
             .basic_consume(
@@ -72,14 +72,14 @@ impl RabbitMQDriver {
                         Some(delivery_result) => {
                             let delivery = delivery_result?;
                             let service = self.service.clone();
-                            tokio::spawn(async move {
+                            let task_result = tokio::spawn(async move {
                                 match Job::decode(&delivery.data[..]) {
                                     Ok(job) => {
                                         info!("received job: {:?}", &job);
                                         match service.process_job(&job).await {
                                             Ok(_) => {
                                                 info!("successfully executed job with id {}", &job.id);
-                                                delivery.ack(BasicAckOptions { multiple: false }).await.expect("error while ack'ing delivery");
+                                                delivery.ack(BasicAckOptions { multiple: false }).await?;
                                             },
                                             Err(error) => {
                                                 match error {
@@ -90,8 +90,7 @@ impl RabbitMQDriver {
                                                     JobServiceError::AgentIssue(e) => {
                                                         error!("executing job {} failed because of an agent issue: {}", &job.id, e);
                                                         nack_delivery(&delivery, true).await;
-                                                        error!("exiting agent due to agent issues in previous jobs");
-                                                        std::process::exit(1);
+                                                        return Err(e);
                                                     }
                                                 }
                                             },
@@ -102,7 +101,8 @@ impl RabbitMQDriver {
                                         nack_delivery(&delivery, true).await;
                                     },
                                 }
-                            });
+                                Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+                            }).await??;
 
                         },
                         None => break,
