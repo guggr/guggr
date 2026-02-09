@@ -4,8 +4,8 @@ use thiserror::Error;
 pub enum JobSchedulerError {
     #[error("Database is currently unavailable")]
     DatabaseUnavailable,
-    #[error("Queue is currently unavailable")]
-    QueueUnavailable,
+    #[error("Queue is currently unavailable: {0}")]
+    QueueUnavailable(String),
     #[error("Internal storage error: {0}")]
     Internal(String),
 }

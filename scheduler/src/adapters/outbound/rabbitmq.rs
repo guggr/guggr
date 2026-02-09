@@ -8,16 +8,44 @@ use lapin::{
     types::{AMQPValue::LongString, FieldTable},
 };
 use prost::Message;
+use thiserror::Error;
+use tracing::error;
 
-use crate::core::ports::publisher::Publisher;
+use crate::core::{domain::errors::JobSchedulerError, ports::publisher::Publisher};
 
 pub struct RabbitMQPublisher {
     pool: deadpool_lapin::Pool,
     queue_name: String,
 }
 
+#[derive(Error, Debug)]
+pub enum RabbitMQPublisherError {
+    #[error("RabbitMQ Connection failed: {0}")]
+    CreateConnectionError(#[from] deadpool_lapin::CreatePoolError),
+    #[error("Pool exhausted or timeout: {0}")]
+    PoolGetConnectionError(#[from] deadpool_lapin::PoolError),
+    #[error("Failure while interacting with rabbitmq")]
+    RabbitMQInteractionError(#[from] lapin::Error),
+}
+
+impl From<RabbitMQPublisherError> for JobSchedulerError {
+    fn from(value: RabbitMQPublisherError) -> Self {
+        match value {
+            RabbitMQPublisherError::CreateConnectionError(e) => {
+                Self::QueueUnavailable(e.to_string())
+            }
+            RabbitMQPublisherError::PoolGetConnectionError(e) => {
+                Self::QueueUnavailable(e.to_string())
+            }
+            other @ RabbitMQPublisherError::RabbitMQInteractionError(..) => {
+                Self::Internal(other.to_string())
+            }
+        }
+    }
+}
+
 impl RabbitMQPublisher {
-    pub fn new(connection_url: &str, queue_name: String) -> Result<Self> {
+    pub fn new(connection_url: &str, queue_name: String) -> Result<Self, RabbitMQPublisherError> {
         let config = deadpool_lapin::Config {
             url: Some(connection_url.into()),
             ..Default::default()
@@ -28,17 +56,10 @@ impl RabbitMQPublisher {
         Ok(Self { pool, queue_name })
     }
 
-    pub async fn setup_schema(&self) -> Result<()> {
-        let connection = self
-            .pool
-            .get()
-            .await
-            .context("while getting connection from pool")?;
+    pub async fn setup_schema(&self) -> Result<(), RabbitMQPublisherError> {
+        let connection = self.pool.get().await?;
 
-        let channel = connection
-            .create_channel()
-            .await
-            .context("while creating channel for given connection")?;
+        let channel = connection.create_channel().await?;
 
         channel
             .queue_declare(
@@ -60,20 +81,10 @@ impl RabbitMQPublisher {
 
         arguments
     }
-}
 
-#[async_trait]
-impl Publisher for RabbitMQPublisher {
-    async fn publish(&self, job: Job) -> Result<()> {
-        let connection = self
-            .pool
-            .get()
-            .await
-            .context("while getting connection from pool")?;
-        let channel = connection
-            .create_channel()
-            .await
-            .context("while creating channel for given connection")?;
+    async fn publish_to_queue(&self, job: Job) -> Result<(), RabbitMQPublisherError> {
+        let connection = self.pool.get().await?;
+        let channel = connection.create_channel().await?;
 
         let properties = BasicProperties::default()
             .with_content_type("application/protobuf".into())
@@ -87,11 +98,19 @@ impl Publisher for RabbitMQPublisher {
                 &job.encode_to_vec(),
                 properties,
             )
-            .await
-            .context("while awaiting publishing")?
-            .await
-            .context("while awaiting publish confirmation")?;
+            .await?
+            .await?;
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl Publisher for RabbitMQPublisher {
+    async fn publish(&self, job: Job) -> Result<(), JobSchedulerError> {
+        Ok(self.publish_to_queue(job).await.map_err(|err| {
+            error!("RabbitMQ Error: {:?}", err);
+            JobSchedulerError::from(err)
+        })?)
     }
 }
