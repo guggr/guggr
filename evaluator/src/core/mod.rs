@@ -1,2 +1,3 @@
-pub(crate) mod ports;
-pub(crate) mod service;
+pub mod domain;
+pub mod ports;
+pub mod service;

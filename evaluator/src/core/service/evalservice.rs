@@ -1,19 +1,8 @@
 use std::sync::Arc;
 
 use gen_proto_types::job_result::v1::JobResult;
-use thiserror::Error;
 
-use crate::core::ports::database::DatabasePort;
-
-#[derive(Debug, Error)]
-pub enum EvalServiceError {
-    #[error("unknown job id supplied")]
-    UnknownJobId,
-    #[error("database error: {0}")]
-    Db(#[from] diesel::result::Error),
-    #[error("database pool error: {0}")]
-    DbPool(#[from] diesel::r2d2::PoolError),
-}
+use crate::core::{domain::errors::JobRepositoryError, ports::database::DatabasePort};
 
 pub struct EvalService {
     postgres_adapter: Arc<dyn DatabasePort + Send + Sync>,
@@ -35,7 +24,7 @@ impl EvalService {
     pub async fn evaluate_job_result(
         &self,
         job_result: &JobResult,
-    ) -> anyhow::Result<(), EvalServiceError> {
+    ) -> anyhow::Result<(), JobRepositoryError> {
         let notify = self
             .postgres_adapter
             .notification_enabled(&job_result.id)

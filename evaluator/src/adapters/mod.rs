@@ -1,1 +1,1 @@
-pub(crate) mod outbound;
+pub mod outbound;
