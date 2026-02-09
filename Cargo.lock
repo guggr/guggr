@@ -226,6 +226,8 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel_migrations",
+ "openssl-sys",
+ "pq-sys",
  "thiserror 2.0.18",
 ]
 

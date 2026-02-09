@@ -35,6 +35,7 @@ pub struct JobRun {
     pub timestamp: NaiveDateTime,
     pub triggered_notification: bool,
     pub output: Option<String>,
+    pub batch_id: String,
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable)]

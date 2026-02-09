@@ -4,6 +4,17 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+    inputs:
+      rustBacktrace:
+        description: 'Rust Backtrace'
+        required: false
+        default: '1'
+        type: choice
+        options:
+          - '0'
+          - '1'
+          - FULL
 
 permissions:
   contents: read
@@ -146,6 +157,8 @@ jobs:
         with:
           cache-on-failure: true
       - run: cargo nextest run --no-tests warn
+        env:
+          RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
 
   trufflehog:
     name: 🔐 secret scanning
