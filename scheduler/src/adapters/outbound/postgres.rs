@@ -104,6 +104,12 @@ impl PostgresFetcher {
             .left_join(job_details_ping::table)
             .load(&mut conn)?;
 
+        debug!("setting last_scheduled timestamp in db to now");
+        diesel::update(job::table)
+            .filter(id.eq_any(ids_to_lock))
+            .set(last_scheduled.eq(now))
+            .execute(&mut conn)?;
+
         Ok(db_jobs)
     }
 }
