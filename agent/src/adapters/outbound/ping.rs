@@ -51,38 +51,30 @@ impl MonitorPort for PingAdapter {
         pinger.timeout(Duration::from_secs(1));
 
         let job_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
-            Ok((IcmpPacket::V4(packet), duration)) => {
-                info!("received ping v4 from {}", ping_details.host);
-
+            Ok((packet, duration)) => {
+                info!(
+                    "received ping {} from {}",
+                    match packet {
+                        IcmpPacket::V4(_) => "v4",
+                        IcmpPacket::V6(_) => "v6",
+                    },
+                    ping_details.host
+                );
                 JobResult {
                     id: job.id.clone(),
                     timestamp: Some(get_timestamp()?),
-                    http: None,
                     ping: Some(PingJobResult {
                         reachable: true,
-                        ip_address: packet.get_real_dest().octets().to_vec(),
+                        ip_address: match packet {
+                            IcmpPacket::V4(packet) => packet.get_real_dest().octets().to_vec(),
+                            IcmpPacket::V6(packet) => packet.get_real_dest().octets().to_vec(),
+                        },
                         latency: Some(types::Duration {
                             seconds: duration.as_secs() as i64,
                             nanos: 0,
                         }),
                     }),
-                }
-            }
-            Ok((IcmpPacket::V6(packet), duration)) => {
-                info!("received ping v6 from {}", ping_details.host);
-
-                JobResult {
-                    id: job.id.clone(),
-                    timestamp: Some(get_timestamp()?),
-                    http: None,
-                    ping: Some(PingJobResult {
-                        reachable: true,
-                        ip_address: packet.get_real_dest().octets().to_vec(),
-                        latency: Some(types::Duration {
-                            seconds: duration.as_secs() as i64,
-                            nanos: 0,
-                        }),
-                    }),
+                    ..Default::default()
                 }
             }
             Err(e) => {
@@ -97,12 +89,12 @@ impl MonitorPort for PingAdapter {
                     JobResult {
                         id: job.id.clone(),
                         timestamp: Some(get_timestamp()?),
-                        http: None,
                         ping: Some(PingJobResult {
                             reachable: false,
                             ip_address: vec![],
                             latency: None,
                         }),
+                        ..Default::default()
                     }
                 }
             }
