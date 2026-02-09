@@ -23,34 +23,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
 
-    let mut retry_count = 0;
-
-    let connection = loop {
-        match Connection::connect(
-            &config.rabbitmq_connection_url(false),
-            ConnectionProperties::default(),
-        )
-        .await
-        {
-            Ok(conn) => {
-                info!("successfully connected to rabbitmq host");
-                break conn;
-            }
-            Err(e) => {
-                retry_count += 1;
-                if retry_count > 5 {
-                    error!("error connecting to rabbitmq after 5 retries: {}", e);
-                    std::process::exit(1);
-                }
-
-                warn!(
-                    "temporary error connecting to rabbitmq (try {}/5). retrying...",
-                    retry_count
-                );
-                sleep(Duration::from_secs(10)).await;
-            }
-        }
-    };
+    let connection = agent::connect_rabbitmq(config.rabbitmq_connection_url(false)).await?;
 
     // Outbound adapter
     let http_adapter = Arc::new(HttpAdapter::new());
