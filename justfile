@@ -3,6 +3,7 @@
 
 # Contains database-specific recipes
 mod db 'database/db.just'
+mod evaluator 'evaluator/evaluator.just'
 
 alias c := check
 alias f := fmt
