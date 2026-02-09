@@ -27,17 +27,21 @@ async fn main() -> Result<()> {
     let shutdown_token = tokio_util::sync::CancellationToken::new();
 
     debug!("initializing postgres fetcher");
-    let fetcher = PostgresFetcher::new(&db_config.postgres_connection_url())
-        .context("while initializing postgres fetcher")?;
+    let fetcher = Arc::from(
+        PostgresFetcher::new(&db_config.postgres_connection_url())
+            .context("while initializing postgres fetcher")?,
+    );
 
     debug!("initializing publisher");
-    let publisher = RabbitMQPublisher::new(
-        &rabbitmq_config.rabbitmq_connection_url(false),
-        rabbitmq_config
-            .rabbitmq_queue_name(0)
-            .context("while getting scheduler queue name")?,
-    )
-    .context("while initializing rabbitmq publisher")?;
+    let publisher = Arc::from(
+        RabbitMQPublisher::new(
+            &rabbitmq_config.rabbitmq_connection_url(false),
+            rabbitmq_config
+                .rabbitmq_queue_name(0)
+                .context("while getting scheduler queue name")?,
+        )
+        .context("while initializing rabbitmq publisher")?,
+    );
     debug!("setting schema up and running migrations");
     publisher
         .setup_schema()
@@ -45,7 +49,7 @@ async fn main() -> Result<()> {
         .context("while setting up rabbitmq publisher schema")?;
 
     debug!("initializing service");
-    let service = SchedulerService::new(Arc::from(fetcher), Arc::from(publisher));
+    let service = SchedulerService::new(fetcher, publisher.clone());
 
     debug!("initializing ticker");
     let ticker = SchedulerTicker::new(
@@ -81,6 +85,11 @@ async fn main() -> Result<()> {
     shutdown_token.cancel();
 
     let _ = ticker_handle.await;
+
+    publisher.close();
+    // Do not remove. Publisher close requires some millis for closing connections
+    // gracefully. Otherwise, errors will be at the end of the log file.
+    tokio::time::sleep(Duration::from_millis(100)).await;
 
     Ok(())
 }

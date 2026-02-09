@@ -9,7 +9,7 @@ use lapin::{
 };
 use prost::Message;
 use thiserror::Error;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::core::{domain::errors::JobSchedulerError, ports::publisher::Publisher};
 
@@ -104,6 +104,11 @@ impl RabbitMQPublisher {
             .await?;
 
         Ok(())
+    }
+
+    pub fn close(&self) {
+        info!("Closing RabbitMQ connection pool");
+        self.pool.close();
     }
 }
 
