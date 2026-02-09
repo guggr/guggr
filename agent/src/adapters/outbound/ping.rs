@@ -11,7 +11,7 @@ use gen_proto_types::{
 use protocheck::{types, types::Timestamp};
 use rand::random;
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
-use tracing::info;
+use tracing::{debug, error, info};
 
 use crate::core::{
     ports::monitor::MonitorPort,
@@ -38,15 +38,26 @@ impl MonitorPort for PingAdapter {
 
         let client = Client::new(&Config::default())
             .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
-        let mut pinger = client
-            .pinger(
-                ping_details
-                    .host
-                    .parse::<IpAddr>()
-                    .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?,
-                PingIdentifier(random()),
-            )
-            .await;
+
+        // Check if domain provided or IP
+        let host_ip = if let Ok(ip) = ping_details.host.parse::<IpAddr>() {
+            ip
+        } else {
+            debug!("ping adapter received domain. trying to resolve it...");
+            if let Some(ip) = agent::resolve_domain(ping_details.host.clone()).await {
+                ip
+            } else {
+                error!(
+                    "ping adapter could not resolve domain {}",
+                    ping_details.host
+                );
+                return Err(JobServiceError::AgentIssue(
+                    "could not resolve domain for ping job".into(),
+                ));
+            }
+        };
+
+        let mut pinger = client.pinger(host_ip, PingIdentifier(random())).await;
 
         pinger.timeout(Duration::from_secs(1));
 
@@ -137,6 +148,34 @@ mod tests {
             res,
             JobResult {
                 id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
+                timestamp: get_current_timestamp(),
+                ping: Some(PingJobResult {
+                    reachable: true,
+                    ip_address: vec![1, 0, 0, 1],
+                    latency: res.ping.as_ref().unwrap().latency
+                }),
+                ..Default::default()
+            }
+        )
+    }
+
+    #[tokio::test]
+    async fn test_ping_success_domain() {
+        let job = Job {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            job_type: JobType::Ping.into(),
+            ping: Some(PingJobType {
+                host: "one.one.one.one".to_string(),
+            }),
+            ..Default::default()
+        };
+
+        let ping_adapter = PingAdapter::new();
+        let res = ping_adapter.execute(&job).await.unwrap();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
                 timestamp: get_current_timestamp(),
                 ping: Some(PingJobResult {
                     reachable: true,

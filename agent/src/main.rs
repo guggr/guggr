@@ -17,7 +17,7 @@ use crate::{
 };
 
 mod adapters;
-mod core;
+pub mod core;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

@@ -1,1 +1,1 @@
-pub(crate) mod jobservice;
+pub mod jobservice;
