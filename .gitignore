@@ -50,6 +50,9 @@ dist/
 # .direnv directory containing generated files
 .direnv
 
+# Secrets
+.env
+
 ###########
 # Windows #
 ###########
