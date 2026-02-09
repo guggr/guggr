@@ -1,7 +1,7 @@
-use std::time::Duration;
+use std::{net::IpAddr, time::Duration};
 
 use lapin::{Connection, ConnectionProperties};
-use tokio::time::sleep;
+use tokio::{net::lookup_host, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -46,4 +46,34 @@ pub fn init_tracing() {
         .with(filter_layer)
         .with(fmt_layer)
         .init(); // .init() is shorthand for set_global_default
+}
+
+pub async fn resolve_domain(domain: String) -> Option<IpAddr> {
+    // This is needed since lookup_host needs a port
+    let domain = format!("{}:0", domain);
+    lookup_host(domain)
+        .await
+        .ok()?
+        .next()
+        .map(|sock_addr| sock_addr.ip())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_resolve_domain_success() {
+        let domain = String::from("one.one.one.one");
+        assert_eq!(
+            resolve_domain(domain).await,
+            Some(IpAddr::from([1, 0, 0, 1]))
+        );
+    }
+
+    #[tokio::test]
+    async fn test_resolve_domain_failure() {
+        let domain = String::from("parallel-dampfmaschine.info");
+        assert_eq!(resolve_domain(domain).await, None);
+    }
 }
