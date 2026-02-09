@@ -35,16 +35,17 @@ repos:
     hooks:
       - id: golangci-fmt
         name: run golangci-lint fmt
+        types: [go]
         language: system
         entry: golangci-lint fmt -d
         pass_filenames: false
 
-      # deactivated while there is no real go project yet
-      #      - id: golangci-lint
-      #        name: run golangci-lint
-      #        language: system
-      #        entry: golangci-lint run
-      #        pass_filenames: false
+      - id: golangci-lint
+        name: run golangci-lint
+        types: [go]
+        language: system
+        entry: golangci-lint run api-service
+        pass_filenames: false
 
       - id: prettier-check
         name: run pnpm check
@@ -63,33 +64,39 @@ repos:
         language: system
         entry: helm lint charts
         pass_filenames: false
+        files: ^charts/
 
       - id: cargo-fmt
         name: run cargo fmt
+        types: [rust]
         language: system
         entry: cargo +nightly fmt --check
         pass_filenames: false
 
       - id: cargo-clippy
         name: run clippy
+        types: [rust]
         language: system
         entry: cargo clippy
         pass_filenames: false
 
       - id: cargo-nextest
         name: run cargo nextest
+        types: [rust]
         language: system
         entry: cargo nextest run --no-tests warn
         pass_filenames: false
 
       - id: cargo-autoinherit
         name: run cargo autoinherit
+        types: [rust]
         language: system
         entry: cargo autoinherit
         pass_filenames: false
 
       - id: cargo-machete
         name: run cargo machete
+        types: [rust]
         language: system
         entry: cargo machete
         pass_filenames: false
