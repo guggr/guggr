@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use gen_proto_types::job::v1::{Job, JobType};
+use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::core::{
@@ -27,20 +28,30 @@ impl SchedulerService {
             return Ok(());
         }
 
+        let batch_tracker = tokio_util::task::TaskTracker::new();
+
         debug!("processing {} jobs", jobs.len());
         for job in jobs {
-            let job = Job::from_database_type(job);
+            let publisher = self.publisher.clone();
 
-            if job.job_type() == JobType::Unspecified {
-                error!("Encountered unknown job type in job id {}", job.id);
-                continue;
-            }
+            batch_tracker.spawn(async move {
+                let job = Job::from_database_type(job);
 
-            match self.publisher.publish(job).await {
-                Ok(..) => (),
-                Err(e) => error!("Failed to publish job: {:?}", e),
-            }
+                if job.job_type() == JobType::Unspecified {
+                    error!("Encountered unknown job type in job id {}", job.id);
+                    return;
+                }
+
+                match publisher.publish(job).await {
+                    Ok(..) => (),
+                    Err(e) => error!("Failed to publish job: {:?}", e),
+                }
+            });
         }
+
+        batch_tracker.close();
+
+        batch_tracker.wait().await;
 
         Ok(())
     }
