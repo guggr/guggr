@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use database_client::{
     DbError,
     schema::{
-        job::dsl::{job, last_scheduled, run_every},
+        job::{self, id},
         job_details_http, job_details_ping,
     },
 };
@@ -83,16 +83,21 @@ impl PostgresFetcher {
         let mut conn = self.pool.get()?;
 
         // TODO: This is scaling extraordinary bad, maybe come up with sth better here?
-        let db_jobs: Vec<DatabaseJobResult> = job
+        let ids_to_lock: Vec<String> = job::table
+            .select(job::id)
             .filter(
-                last_scheduled
+                job::last_scheduled
                     .is_null()
-                    .or((last_scheduled.assume_not_null() + run_every).le(now)),
+                    .or((job::last_scheduled.assume_not_null() + job::run_every).le(now)),
             )
-            .left_join(job_details_http::table)
-            .left_join(job_details_ping::table)
             .for_update()
             .skip_locked()
+            .load(&mut conn)?;
+
+        let db_jobs: Vec<DatabaseJobResult> = job::table
+            .filter(id.eq_any(ids_to_lock))
+            .left_join(job_details_http::table)
+            .left_join(job_details_ping::table)
             .load(&mut conn)?;
 
         Ok(db_jobs)
