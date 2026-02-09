@@ -51,7 +51,7 @@ impl From<PostgresFetcherError> for JobSchedulerError {
     fn from(value: PostgresFetcherError) -> Self {
         match value {
             PostgresFetcherError::ConnectionError(_)
-            | PostgresFetcherError::PoolGetConnectionError(_) => Self::Unavailable,
+            | PostgresFetcherError::PoolGetConnectionError(_) => Self::DatabaseUnavailable,
 
             other @ PostgresFetcherError::FetchJobsError { .. } => {
                 Self::Internal(other.to_string())
