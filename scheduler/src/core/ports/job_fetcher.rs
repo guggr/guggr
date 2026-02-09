@@ -1,10 +1,9 @@
 use async_trait::async_trait;
+use database_client::models::Job;
 
-use crate::core::domain::{errors::JobRepositoryError, models::Job};
+use crate::core::domain::errors::JobRepositoryError;
 
 #[async_trait]
-pub trait JobFetcher: Send + Sync {
-    /// Invokes the adapter-specific implementation to fetch jobs from the
-    /// chosen repository.
+pub trait JobFetcher: Send {
     async fn fetch_jobs_batch(&self) -> Result<Vec<Job>, JobRepositoryError>;
 }
