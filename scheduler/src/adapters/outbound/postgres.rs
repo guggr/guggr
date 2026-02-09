@@ -18,7 +18,10 @@ use diesel::{
 use thiserror::Error;
 use tracing::error;
 
-use crate::core::{domain::errors::JobRepositoryError, ports::job_fetcher::JobFetcher};
+use crate::core::{
+    domain::{errors::JobRepositoryError, type_mapper::DatabaseJobResult},
+    ports::job_fetcher::JobFetcher,
+};
 
 pub struct PostgresFetcher {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -75,14 +78,11 @@ impl PostgresFetcher {
     ///
     /// Checks for unset [`last_scheduled`] field or where the [`run_every`]
     /// interval is exceeded.
-    fn run_fetch_jobs_query(
-        &self,
-    ) -> Result<Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>, PostgresFetcherError>
-    {
+    fn run_fetch_jobs_query(&self) -> Result<Vec<DatabaseJobResult>, PostgresFetcherError> {
         let mut conn = self.pool.get()?;
 
         // TODO: This is scaling extraordinary bad, maybe come up with sth better here?
-        let db_jobs: Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)> = job
+        let db_jobs: Vec<DatabaseJobResult> = job
             .filter(
                 last_scheduled
                     .is_null()
@@ -100,10 +100,7 @@ impl PostgresFetcher {
 
 #[async_trait]
 impl JobFetcher for PostgresFetcher {
-    async fn fetch_jobs_batch(
-        &self,
-    ) -> Result<Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>, JobRepositoryError>
-    {
+    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobRepositoryError> {
         Ok(self.run_fetch_jobs_query().map_err(|err| {
             error!("Database Error: {:?}", err);
             JobRepositoryError::from(err)

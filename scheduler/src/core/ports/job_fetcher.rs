@@ -1,11 +1,8 @@
 use async_trait::async_trait;
-use database_client::models::{Job, JobDetailsHttp, JobDetailsPing};
 
-use crate::core::domain::errors::JobRepositoryError;
+use crate::core::domain::{errors::JobRepositoryError, type_mapper::DatabaseJobResult};
 
 #[async_trait]
 pub trait JobFetcher: Send + Sync {
-    async fn fetch_jobs_batch(
-        &self,
-    ) -> Result<Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>, JobRepositoryError>;
+    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobRepositoryError>;
 }
