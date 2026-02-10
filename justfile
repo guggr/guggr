@@ -71,8 +71,8 @@ lint-rust:
 # Run nextest
 [group('rust')]
 [group('test')]
-test-rust:
-	cargo nextest run --no-tests warn
+test-rust profile="default":
+	cargo nextest run --no-tests warn {{ if profile != "default" { "-P " + profile } else { "" } }}
 
 # Run machete
 [group('rust')]

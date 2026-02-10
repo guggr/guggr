@@ -131,8 +131,14 @@ mod tests {
 
     use super::*;
 
+    /// Checks Ping Job with valid ip and listens for `reachable == true` with
+    /// `ip_address == 1.0.0.1`
+    ///
+    /// Prefix is needed for nextest to exclude this test in the CI workflows,
+    /// since there occur problems with permissions when running in Github
+    /// Actions
     #[tokio::test]
-    async fn test_ping_success() {
+    async fn no_ci_test_ping_success() {
         let job = Job {
             id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
             job_type: JobType::Ping.into(),
@@ -159,8 +165,14 @@ mod tests {
         )
     }
 
+    /// Checks Ping Job with domain `one.one.one.one` and listens for `reachable
+    /// == true` and an `ip_address` of either `1.0.0.1` or `1.1.1.1`
+    ///
+    /// Prefix is needed for nextest to exclude this test in the CI workflows,
+    /// since there occur problems with permissions when running in Github
+    /// Actions
     #[tokio::test]
-    async fn test_ping_success_domain() {
+    async fn no_ci_test_ping_success_domain() {
         let job = Job {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
             job_type: JobType::Ping.into(),
@@ -195,8 +207,13 @@ mod tests {
         assert!(res == expected_result_alt_1 || res == expected_result_alt_2)
     }
 
+    /// Checks for `reachable == false` for not reachable IPs
+    ///
+    /// Prefix is needed for nextest to exclude this test in the CI workflows,
+    /// since there occur problems with permissions when running in Github
+    /// Actions
     #[tokio::test]
-    async fn test_ping_error() {
+    async fn no_ci_test_ping_error() {
         let job = Job {
             id: "CQybHx0FnQpv0SxRoVNou".to_string(),
             job_type: JobType::Ping.into(),

@@ -1,0 +1,3 @@
+[profile.ci]
+default-filter = "not test(/no_ci_.*/)"
+fail-fast = false
