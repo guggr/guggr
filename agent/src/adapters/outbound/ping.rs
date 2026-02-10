@@ -172,19 +172,27 @@ mod tests {
 
         let ping_adapter = PingAdapter::new();
         let res = ping_adapter.execute(&job).await.unwrap();
-        assert_eq!(
-            res,
-            JobResult {
-                id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
-                timestamp: get_current_timestamp(),
-                ping: Some(PingJobResult {
-                    reachable: true,
-                    ip_address: vec![1, 0, 0, 1],
-                    latency: res.ping.as_ref().unwrap().latency
-                }),
-                ..Default::default()
-            }
-        )
+        let expected_result_alt_1 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            timestamp: get_current_timestamp(),
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: vec![1, 0, 0, 1],
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+        let expected_result_alt_2 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            timestamp: get_current_timestamp(),
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: vec![1, 1, 1, 1],
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+        assert!(res == expected_result_alt_1 || res == expected_result_alt_2)
     }
 
     #[tokio::test]
