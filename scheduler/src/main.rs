@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     telemetry::init_tracing();
 
     debug!("Loading rabbitmq config from env");
-    let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_SCHEDULER_QUEUE"])
+    let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE"])
         .context("while loading RabbitMQ config from environment")?;
     debug!("Loading db config from env");
     let db_config =
