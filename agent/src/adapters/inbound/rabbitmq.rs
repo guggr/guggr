@@ -1,7 +1,7 @@
+use deadpool_lapin::Pool;
 use futures_lite::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
-    Channel, Connection, Error,
     message::Delivery,
     options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions},
     types::FieldTable,
@@ -15,38 +15,38 @@ use crate::core::service::jobservice::{JobService, JobServiceError};
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
     #[error("error decoding job")]
-    JobDecodeError(#[from] DecodeError),
+    JobDecode(#[from] DecodeError),
     #[error("connection error")]
-    ConnectionError(#[from] Error),
+    Connection(#[from] lapin::Error),
+    #[error("create pool error")]
+    CreatePool(#[from] deadpool_lapin::CreatePoolError),
 }
 
 pub struct RabbitMQDriver {
     service: JobService,
-    channel: Channel,
+    pool: Pool,
     queue_name: String,
 }
 
 impl RabbitMQDriver {
     pub async fn new(
-        connection: &Connection,
+        pool: Pool,
         queue_name: String,
         service: JobService,
     ) -> Result<Self, RabbitMQDriverError> {
-        let channel = connection
-            .create_channel()
-            .await
-            .map_err(RabbitMQDriverError::ConnectionError)?;
-
         Ok(RabbitMQDriver {
+            pool,
             service,
-            channel,
             queue_name,
         })
     }
 
     pub async fn start(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let mut consumer = self
-            .channel
+        let connection = self.pool.get().await?;
+
+        let channel = connection.create_channel().await?;
+
+        let mut consumer = channel
             .basic_consume(
                 &self.queue_name,
                 "consumertag",
@@ -90,7 +90,7 @@ impl RabbitMQDriver {
                                 }
                             }
                             Err(e) => {
-                                error!("{}", RabbitMQDriverError::JobDecodeError(e));
+                                error!("{}", RabbitMQDriverError::JobDecode(e));
                                 nack_delivery(&delivery, true).await?;
                             }
                         }
@@ -110,5 +110,5 @@ async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, Rabbi
             ..Default::default()
         })
         .await
-        .map_err(RabbitMQDriverError::ConnectionError)
+        .map_err(RabbitMQDriverError::Connection)
 }

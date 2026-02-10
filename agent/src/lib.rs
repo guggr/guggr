@@ -1,30 +1,33 @@
-use std::{net::IpAddr, time::Duration};
+use std::{error::Error, net::IpAddr, time::Duration};
 
-use lapin::{Connection, ConnectionProperties};
+use deadpool_lapin::{Pool, Runtime};
 use tokio::{net::lookup_host, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-pub async fn connect_rabbitmq(
-    connection_url: String,
-) -> Result<Connection, Box<dyn std::error::Error>> {
+pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn Error>> {
+    let config = deadpool_lapin::Config {
+        url: Some(connection_url.into()),
+        ..Default::default()
+    };
+
     let mut retry_count = 0;
 
-    let connection = loop {
-        match Connection::connect(&connection_url, ConnectionProperties::default()).await {
+    let pool = loop {
+        match config.create_pool(Some(Runtime::Tokio1)) {
             Ok(conn) => {
-                info!("successfully connected to rabbitmq host");
+                info!("successfully created rabbitmq pool");
                 break conn;
             }
             Err(e) => {
                 retry_count += 1;
                 if retry_count > 5 {
-                    error!("error connecting to rabbitmq after 5 retries: {}", e);
+                    error!("error creating rabbitmq pool after 5 retries: {}", e);
                     std::process::exit(1);
                 }
 
                 warn!(
-                    "temporary error connecting to rabbitmq (try {}/5). retrying...",
+                    "temporary error creating rabbitmq pool (try {}/5). retrying...",
                     retry_count
                 );
                 sleep(Duration::from_secs(10)).await;
@@ -32,7 +35,7 @@ pub async fn connect_rabbitmq(
         }
     };
 
-    Ok(connection)
+    Ok(pool)
 }
 
 pub fn init_tracing() {

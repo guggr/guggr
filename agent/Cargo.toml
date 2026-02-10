@@ -19,6 +19,7 @@ lapin = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 prost = { workspace = true }
 futures-lite = { workspace = true }
+deadpool-lapin = { workspace = true }
 
 [dev-dependencies]
 httpmock = { workspace = true }

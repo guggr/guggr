@@ -25,13 +25,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
 
-    let connection = agent::connect_rabbitmq(config.rabbitmq_connection_url(false)).await?;
+    let rabbitmq_pool = agent::create_rabbitmq_pool(&config.rabbitmq_connection_url(false)).await?;
 
     // Outbound adapter
     let http_adapter = Arc::new(HttpAdapter::new());
     let ping_adapter = Arc::new(PingAdapter::new());
     let rabbitmq_publisher = Arc::new(
-        RabbitMQPublisher::new(&connection, config.rabbitmq_queue_name(1).unwrap()).await?,
+        RabbitMQPublisher::new(
+            rabbitmq_pool.clone(),
+            config.rabbitmq_queue_name(1).unwrap(),
+        )
+        .await?,
     );
 
     let mut processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>> =
@@ -44,7 +48,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Inbound adapter
     let rabbitmq_driver = RabbitMQDriver::new(
-        &connection,
+        rabbitmq_pool.clone(),
         config.rabbitmq_queue_name(0).unwrap(),
         job_service,
     )
@@ -56,9 +60,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 Ok(_) => {}
                 Err(err) if err.downcast_ref::<AgentError>().is_some() => {
                     error!("exiting agent due to agent issues in previous jobs");
-                    connection
-                        .close(1, "connection closed due to agent issue")
-                        .await?;
+                    rabbitmq_pool.close();
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                     std::process::exit(1);
                 }
                 Err(err) => {
@@ -68,7 +71,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         _ = tokio::signal::ctrl_c() => {
             info!("received ctrl-c signal. exiting agent");
-            connection.close(0, "consumer closed connection due to exit").await?;
+            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         }
     }
 
