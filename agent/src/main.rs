@@ -54,6 +54,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
+    info!("Agent is starting...");
+
     select! {
         res = rabbitmq_driver.start() => {
             match res {
