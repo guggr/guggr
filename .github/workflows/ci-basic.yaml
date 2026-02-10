@@ -145,7 +145,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo nextest run --no-tests warn
+      - run: cargo nextest run --no-tests warn -P ci
 
   trufflehog:
     name: 🔐 secret scanning
