@@ -38,6 +38,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await?,
     );
 
+    rabbitmq_publisher.setup_schema().await?;
+
     let mut processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>> =
         HashMap::new();
     processing_adapter.insert(JobType::Http, http_adapter);
@@ -53,6 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         job_service,
     )
     .await?;
+    rabbitmq_driver.setup_schema().await?;
 
     info!("Agent is starting...");
 

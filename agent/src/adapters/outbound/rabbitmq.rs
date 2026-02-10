@@ -1,7 +1,14 @@
 use async_trait::async_trait;
 use deadpool_lapin::Pool;
 use gen_proto_types::job_result::v1::JobResult;
-use lapin::{BasicProperties, options::BasicPublishOptions};
+use lapin::{
+    BasicProperties,
+    options::{BasicPublishOptions, QueueDeclareOptions},
+    types::{
+        AMQPValue::{LongInt, LongString},
+        FieldTable,
+    },
+};
 use prost::Message;
 use thiserror::Error;
 use tracing::debug;
@@ -22,14 +29,45 @@ pub struct RabbitMQPublisher {
 #[derive(Error, Debug)]
 pub enum RabbitMQPublisherError {
     #[error("rabbitmq connection error")]
-    ConnectionError(#[from] lapin::Error),
+    Connection(#[from] lapin::Error),
     #[error("pooling error")]
-    PoolError(#[from] deadpool_lapin::PoolError),
+    Pool(#[from] deadpool_lapin::PoolError),
 }
 
 impl RabbitMQPublisher {
     pub async fn new(pool: Pool, queue_name: String) -> Result<Self, RabbitMQPublisherError> {
         Ok(RabbitMQPublisher { pool, queue_name })
+    }
+
+    pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
+        let connection = self.pool.get().await?;
+
+        let channel = connection.create_channel().await?;
+
+        channel
+            .queue_declare(
+                &self.queue_name,
+                QueueDeclareOptions {
+                    durable: true,
+                    ..Default::default()
+                },
+                Self::queue_args(),
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    fn queue_args() -> FieldTable {
+        let mut args = FieldTable::default();
+        // set queue type to quorum
+        args.insert("x-queue-type".into(), LongString("quorum".into()));
+        // set maximum delivery limit until messages get pushed into dead letter
+        // exchange
+        args.insert("delivery-limit".into(), LongInt(5));
+        // TODO: specify dead letter exchange in setup schema
+
+        args
     }
 }
 
@@ -42,7 +80,7 @@ impl PublisherPort for RabbitMQPublisher {
             .pool
             .get()
             .await
-            .map_err(|e| AgentIssue(RabbitMQPublisherError::PoolError(e).into()))?;
+            .map_err(|e| AgentIssue(RabbitMQPublisherError::Pool(e).into()))?;
 
         let channel = connection
             .create_channel()
