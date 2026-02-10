@@ -2,4 +2,4 @@
     just --list agent
 
 run:
-    RABBITMQ_USER=guggr RABBITMQ_PASSWORD=guggr RABBITMQ_HOST=localhost RABBITMQ_PORT=5672 RABBITMQ_JOBS_QUEUE=jobs RABBITMQ_JOB_RESULT_QUEUE=jobresults cargo run
+    env $(cat .env | xargs) cargo run --bin agent
