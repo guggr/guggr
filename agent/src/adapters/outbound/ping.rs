@@ -3,12 +3,13 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+use agent::ToProto;
 use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::PingJobResult, v1::JobResult},
 };
-use protocheck::{types, types::Timestamp};
+use protocheck::types::Timestamp;
 use rand::random;
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
 use tracing::{debug, error, info};
@@ -62,7 +63,7 @@ impl MonitorPort for PingAdapter {
         pinger.timeout(Duration::from_secs(1));
 
         let job_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
-            Ok((packet, duration)) => {
+            Ok((packet, latency)) => {
                 info!(
                     "received ping {} from {}",
                     match packet {
@@ -80,10 +81,7 @@ impl MonitorPort for PingAdapter {
                             IcmpPacket::V4(packet) => packet.get_real_dest().octets().to_vec(),
                             IcmpPacket::V6(packet) => packet.get_real_dest().octets().to_vec(),
                         },
-                        latency: Some(types::Duration {
-                            seconds: duration.as_secs() as i64,
-                            nanos: 0,
-                        }),
+                        latency: Some(latency.to_proto()),
                     }),
                     ..Default::default()
                 }
@@ -116,13 +114,10 @@ impl MonitorPort for PingAdapter {
 }
 
 fn get_timestamp() -> Result<Timestamp, JobServiceError> {
-    Ok(Timestamp {
-        seconds: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| JobServiceError::AgentIssue(e.into()))?
-            .as_secs() as i64,
-        ..Default::default()
-    })
+    Ok(SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| JobServiceError::AgentIssue(e.into()))?
+        .to_proto())
 }
 
 #[cfg(test)]
@@ -154,7 +149,8 @@ mod tests {
             res,
             JobResult {
                 id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
-                timestamp: get_current_timestamp(),
+                // Needed since timestamps would be too accurate
+                timestamp: res.timestamp,
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![1, 0, 0, 1],
@@ -186,7 +182,8 @@ mod tests {
         let res = ping_adapter.execute(&job).await.unwrap();
         let expected_result_alt_1 = JobResult {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
-            timestamp: get_current_timestamp(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 0, 0, 1],
@@ -196,7 +193,8 @@ mod tests {
         };
         let expected_result_alt_2 = JobResult {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
-            timestamp: get_current_timestamp(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 1, 1, 1],
@@ -229,7 +227,8 @@ mod tests {
             res,
             JobResult {
                 id: "CQybHx0FnQpv0SxRoVNou".to_string(),
-                timestamp: get_current_timestamp(),
+                // Needed since timestamps would be too accurate
+                timestamp: res.timestamp,
                 ping: Some(PingJobResult {
                     reachable: false,
                     ..Default::default()
@@ -237,15 +236,5 @@ mod tests {
                 ..Default::default()
             }
         )
-    }
-
-    fn get_current_timestamp() -> Option<Timestamp> {
-        Some(Timestamp {
-            seconds: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64,
-            nanos: 0,
-        })
     }
 }

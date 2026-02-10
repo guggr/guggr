@@ -1,9 +1,38 @@
 use std::{error::Error, net::IpAddr, time::Duration};
 
 use deadpool_lapin::{Pool, Runtime};
+use protocheck::types::Timestamp;
 use tokio::{net::lookup_host, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+
+pub trait ToProto<T> {
+    fn to_proto(&self) -> T;
+}
+
+impl ToProto<protocheck::types::Duration> for Duration {
+    fn to_proto(&self) -> protocheck::types::Duration {
+        protocheck::types::Duration {
+            // Theoretically u64 can be bigger than i64 but that only happens when working with
+            // times very far in the future
+            seconds: self.as_secs() as i64,
+            // Nanos are always 0 <= n < 1_000_000_000 = 10^9. Therefore, casting is safe
+            nanos: self.subsec_nanos() as i32,
+        }
+    }
+}
+
+impl ToProto<Timestamp> for Duration {
+    fn to_proto(&self) -> Timestamp {
+        Timestamp {
+            // Theoretically u64 can be bigger than i64 but that only happens when working with
+            // times very far in the future
+            seconds: self.as_secs() as i64,
+            // Nanos are always 0 <= n < 1_000_000_000 = 10^9. Therefore, casting is safe
+            nanos: self.subsec_nanos() as i32,
+        }
+    }
+}
 
 pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn Error>> {
     let config = deadpool_lapin::Config {

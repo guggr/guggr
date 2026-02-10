@@ -3,12 +3,12 @@ use std::{
     time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
+use agent::ToProto;
 use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::HttpJobResult, v1::JobResult},
 };
-use protocheck::types::{Duration, Timestamp};
 use tracing::info;
 
 use crate::core::{
@@ -41,10 +41,6 @@ impl MonitorPort for HttpAdapter {
         let start_time = Instant::now();
         let response = self.client.head(&http_details.url).send().await;
         let latency = start_time.elapsed();
-        let protocheck_latency = Duration {
-            seconds: latency.as_secs() as i64,
-            nanos: latency.as_nanos() as i32,
-        };
 
         let (res, reachable) = match response {
             Ok(res) => (Some(res), true),
@@ -82,7 +78,7 @@ impl MonitorPort for HttpAdapter {
                     reachable,
                     ip_address: ip_bytes,
                     status_code,
-                    latency: Some(protocheck_latency),
+                    latency: Some(latency.to_proto()),
                     payload: payload.to_vec(),
                 }
             }
@@ -94,10 +90,7 @@ impl MonitorPort for HttpAdapter {
 
         let job_result = JobResult {
             id: job.id.clone(),
-            timestamp: Some(Timestamp {
-                seconds: timestamp.as_secs() as i64,
-                ..Default::default()
-            }),
+            timestamp: Some(timestamp.to_proto()),
             http: Some(http_job_result),
             ..Default::default()
         };
@@ -138,7 +131,8 @@ mod tests {
             res,
             JobResult {
                 id: "GyLQDBZm1JYP7f_eJ24iH".to_string(),
-                timestamp: get_current_timestamp(),
+                // Needed since timestamps would be too accurate
+                timestamp: res.timestamp,
                 http: Some(HttpJobResult {
                     reachable: true,
                     ip_address: vec![127, 0, 0, 1],
@@ -168,7 +162,8 @@ mod tests {
             res,
             JobResult {
                 id: "S3tqA6Gb-eY-jMIcGo7Is".to_string(),
-                timestamp: get_current_timestamp(),
+                // Needed since timestamps would be too accurate
+                timestamp: res.timestamp,
                 http: Some(HttpJobResult {
                     reachable: false,
                     ip_address: vec![],
@@ -179,15 +174,5 @@ mod tests {
                 ..Default::default()
             }
         )
-    }
-
-    fn get_current_timestamp() -> Option<Timestamp> {
-        Some(Timestamp {
-            seconds: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64,
-            nanos: 0,
-        })
     }
 }
