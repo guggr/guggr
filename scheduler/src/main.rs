@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     let shutdown_token = tokio_util::sync::CancellationToken::new();
 
-    debug!("initializing postgres fetcher");
+    debug!("initializing postgres fetcher and running pending migrations on the database");
     let fetcher = Arc::from(
         PostgresFetcher::new(&db_config.postgres_connection_url())
             .context("while initializing postgres fetcher")?,
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         )
         .context("while initializing rabbitmq publisher")?,
     );
-    debug!("setting schema up and running migrations");
+    debug!("setting publisher schema up");
     publisher
         .setup_schema()
         .await
