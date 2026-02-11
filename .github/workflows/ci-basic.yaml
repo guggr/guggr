@@ -120,7 +120,7 @@ jobs:
         with:
           cache-on-failure: true
           add-job-id-key: false
-      - run: cargo clippy
+      - run: cargo clippy --all-features --all-targets -- -D warnings
 
   helm-lint:
     name: 🐛 lint - helm
