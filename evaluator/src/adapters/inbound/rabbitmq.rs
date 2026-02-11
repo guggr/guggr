@@ -19,6 +19,16 @@ use crate::core::{
     service::evalservice::EvalService,
 };
 
+/// Errors for [`RabbitMQDriverError`]
+///
+/// - [`RabbitMQDriverError::JobResultDecode`] is raised when the JobResult
+///   message can't be decoded
+/// - [`RabbitMQDriverError::Connection`] is raised when the initial connection
+///   to rabbitmq failed
+/// - [`RabbitMQDriverError::Pool`] is raised, when no connection could be
+///   obtained from the pool
+/// - [`RabbitMQDriverError::Internal`] is raised when an
+///   [`JobEvaluatorError::Internal`] is raised
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
     #[error("error decoding job")]
