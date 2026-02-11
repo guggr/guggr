@@ -6,6 +6,7 @@ use tracing::{error, info, warn};
 
 pub mod adapters;
 pub mod core;
+pub mod telemetry;
 
 pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
     let config = deadpool_lapin::Config {

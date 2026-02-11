@@ -5,12 +5,15 @@ use config::{PostgresConfig, RabbitMQConfig};
 use evaluator::{
     adapters::{inbound::rabbitmq::RabbitMQDriver, outbound::postgres::PostgresAdapter},
     core::service::evalservice::EvalService,
+    telemetry,
 };
 use tokio::{select, signal::unix::SignalKind};
 use tracing::{debug, error, info};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    telemetry::init_tracing();
+
     debug!("Loading rabbitmq config from env");
     let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_JOB_RESULT_QUEUE"])
         .context("while loading RabbitMQ config from environment")?;
