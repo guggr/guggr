@@ -119,7 +119,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-          add-job-id-key: false
       - run: cargo clippy --all-features --all-targets -- -D warnings
 
   helm-lint:
@@ -154,7 +153,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-          add-job-id-key: false
       - run: cargo nextest run --no-tests warn
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
