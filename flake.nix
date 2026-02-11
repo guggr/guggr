@@ -56,7 +56,9 @@
               cargo-machete
               diesel-cli
               diesel-cli-ext
+              libpq
             ];
+            LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
           };
         }
       );
