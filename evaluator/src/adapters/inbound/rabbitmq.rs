@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use deadpool_lapin::Pool;
 use futures_lite::StreamExt;
 use gen_proto_types::job_result::v1::JobResult;
@@ -13,7 +14,10 @@ use prost::{DecodeError, Message};
 use thiserror::Error;
 use tracing::{error, info};
 
-use crate::core::{domain::errors::JobEvaluatorError, service::evalservice::EvalService};
+use crate::core::{
+    domain::errors::JobEvaluatorError, ports::rabbitmq_driver::RabbitMQDriverPort,
+    service::evalservice::EvalService,
+};
 
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
@@ -23,6 +27,19 @@ pub enum RabbitMQDriverError {
     Connection(#[from] lapin::Error),
     #[error("get pool connection error")]
     Pool(#[from] deadpool_lapin::PoolError),
+    #[error("internal error while evaluating job: {0}")]
+    Internal(String),
+}
+
+/// Allows for converting the RabbitMQ-specific errors to domain errors
+impl From<RabbitMQDriverError> for JobEvaluatorError {
+    fn from(value: RabbitMQDriverError) -> Self {
+        match value {
+            RabbitMQDriverError::Connection(_) | RabbitMQDriverError::Pool(_) => Self::Unavailable,
+
+            other => Self::Internal(other.to_string()),
+        }
+    }
 }
 
 pub struct RabbitMQDriver {
@@ -75,7 +92,7 @@ impl RabbitMQDriver {
         args
     }
 
-    pub async fn start(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn start(&self) -> Result<(), RabbitMQDriverError> {
         let connection = self.pool.get().await?;
 
         let channel = connection.create_channel().await?;
@@ -99,38 +116,35 @@ impl RabbitMQDriver {
                 Some(delivery_result) => {
                     let delivery = delivery_result?;
                     let service = self.service.clone();
-                    tokio::spawn(async move {
-                        match JobResult::decode(&delivery.data[..]) {
-                            Ok(job_result) => {
-                                info!("received job: {:?}", &job_result);
-                                match service.evaluate_job_result(&job_result).await {
-                                    Ok(_) => {
-                                        info!("successfully executed job with id {}", &job_result.id);
-                                        delivery.ack(BasicAckOptions { multiple: false }).await;
-                                    }
-                                    Err(error) => {
-                                        match error {
-                                            JobEvaluatorError::Internal(e) => {
-                                                error!("evaluating job {} failed: {}", &job_result.id, e);
-                                                nack_delivery(&delivery, false).await;
-                                                return Err(e);
-                                            }
-                                            JobEvaluatorError::Unavailable => {
-                                                error!("evaluating job {} failed because no connection to the database could be made", &job_result.id);
-                                                nack_delivery(&delivery, true).await;
-                                            }
-                                        }
-                                    }
+                    match JobResult::decode(&delivery.data[..]) {
+                        Ok(job_result) => {
+                            info!("received job: {:?}", &job_result);
+                            match service.evaluate_job_result(&job_result).await {
+                                Ok(_) => {
+                                    info!("successfully executed job with id {}", &job_result.id);
+                                    delivery.ack(BasicAckOptions { multiple: false }).await?;
                                 }
-                            }
-                            Err(e) => {
-                                error!("{}", RabbitMQDriverError::JobResultDecode(e));
-                                nack_delivery(&delivery, true).await;
+                                Err(error) => match error {
+                                    JobEvaluatorError::Internal(e) => {
+                                        error!("evaluating job {} failed: {}", &job_result.id, e);
+                                        nack_delivery(&delivery, false).await?;
+                                        return Err(RabbitMQDriverError::Internal(e));
+                                    }
+                                    JobEvaluatorError::Unavailable => {
+                                        error!(
+                                            "evaluating job {} failed because no connection to the database could be made",
+                                            &job_result.id
+                                        );
+                                        nack_delivery(&delivery, true).await?;
+                                    }
+                                },
                             }
                         }
-                        Ok(())
-                        //Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-                    }).await??;
+                        Err(e) => {
+                            error!("{}", RabbitMQDriverError::JobResultDecode(e));
+                            nack_delivery(&delivery, true).await?;
+                        }
+                    }
                 }
                 None => continue,
             }
@@ -146,4 +160,20 @@ async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, Rabbi
         })
         .await
         .map_err(RabbitMQDriverError::Connection)
+}
+
+#[async_trait]
+impl RabbitMQDriverPort for RabbitMQDriver {
+    async fn setup(&self) -> Result<(), JobEvaluatorError> {
+        self.setup_schema().await.map_err(|err| {
+            error!("RabbitMQDriver Error: {:?}", err);
+            JobEvaluatorError::from(err)
+        })
+    }
+    async fn start(&self) -> Result<(), JobEvaluatorError> {
+        self.start().await.map_err(|err| {
+            error!("RabbitMQDriver Error: {:?}", err);
+            JobEvaluatorError::from(err)
+        })
+    }
 }
