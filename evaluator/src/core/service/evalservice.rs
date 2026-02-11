@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use gen_proto_types::job_result::v1::JobResult;
 
-use crate::core::{domain::errors::JobRepositoryError, ports::database::DatabasePort};
+use crate::core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort};
 
 pub struct EvalService {
     postgres_adapter: Arc<dyn DatabasePort + Send + Sync>,
@@ -24,7 +24,7 @@ impl EvalService {
     pub async fn evaluate_job_result(
         &self,
         job_result: &JobResult,
-    ) -> anyhow::Result<(), JobRepositoryError> {
+    ) -> anyhow::Result<(), JobEvaluatorError> {
         let notify = self
             .postgres_adapter
             .notification_enabled(&job_result.id)

@@ -14,7 +14,7 @@ use gen_proto_types::job_result::v1::JobResult;
 use thiserror::Error;
 use tracing::error;
 
-use crate::core::{domain::errors::JobRepositoryError, ports::database::DatabasePort};
+use crate::core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort};
 
 pub struct PostgresAdapter {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -44,7 +44,7 @@ pub enum PostgresAdapterError {
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
-impl From<PostgresAdapterError> for JobRepositoryError {
+impl From<PostgresAdapterError> for JobEvaluatorError {
     fn from(value: PostgresAdapterError) -> Self {
         match value {
             PostgresAdapterError::ConnectionError(_)
@@ -101,10 +101,10 @@ impl PostgresAdapter {
 
 #[async_trait]
 impl DatabasePort for PostgresAdapter {
-    async fn notification_enabled(&self, job_id: &str) -> Result<bool, JobRepositoryError> {
+    async fn notification_enabled(&self, job_id: &str) -> Result<bool, JobEvaluatorError> {
         self.run_notification_enabled(job_id).map_err(|err| {
             error!("Database Error: {:?}", err);
-            JobRepositoryError::from(err)
+            JobEvaluatorError::from(err)
         })
     }
 
@@ -112,11 +112,11 @@ impl DatabasePort for PostgresAdapter {
         &self,
         job_result: &JobResult,
         notified: bool,
-    ) -> Result<(), JobRepositoryError> {
+    ) -> Result<(), JobEvaluatorError> {
         self.run_write_job_result(job_result, notified)
             .map_err(|err| {
                 error!("Database Error: {:?}", err);
-                JobRepositoryError::from(err)
+                JobEvaluatorError::from(err)
             })
     }
 }

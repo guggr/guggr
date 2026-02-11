@@ -13,7 +13,7 @@ use prost::{DecodeError, Message};
 use thiserror::Error;
 use tracing::{error, info};
 
-use crate::core::{domain::errors::JobRepositoryError, service::evalservice::EvalService};
+use crate::core::{domain::errors::JobEvaluatorError, service::evalservice::EvalService};
 
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
@@ -110,12 +110,12 @@ impl RabbitMQDriver {
                                     }
                                     Err(error) => {
                                         match error {
-                                            JobRepositoryError::Internal(e) => {
+                                            JobEvaluatorError::Internal(e) => {
                                                 error!("evaluating job {} failed: {}", &job_result.id, e);
                                                 nack_delivery(&delivery, false).await;
                                                 return Err(e);
                                             }
-                                            JobRepositoryError::Unavailable => {
+                                            JobEvaluatorError::Unavailable => {
                                                 error!("evaluating job {} failed because no connection to the database could be made", &job_result.id);
                                                 nack_delivery(&delivery, true).await;
                                             }
