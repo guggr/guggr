@@ -15,10 +15,5 @@ config = { workspace = true }
 prost = { workspace = true }
 database-client = {workspace = true}
 diesel = { workspace = true, features = ["postgres", "chrono"] }
-pq-sys = { workspace = true, features = ["bundled"] }
-openssl-sys = { workspace = true, features = ["vendored"] }
 chrono = { workspace = true }
 tracing.workspace = true
-
-[package.metadata.cargo-machete]
-ignored = ["pq-sys", "openssl-sys"]

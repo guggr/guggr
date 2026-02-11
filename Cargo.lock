@@ -342,8 +342,6 @@ dependencies = [
  "database-client",
  "diesel",
  "gen-proto-types",
- "openssl-sys",
- "pq-sys",
  "prost",
  "protocheck",
  "thiserror 2.0.18",
