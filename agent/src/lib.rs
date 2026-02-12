@@ -34,6 +34,9 @@ impl ToProto<Timestamp> for Duration {
     }
 }
 
+/// Creates an RabbitMQ Pool via deadpool.
+///
+/// Errors when there is a problem with connecting to RabbitMQ.
 pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn Error>> {
     let config = deadpool_lapin::Config {
         url: Some(connection_url.into()),
@@ -67,6 +70,9 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn 
     Ok(pool)
 }
 
+/// Sets up tracing to log in JSON format
+///
+/// Panics if there is a problem with parsing the default EnvFilter.
 pub fn init_tracing() {
     let fmt_layer = fmt::layer().with_file(true).with_line_number(true).json(); // Keep JSON for production logs
 
@@ -80,6 +86,8 @@ pub fn init_tracing() {
         .init(); // .init() is shorthand for set_global_default
 }
 
+/// Helps with resolving domains to IPs by utilizing tokio's `lookup_host`
+/// method.
 pub async fn resolve_domain(domain: String) -> Option<IpAddr> {
     // This is needed since lookup_host needs a port
     let domain = format!("{}:0", domain);
