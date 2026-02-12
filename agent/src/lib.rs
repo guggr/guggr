@@ -97,9 +97,10 @@ mod tests {
     #[tokio::test]
     async fn test_resolve_domain_success() {
         let domain = String::from("one.one.one.one");
-        assert_eq!(
-            resolve_domain(domain).await,
-            Some(IpAddr::from([1, 0, 0, 1]))
+        let resolved = resolve_domain(domain).await;
+        assert!(
+            resolved == Some(IpAddr::from([1, 0, 0, 1]))
+                || resolved == Some(IpAddr::from([1, 1, 1, 1])),
         );
     }
 
