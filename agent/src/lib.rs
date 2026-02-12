@@ -1,6 +1,7 @@
 use std::{error::Error, net::IpAddr, time::Duration};
 
 use deadpool_lapin::{Pool, Runtime};
+use nanoid::nanoid;
 use protocheck::types::Timestamp;
 use tokio::{net::lookup_host, time::sleep};
 use tracing::{error, info, warn};
@@ -96,6 +97,35 @@ pub async fn resolve_domain(domain: String) -> Option<IpAddr> {
         .ok()?
         .next()
         .map(|sock_addr| sock_addr.ip())
+}
+
+/// Generates a unique run id every time it is called. To be unique across
+/// multiple agents the `nanoid` part is prefixed with the hostname.
+/// If the hostname can not be retrieved, the `nanoid` is prefixed with
+/// `agent-unknown`.
+///
+/// # Example
+/// ```rust
+/// use agent::generate_run_id;
+///
+/// println!("{}", generate_run_id());
+/// ```
+pub fn generate_run_id() -> String {
+    match hostname::get() {
+        Ok(hostname) => {
+            let run_id = format!(
+                "{}-{}",
+                hostname.to_string_lossy().to_lowercase(),
+                nanoid!()
+            );
+            run_id
+        }
+        Err(err) => {
+            warn!("error getting hostname: {}", err);
+            let run_id = format!("agent-unknown-{}", nanoid!());
+            run_id
+        }
+    }
 }
 
 #[cfg(test)]
