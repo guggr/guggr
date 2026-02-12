@@ -2,4 +2,4 @@
     just --list agent
 
 run:
-    env $(cat .env | xargs) cargo run --bin agent
+    env $(cat .env.example | xargs) cargo run --bin agent

@@ -48,10 +48,10 @@ impl JobService {
         }
     }
 
-    pub async fn process_job(&self, job: &Job) -> Result<(), JobServiceError> {
+    pub async fn process_job(&self, job: &Job, run_id: String) -> Result<(), JobServiceError> {
         let result = match self.processing_adapter.get(&job.job_type()) {
             None => return Err(JobServiceError::UnknownJobType),
-            Some(processing_adapter) => processing_adapter.execute(job).await?,
+            Some(processing_adapter) => processing_adapter.execute(job, run_id).await?,
         };
 
         self.publisher_adapter.publish_result(&result).await

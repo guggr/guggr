@@ -30,7 +30,7 @@ impl HttpAdapter {
 
 #[async_trait]
 impl MonitorPort for HttpAdapter {
-    async fn execute(&self, job: &Job) -> Result<JobResult, JobServiceError> {
+    async fn execute(&self, job: &Job, run_id: String) -> Result<JobResult, JobServiceError> {
         let http_details = job.http.as_ref().unwrap();
 
         info!(
@@ -90,6 +90,8 @@ impl MonitorPort for HttpAdapter {
 
         let job_result = JobResult {
             id: job.id.clone(),
+            batch_id: job.batch_id.clone(),
+            run_id,
             timestamp: Some(timestamp.to_proto()),
             http: Some(http_job_result),
             ..Default::default()
@@ -117,6 +119,7 @@ mod tests {
 
         let job = Job {
             id: "GyLQDBZm1JYP7f_eJ24iH".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
             job_type: JobType::Http.into(),
             http: Some(HttpJobType {
                 url: server.url("/"),
@@ -124,13 +127,17 @@ mod tests {
             ..Default::default()
         };
 
+        let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
+
         let http_adapter = HttpAdapter::new();
-        let res: JobResult = http_adapter.execute(&job).await.unwrap();
+        let res: JobResult = http_adapter.execute(&job, run_id.clone()).await.unwrap();
         mock.assert();
         assert_eq!(
             res,
             JobResult {
                 id: "GyLQDBZm1JYP7f_eJ24iH".to_string(),
+                batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+                run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
                 http: Some(HttpJobResult {
@@ -149,6 +156,7 @@ mod tests {
     async fn test_http_failure() {
         let job = Job {
             id: "S3tqA6Gb-eY-jMIcGo7Is".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
             job_type: JobType::Http.into(),
             http: Some(HttpJobType {
                 url: "http://example.lol".to_string(),
@@ -156,12 +164,16 @@ mod tests {
             ..Default::default()
         };
 
+        let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
+
         let http_adapter = HttpAdapter::new();
-        let res = http_adapter.execute(&job).await.unwrap();
+        let res = http_adapter.execute(&job, run_id.clone()).await.unwrap();
         assert_eq!(
             res,
             JobResult {
                 id: "S3tqA6Gb-eY-jMIcGo7Is".to_string(),
+                batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+                run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
                 http: Some(HttpJobResult {

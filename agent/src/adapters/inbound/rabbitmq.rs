@@ -1,3 +1,4 @@
+use agent::generate_run_id;
 use deadpool_lapin::Pool;
 use futures_lite::StreamExt;
 use gen_proto_types::job::v1::Job;
@@ -99,40 +100,56 @@ impl RabbitMQDriver {
                 Some(delivery_result) => {
                     let delivery = delivery_result?;
                     let service = self.service.clone();
+                    let run_id = generate_run_id();
                     tokio::spawn(async move {
-                        match Job::decode(&delivery.data[..]) {
-                            Ok(job) => {
-                                info!("received job: {:?}", &job);
-                                match service.process_job(&job).await {
-                                    Ok(_) => {
-                                        info!("successfully executed job with id {}", &job.id);
-                                        delivery.ack(BasicAckOptions { multiple: false }).await?;
-                                    }
-                                    Err(error) => {
-                                        match error {
-                                            JobServiceError::UnknownJobType => {
-                                                error!("executing job {} failed because an unknown job type has been supplied.", &job.id);
-                                                nack_delivery(&delivery, false).await?;
-                                            }
-                                            JobServiceError::AgentIssue(e) => {
-                                                error!("executing job {} failed because of an agent issue: {}", &job.id, e);
-                                                nack_delivery(&delivery, true).await?;
-                                                return Err(e);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Err(e) => {
-                                error!("{}", RabbitMQDriverError::JobDecode(e));
-                                nack_delivery(&delivery, true).await?;
-                            }
-                        }
+                        process_delivery(delivery, service, run_id).await?;
+
                         Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-                    }).await??;
+                    })
+                    .await??;
                 }
                 None => continue,
             }
+        }
+    }
+}
+
+#[tracing::instrument(skip(delivery, service), fields(run_id = %run_id))]
+async fn process_delivery(
+    delivery: Delivery,
+    service: JobService,
+    run_id: String,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    match Job::decode(&delivery.data[..]) {
+        Ok(job) => {
+            info!("received job: {:?}", &job);
+            match service.process_job(&job, run_id).await {
+                Ok(_) => {
+                    info!("successfully executed job");
+                    delivery.ack(BasicAckOptions { multiple: false }).await?;
+                    Ok(())
+                }
+                Err(error) => match error {
+                    JobServiceError::UnknownJobType => {
+                        error!(
+                            "executing job failed because an unknown job type has been supplied."
+                        );
+                        nack_delivery(&delivery, false).await?;
+                        Err(error.into())
+                    }
+                    JobServiceError::AgentIssue(e) => {
+                        error!("executing job failed because of an agent issue: {}", e);
+                        nack_delivery(&delivery, true).await?;
+                        Err(e)
+                    }
+                },
+            }
+        }
+        Err(e) => {
+            let decode_err = RabbitMQDriverError::JobDecode(e);
+            error!("{}", decode_err);
+            nack_delivery(&delivery, true).await?;
+            Err(decode_err.into())
         }
     }
 }
