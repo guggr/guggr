@@ -22,8 +22,8 @@ use crate::core::{
 pub struct PingAdapter {}
 
 impl PingAdapter {
-    pub fn new() -> Self {
-        PingAdapter {}
+    pub const fn new() -> Self {
+        Self {}
     }
 }
 
@@ -96,19 +96,18 @@ impl MonitorPort for PingAdapter {
                     return Err(JobServiceError::AgentIssue(
                         AgentError::Ping(e.into()).into(),
                     ));
-                } else {
-                    JobResult {
-                        id: job.id.clone(),
-                        batch_id: job.batch_id.clone(),
-                        run_id,
-                        timestamp: Some(get_timestamp()?),
-                        ping: Some(PingJobResult {
-                            reachable: false,
-                            ip_address: vec![],
-                            latency: None,
-                        }),
-                        ..Default::default()
-                    }
+                }
+                JobResult {
+                    id: job.id.clone(),
+                    batch_id: job.batch_id.clone(),
+                    run_id,
+                    timestamp: Some(get_timestamp()?),
+                    ping: Some(PingJobResult {
+                        reachable: false,
+                        ip_address: vec![],
+                        latency: None,
+                    }),
+                    ..Default::default()
                 }
             }
         };

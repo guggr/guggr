@@ -33,16 +33,12 @@ pub struct RabbitMQDriver {
 }
 
 impl RabbitMQDriver {
-    pub async fn new(
-        pool: Pool,
-        queue_name: String,
-        service: JobService,
-    ) -> Result<Self, RabbitMQDriverError> {
-        Ok(RabbitMQDriver {
-            pool,
+    pub const fn new(pool: Pool, queue_name: String, service: JobService) -> Self {
+        Self {
             service,
+            pool,
             queue_name,
-        })
+        }
     }
 
     pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
@@ -96,19 +92,16 @@ impl RabbitMQDriver {
         info!("starting consume");
 
         loop {
-            match consumer.next().await {
-                Some(delivery_result) => {
-                    let delivery = delivery_result?;
-                    let service = self.service.clone();
-                    let run_id = generate_run_id();
-                    tokio::spawn(async move {
-                        process_delivery(delivery, service, run_id).await?;
+            if let Some(delivery_result) = consumer.next().await {
+                let delivery = delivery_result?;
+                let service = self.service.clone();
+                let run_id = generate_run_id();
+                tokio::spawn(async move {
+                    process_delivery(delivery, service, run_id).await?;
 
-                        Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-                    })
-                    .await??;
-                }
-                None => continue,
+                    Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+                })
+                .await??;
             }
         }
     }
@@ -124,7 +117,7 @@ async fn process_delivery(
         Ok(job) => {
             info!("received job: {:?}", &job);
             match service.process_job(&job, run_id).await {
-                Ok(_) => {
+                Ok(()) => {
                     info!("successfully executed job");
                     delivery.ack(BasicAckOptions { multiple: false }).await?;
                     Ok(())

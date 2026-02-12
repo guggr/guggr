@@ -30,13 +30,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Outbound adapter
     let http_adapter = Arc::new(HttpAdapter::new());
     let ping_adapter = Arc::new(PingAdapter::new());
-    let rabbitmq_publisher = Arc::new(
-        RabbitMQPublisher::new(
-            rabbitmq_pool.clone(),
-            config.rabbitmq_queue_name(1).unwrap(),
-        )
-        .await?,
-    );
+    let rabbitmq_publisher = Arc::new(RabbitMQPublisher::new(
+        rabbitmq_pool.clone(),
+        config.rabbitmq_queue_name(1).unwrap(),
+    ));
 
     rabbitmq_publisher.setup_schema().await?;
 
@@ -53,8 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         rabbitmq_pool.clone(),
         config.rabbitmq_queue_name(0).unwrap(),
         job_service,
-    )
-    .await?;
+    );
     rabbitmq_driver.setup_schema().await?;
 
     info!("Agent is starting...");
@@ -64,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     select! {
         res = rabbitmq_driver.start() => {
             match res {
-                Ok(_) => {}
+                Ok(()) => {}
                 Err(err) if err.downcast_ref::<AgentError>().is_some() => {
                     error!("exiting agent due to agent issues in previous jobs");
                     rabbitmq_pool.close();
@@ -72,7 +68,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     std::process::exit(1);
                 }
                 Err(err) => {
-                    error!("error happened while executing agent: {}", err)
+                    error!("error happened while executing agent: {}", err);
                 }
             }
         }

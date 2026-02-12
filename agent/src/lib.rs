@@ -16,9 +16,9 @@ impl ToProto<protocheck::types::Duration> for Duration {
         protocheck::types::Duration {
             // Theoretically u64 can be bigger than i64 but that only happens when working with
             // times very far in the future
-            seconds: self.as_secs() as i64,
+            seconds: self.as_secs().cast_signed(),
             // Nanos are always 0 <= n < 1_000_000_000 = 10^9. Therefore, casting is safe
-            nanos: self.subsec_nanos() as i32,
+            nanos: self.subsec_nanos().cast_signed(),
         }
     }
 }
@@ -28,16 +28,17 @@ impl ToProto<Timestamp> for Duration {
         Timestamp {
             // Theoretically u64 can be bigger than i64 but that only happens when working with
             // times very far in the future
-            seconds: self.as_secs() as i64,
+            seconds: self.as_secs().cast_signed(),
             // Nanos are always 0 <= n < 1_000_000_000 = 10^9. Therefore, casting is safe
-            nanos: self.subsec_nanos() as i32,
+            nanos: self.subsec_nanos().cast_signed(),
         }
     }
 }
 
-/// Creates an RabbitMQ Pool via deadpool.
+/// Creates an `RabbitMQ` Pool via deadpool.
 ///
-/// Errors when there is a problem with connecting to RabbitMQ.
+/// # Errors
+/// Raises an error when there is a problem with connecting to `RabbitMQ`.
 pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn Error>> {
     let config = deadpool_lapin::Config {
         url: Some(connection_url.into()),
@@ -73,7 +74,9 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, Box<dyn 
 
 /// Sets up tracing to log in JSON format
 ///
-/// Panics if there is a problem with parsing the default EnvFilter.
+/// # Panics
+/// This function panics if there is a problem with parsing the default
+/// `EnvFilter`.
 pub fn init_tracing() {
     let fmt_layer = fmt::layer().with_file(true).with_line_number(true).json(); // Keep JSON for production logs
 
@@ -91,7 +94,7 @@ pub fn init_tracing() {
 /// method.
 pub async fn resolve_domain(domain: String) -> Option<IpAddr> {
     // This is needed since lookup_host needs a port
-    let domain = format!("{}:0", domain);
+    let domain = format!("{domain}:0");
     lookup_host(domain)
         .await
         .ok()?
@@ -101,6 +104,7 @@ pub async fn resolve_domain(domain: String) -> Option<IpAddr> {
 
 /// Generates a unique run id every time it is called. To be unique across
 /// multiple agents the `nanoid` part is prefixed with the hostname.
+///
 /// If the hostname can not be retrieved, the `nanoid` is prefixed with
 /// `agent-unknown`.
 ///

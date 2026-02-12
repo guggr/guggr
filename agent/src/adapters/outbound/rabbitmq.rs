@@ -35,8 +35,8 @@ pub enum RabbitMQPublisherError {
 }
 
 impl RabbitMQPublisher {
-    pub async fn new(pool: Pool, queue_name: String) -> Result<Self, RabbitMQPublisherError> {
-        Ok(RabbitMQPublisher { pool, queue_name })
+    pub const fn new(pool: Pool, queue_name: String) -> Self {
+        Self { pool, queue_name }
     }
 
     pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {

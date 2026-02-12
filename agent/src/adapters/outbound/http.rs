@@ -22,7 +22,7 @@ pub struct HttpAdapter {
 
 impl HttpAdapter {
     pub fn new() -> Self {
-        HttpAdapter {
+        Self {
             client: reqwest::Client::new(),
         }
     }
@@ -48,9 +48,8 @@ impl MonitorPort for HttpAdapter {
                 if self.client.head("http://gug.gr").send().await.is_err() {
                     // Error on agent side return agent error
                     return Err(JobServiceError::AgentIssue(AgentError::Http(error).into()));
-                } else {
-                    (None, false)
                 }
+                (None, false)
             }
         };
 
@@ -68,7 +67,7 @@ impl MonitorPort for HttpAdapter {
                     IpAddr::V4(ipv4) => ipv4.octets().to_vec(),
                     IpAddr::V6(ipv6) => ipv6.octets().to_vec(),
                 };
-                let status_code = response.status().as_u16() as i32;
+                let status_code = i32::from(response.status().as_u16());
                 let payload = response
                     .bytes()
                     .await

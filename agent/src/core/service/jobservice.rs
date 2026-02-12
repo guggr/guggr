@@ -42,12 +42,17 @@ impl JobService {
         processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>>,
         publisher_adapter: Arc<dyn PublisherPort + Send + Sync>,
     ) -> Self {
-        JobService {
+        Self {
             processing_adapter,
             publisher_adapter,
         }
     }
 
+    /// Takes a job and hands it to the responsible adapter for execution.
+    ///
+    /// # Errors
+    /// Raises an Error if the execution of the job fails within the adapter or
+    /// if there is an error while publishing the result back to `RabbitMQ`.
     pub async fn process_job(&self, job: &Job, run_id: String) -> Result<(), JobServiceError> {
         let result = match self.processing_adapter.get(&job.job_type()) {
             None => return Err(JobServiceError::UnknownJobType),
