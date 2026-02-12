@@ -103,9 +103,6 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - run: rustup update nightly && rustup default nightly
       - run: rustup component add rustfmt --toolchain nightly
-      - uses: Swatinem/rust-cache@v2.8.2
-        with:
-          cache-on-failure: true
       - run: cargo +nightly fmt --check
 
   cargo-lint:
@@ -122,7 +119,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo clippy
+      - run: cargo clippy --all-features --all-targets -- -D warnings
 
   helm-lint:
     name: 🐛 lint - helm
@@ -156,7 +153,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo nextest run --no-tests warn -P ci
+      - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
 
@@ -180,6 +177,6 @@ jobs:
           ref: ${{env.branch}}
           fetch-depth: ${{env.depth}}
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@v3.93.0
+        uses: trufflesecurity/trufflehog@v3.93.3
         with:
           extra_args: --results=verified,unknown
