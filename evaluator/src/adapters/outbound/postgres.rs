@@ -1,8 +1,7 @@
 use async_trait::async_trait;
-use chrono::Utc;
 use database_client::{
     DbError, create_connection_pool,
-    models::{Job, JobRun},
+    models::{Job, JobResultHttp, JobResultPing, JobRun},
     schema::job::id,
 };
 use diesel::{
@@ -10,11 +9,17 @@ use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
-use gen_proto_types::job_result::v1::JobResult;
+use gen_proto_types::job_result::{
+    types::v1::{HttpJobResult, PingJobResult},
+    v1::JobResult,
+};
 use thiserror::Error;
 use tracing::error;
 
-use crate::core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort};
+use crate::{
+    core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort},
+    ipnet_from_bytes_host, naive_from_proto_ts, protocheck_duration_to_i32_millis,
+};
 
 pub struct PostgresAdapter {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -41,6 +46,10 @@ pub enum PostgresAdapterError {
     Result(#[from] diesel::result::Error),
     #[error("Unknown Job ID: {0}")]
     UnknownJobId(String),
+    #[error("No Result was attached to the JobResult: {0}")]
+    NoResult(String),
+    #[error("Could not convert IP/Timestamp: {0}")]
+    Conversion(String),
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
@@ -75,6 +84,52 @@ impl PostgresAdapter {
         }
     }
 
+    fn write_job_result_http(
+        &self,
+        run_id: &str,
+        result: &HttpJobResult,
+    ) -> Result<(), PostgresAdapterError> {
+        use database_client::schema::job_result_http;
+        let mut conn = self.pool.get()?;
+
+        let result = JobResultHttp {
+            id: run_id.to_string(),
+            ip_address: ipnet_from_bytes_host(&result.ip_address)
+                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
+            status_code: result.status_code,
+            latency: protocheck_duration_to_i32_millis(result.latency.unwrap())
+                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
+            payload: result.payload.clone(),
+        };
+        diesel::insert_into(job_result_http::table)
+            .values(&result)
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    fn write_job_result_ping(
+        &self,
+        run_id: &str,
+        result: &PingJobResult,
+    ) -> Result<(), PostgresAdapterError> {
+        use database_client::schema::job_result_ping;
+        let mut conn = self.pool.get()?;
+
+        let result = JobResultPing {
+            id: run_id.to_string(),
+            ip_address: ipnet_from_bytes_host(result.ip_address.as_slice())
+                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
+            latency: protocheck_duration_to_i32_millis(result.latency.unwrap())
+                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
+        };
+        diesel::insert_into(job_result_ping::table)
+            .values(&result)
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
     fn run_write_job_result(
         &self,
         job_result: &JobResult,
@@ -84,18 +139,32 @@ impl PostgresAdapter {
 
         let mut conn = self.pool.get()?;
 
+        let reachable = if job_result.http.is_some() {
+            job_result.http.as_ref().unwrap().reachable
+        } else if job_result.ping.is_some() {
+            job_result.ping.as_ref().unwrap().reachable
+        } else {
+            return Err(PostgresAdapterError::NoResult(job_result.run_id.clone()));
+        };
+
         let job_run = JobRun {
             id: job_result.run_id.clone(),
             job_id: job_result.id.clone(),
             batch_id: job_result.batch_id.clone(),
             triggered_notification: notified,
-            timestamp: Utc::now().naive_utc(), //TODO
-            output: None,
+            timestamp: naive_from_proto_ts(&job_result.timestamp.unwrap()).unwrap(),
+            reachable,
         };
 
         diesel::insert_into(job_runs::table)
             .values(&job_run)
             .execute(&mut conn)?;
+
+        if job_result.http.is_some() {
+            self.write_job_result_http(&job_result.run_id, job_result.http.as_ref().unwrap())?;
+        } else if job_result.ping.is_some() {
+            self.write_job_result_ping(&job_result.run_id, job_result.ping.as_ref().unwrap())?;
+        }
         Ok(())
     }
 }
