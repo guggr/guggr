@@ -44,4 +44,6 @@ models:
         > {{ models_file }}
 
     sed -i 's/Identifiable/Identifiable, Insertable/' {{ models_file }}
+    sed -i 's/use ipnetwork::IpNetwork;/use ipnet::IpNet;/' {{ models_file }}
+    sed -i 's/IpNetwork/IpNet/' {{ models_file }}
     @just fmt-rust

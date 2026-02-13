@@ -6,11 +6,7 @@ authors.workspace = true
 
 [dependencies]
 chrono = { workspace = true }
-diesel = { workspace = true, features = ["chrono", "postgres", "r2d2"] }
+diesel = { workspace = true, features = ["chrono", "postgres", "r2d2", "ipnet-address"] }
 diesel_migrations = { workspace = true, features = ["postgres"] }
+ipnet = { workspace = true }
 thiserror = { workspace = true }
-pq-sys = { workspace = true, features = ["bundled"] }
-openssl-sys = { workspace = true, features = ["vendored"] }
-
-[package.metadata.cargo-machete]
-ignored = ["pq-sys", "openssl-sys"]
