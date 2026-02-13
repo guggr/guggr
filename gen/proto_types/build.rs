@@ -32,10 +32,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut config = Config::new();
     config
-        .file_descriptor_set_path(&descriptor_path)
+        .file_descriptor_set_path(descriptor_path)
         // Required if you use `bytes` fields anywhere
         .bytes(["."])
-        .out_dir(&out_dir);
+        .out_dir(out_dir);
 
     set_up_validators(&mut config, &proto_files, &[&proto_dir], &["guggr.v1"])?;
 
