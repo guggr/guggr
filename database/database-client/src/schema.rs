@@ -21,6 +21,24 @@ diesel::table! {
 }
 
 diesel::table! {
+    job_result_http (id) {
+        id -> Text,
+        ip_address -> Inet,
+        status_code -> Int4,
+        latency -> Int4,
+        payload -> Bytea,
+    }
+}
+
+diesel::table! {
+    job_result_ping (id) {
+        id -> Text,
+        ip_address -> Inet,
+        latency -> Int4,
+    }
+}
+
+diesel::table! {
     job_runs (id) {
         id -> Text,
         job_id -> Text,
@@ -28,6 +46,7 @@ diesel::table! {
         triggered_notification -> Bool,
         output -> Nullable<Text>,
         batch_id -> Text,
+        reachable -> Bool,
     }
 }
 
@@ -62,16 +81,14 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(job -> group (group_id));
-diesel::joinable!(job -> job_type (job_type_id));
-diesel::joinable!(job_runs -> job (job_id));
-diesel::joinable!(user_group_mapping -> group (group_id));
-diesel::joinable!(user_group_mapping -> role (role_id));
-diesel::joinable!(user_group_mapping -> user (user_id));
+diesel::joinable!(job_result_http -> job_runs (id));
+diesel::joinable!(job_result_ping -> job_runs (id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     group,
     job,
+    job_result_http,
+    job_result_ping,
     job_runs,
     job_type,
     role,
