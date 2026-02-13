@@ -5,8 +5,8 @@ edition.workspace = true
 
 [dependencies]
 prost.workspace = true
-protocheck = { workspace = true }
+protify = { workspace = true }
 
 [build-dependencies]
 prost-build = { workspace = true }
-protocheck-build = { workspace = true }
+protify-build = { workspace = true }
