@@ -66,12 +66,21 @@ impl From<PostgresAdapterError> for JobEvaluatorError {
 }
 
 impl PostgresAdapter {
+    /// # Errors
+    ///
+    /// Will return `PostgresAdapterError` if no connection pool could be
+    /// created from the supplied database url
     pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
         Ok(Self {
             pool: create_connection_pool(database_url)?,
         })
     }
 
+    /// # Errors
+    ///
+    /// Will return `PostgresAdapterError` if either
+    /// - no connection could be retrieved from the pool
+    /// - no record for that `job_id` was found
     fn run_notification_enabled(&self, job_id: &str) -> Result<bool, PostgresAdapterError> {
         use database_client::schema::job::dsl::job;
 
@@ -83,7 +92,13 @@ impl PostgresAdapter {
             None => Err(PostgresAdapterError::UnknownJobId(job_id.to_string())),
         }
     }
-
+    /// # Errors
+    ///
+    /// Will return `PostgresAdapterError` if either
+    /// - no connection could be retrieved from the pool
+    /// - the latency could not be converted
+    /// - the IP address could not be converted
+    /// - the record could not be inserted into the database
     fn write_job_result_http(
         &self,
         run_id: &str,
@@ -107,7 +122,13 @@ impl PostgresAdapter {
 
         Ok(())
     }
-
+    /// # Errors
+    ///
+    /// Will return `PostgresAdapterError` if either
+    /// - no connection could be retrieved from the pool
+    /// - the latency could not be converted
+    /// - the IP address could not be converted
+    /// - the record could not be inserted into the database
     fn write_job_result_ping(
         &self,
         run_id: &str,
@@ -130,6 +151,14 @@ impl PostgresAdapter {
         Ok(())
     }
 
+    /// # Errors
+    ///
+    /// Will return `PostgresAdapterError` if either
+    /// - no connection could be retrieved from the pool
+    /// - the timestamp could not be converted
+    /// - the underlying `job_result` (`HttpJobResult` or `PingJobResult`) could
+    ///   not be processed
+    /// - the record could not be inserted into the database
     fn run_write_job_result(
         &self,
         job_result: &JobResult,

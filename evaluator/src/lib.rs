@@ -47,6 +47,10 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
     Ok(pool)
 }
 
+/// # Errors
+///
+/// Will return `Err` if the supplied byte slice is neither 4 nor 16 bytes
+/// long
 pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, &'static str> {
     match bytes.len() {
         4 => Ok(IpNet::from(IpAddr::V4(Ipv4Addr::new(
@@ -60,13 +64,16 @@ pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, &'static str> {
     }
 }
 
+/// # Errors
+///
+/// Will return `Err` if the supplied timestamp is larger than an i32
 fn protocheck_duration_to_i32_millis(d: protocheck::types::Duration) -> Result<i32, &'static str> {
-    let secs: i128 = d.seconds as i128;
-    let nanos: i128 = d.nanos as i128;
+    let secs: i128 = i128::from(d.seconds);
+    let nanos: i128 = i128::from(d.nanos);
 
     let ms: i128 = secs.saturating_mul(1_000) + nanos / 1_000_000;
 
-    if ms > i32::MAX as i128 {
+    if ms > i128::from(i32::MAX) {
         return Err("duration too large for i32 milliseconds");
     }
     Ok(ms as i32)

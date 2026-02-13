@@ -18,9 +18,14 @@ impl Clone for EvalService {
 
 impl EvalService {
     pub fn new(postgres_adapter: Arc<dyn DatabasePort + Send + Sync>) -> Self {
-        EvalService { postgres_adapter }
+        Self { postgres_adapter }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the `notification` setting could not be
+    /// retrieved or an issue occurred while writing the result into the
+    /// database
     pub async fn evaluate_job_result(
         &self,
         job_result: &JobResult,

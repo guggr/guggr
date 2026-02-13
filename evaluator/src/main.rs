@@ -39,11 +39,10 @@ async fn main() -> Result<()> {
 
     debug!("initializing rabbitmq driver");
     let rabbitmq_driver = RabbitMQDriver::new(
+        service,
         rabbitmq_pool.clone(),
         rabbitmq_config.rabbitmq_queue_name(0).unwrap(),
-        service,
-    )
-    .await?;
+    );
     rabbitmq_driver.setup_schema().await?;
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate())?;
@@ -53,9 +52,9 @@ async fn main() -> Result<()> {
     select! {
         res = rabbitmq_driver.start() => {
             match res {
-                Ok(_) => {}
+                Ok(()) => {}
                 Err(err) => {
-                    error!("error happened while executing evaluator: {}", err)
+                    error!("error happened while executing evaluator: {}", err);
                 }
             }
         }
