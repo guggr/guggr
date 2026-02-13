@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS "job_result_http" (
 );
 
 ALTER TABLE public.job_runs
+DROP COLUMN output;
+
+ALTER TABLE public.job_runs
 ADD COLUMN reachable BOOLEAN;
 
 UPDATE public.job_runs

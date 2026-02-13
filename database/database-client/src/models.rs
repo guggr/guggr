@@ -53,7 +53,6 @@ pub struct JobRun {
     pub job_id: String,
     pub timestamp: NaiveDateTime,
     pub triggered_notification: bool,
-    pub output: Option<String>,
     pub batch_id: String,
     pub reachable: bool,
 }
