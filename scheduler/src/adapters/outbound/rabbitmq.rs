@@ -23,7 +23,7 @@ pub enum RabbitMQPublisherError {
     CreateConnectionError(#[from] deadpool_lapin::CreatePoolError),
     #[error("Pool exhausted or timeout: {0}")]
     PoolGetConnectionError(#[from] deadpool_lapin::PoolError),
-    #[error("Failure while interacting with rabbitmq")]
+    #[error("Failure while interacting with rabbitmq: {0}")]
     RabbitMQInteractionError(#[from] lapin::Error),
 }
 
