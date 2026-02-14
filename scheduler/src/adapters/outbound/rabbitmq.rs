@@ -12,18 +12,29 @@ use tracing::{debug, error, info};
 
 use crate::core::{domain::errors::JobSchedulerError, ports::publisher::Publisher};
 
+/// Publisher instance for pushing jobs to a `RabbitMQ` queue. Uses a connection
+/// pool for exchange with the `RabbitMQ` instance.
 pub struct RabbitMQPublisher {
     pool: deadpool_lapin::Pool,
     queue_name: String,
 }
 
+/// Errors for [`RabbitMQPublisher`]
+///
+/// - [`RabbitMQPublisher::CreateConnectionError`] is
+/// - [`RabbitMQPublisher::PoolGetConnectionError`] is
+/// - [`RabbitMQPublisher::RabbitMQInteractionError`] is
 #[derive(Error, Debug)]
 pub enum RabbitMQPublisherError {
-    #[error("RabbitMQ Connection failed: {0}")]
+    /// Raised, the initial connection to `RabbitMQ` fails more information see
+    /// [`DbError`]
+    #[error("RabbitMQ connection failed: {0}")]
     CreateConnectionError(#[from] deadpool_lapin::CreatePoolError),
-    #[error("Pool exhausted or timeout: {0}")]
+    /// Raised, when no connection could be obtained from the connection pool
+    #[error("pool exhausted or timeout: {0}")]
     PoolGetConnectionError(#[from] deadpool_lapin::PoolError),
-    #[error("Failure while interacting with rabbitmq: {0}")]
+    /// Raised, when there was an error while interacting with `RabbitMQ`
+    #[error("failure while interacting with rabbitmq: {0}")]
     RabbitMQInteractionError(#[from] lapin::Error),
 }
 
@@ -44,6 +55,11 @@ impl From<RabbitMQPublisherError> for JobSchedulerError {
 }
 
 impl RabbitMQPublisher {
+    /// Creates a new [`RabbitMQPublisher`] instance from a given connection url
+    /// and queue name.
+    ///
+    /// # Errors
+    /// Returns an error if the connection pool creation fails.
     pub fn new(connection_url: &str, queue_name: String) -> Result<Self, RabbitMQPublisherError> {
         let config = deadpool_lapin::Config {
             url: Some(connection_url.into()),
@@ -55,6 +71,16 @@ impl RabbitMQPublisher {
         Ok(Self { pool, queue_name })
     }
 
+    /// Declares the job queue that will be used by [`Self::publish_to_queue`].
+    ///
+    /// # Errors
+    /// Returns an error if
+    /// - getting a connection from the Pool fails
+    ///   ([`RabbitMQPublisherError::PoolGetConnectionError`])
+    /// - creating a new channel fails
+    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
+    /// - declaring the queue fails
+    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
     pub async fn setup_schema(&self) -> Result<(), RabbitMQPublisherError> {
         let connection = self.pool.get().await?;
 
@@ -74,6 +100,7 @@ impl RabbitMQPublisher {
         Ok(())
     }
 
+    /// Helper function returning the arguments needed for declaring the queue.
     fn quorum_args() -> FieldTable {
         let mut arguments = FieldTable::default();
         arguments.insert("x-queue-type".into(), LongString("quorum".into()));
@@ -81,8 +108,19 @@ impl RabbitMQPublisher {
         arguments
     }
 
+    /// Publishes a given [`Job`] to the specified queue (through
+    /// [`Self::new`]).
+    ///
+    /// # Errors
+    /// Returns an error if
+    /// - getting a connection from the Pool fails
+    ///   ([`RabbitMQPublisherError::PoolGetConnectionError`])
+    /// - creating a new channel fails
+    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
+    /// - publishing the message fails
+    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
     async fn publish_to_queue(&self, job: Job) -> Result<(), RabbitMQPublisherError> {
-        debug!("getting connection and channel for rabbitmq");
+        debug!("getting connection and channel for RabbitMQ");
         let connection = self.pool.get().await?;
         let channel = connection.create_channel().await?;
 
@@ -105,8 +143,9 @@ impl RabbitMQPublisher {
         Ok(())
     }
 
+    /// Closes the connection pool. Required for graceful shutdown.
     pub fn close(&self) {
-        info!("Closing RabbitMQ connection pool");
+        info!("closing RabbitMQ connection pool");
         self.pool.close();
     }
 }
@@ -115,7 +154,7 @@ impl RabbitMQPublisher {
 impl Publisher for RabbitMQPublisher {
     async fn publish(&self, job: Job) -> Result<(), JobSchedulerError> {
         Ok(self.publish_to_queue(job).await.map_err(|err| {
-            error!("RabbitMQ Error: {:?}", err);
+            error!("RabbitMQ error: {:?}", err);
             JobSchedulerError::from(err)
         })?)
     }

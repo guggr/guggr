@@ -5,5 +5,6 @@ use crate::core::domain::errors::JobSchedulerError;
 
 #[async_trait]
 pub trait Publisher: Send + Sync {
+    /// Publishes jobs via the specific adapter implementation.
     async fn publish(&self, job: Job) -> Result<(), JobSchedulerError>;
 }

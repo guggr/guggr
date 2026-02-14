@@ -1,11 +1,16 @@
 use thiserror::Error;
 
+/// Errors for the scheduler service
 #[derive(Debug, Error)]
 pub enum JobSchedulerError {
-    #[error("Database is currently unavailable: {0}")]
+    /// Raised when the database connection fails
+    #[error("database is currently unavailable: {0}")]
     DatabaseUnavailable(String),
-    #[error("Queue is currently unavailable: {0}")]
+    /// Raised when the `RabbitMQ` queue connection fails
+    #[error("queue is currently unavailable: {0}")]
     QueueUnavailable(String),
-    #[error("Internal storage error: {0}")]
+    /// Raised when an internal error occurs that does not involve connection
+    /// failures
+    #[error("internal storage error: {0}")]
     Internal(String),
 }

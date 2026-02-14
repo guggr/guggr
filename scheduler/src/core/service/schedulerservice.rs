@@ -9,16 +9,32 @@ use crate::core::{
     ports::{job_fetcher::JobFetcher, publisher::Publisher},
 };
 
+/// Service logic for fetching jobs and publishing them.
 pub struct SchedulerService {
     repo: Arc<dyn JobFetcher>,
     publisher: Arc<dyn Publisher>,
 }
 
 impl SchedulerService {
+    /// Creates a new [`SchedulerService`] instance using a given fetcher and
+    /// publisher.
     pub fn new(repo: Arc<dyn JobFetcher>, publisher: Arc<dyn Publisher>) -> Self {
         Self { repo, publisher }
     }
 
+    /// Runs the business logic for fetching jobs from the database and pushing
+    /// them to the database.
+    ///
+    /// # Errors
+    /// Returns an error if fetching the jobs from the database failed
+    ///
+    /// # Error Handling
+    /// Logs an error if
+    /// - a [`JobType::Unspecified`] is encountered
+    /// - publishing the job the job failed
+    ///
+    /// This does not stop the run from continuing, further jobs are published
+    /// even if an error was logged.
     pub async fn run(&self) -> Result<(), JobSchedulerError> {
         debug!("fetching jobs from db");
         let jobs = self.repo.fetch_jobs_batch().await?;

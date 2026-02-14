@@ -10,6 +10,8 @@ use crate::core::{
     service::schedulerservice::SchedulerService,
 };
 
+/// Struct for Ticker adapter. Holds its own task tracker for implementing
+/// graceful shutdown.
 pub struct SchedulerTicker {
     service: Arc<SchedulerService>,
     interval: Interval,
@@ -18,6 +20,8 @@ pub struct SchedulerTicker {
 }
 
 impl SchedulerTicker {
+    /// Creates a new [`SchedulerTicker`] for running the service. Requires a
+    /// shutdown token for graceful shutdown.
     #[must_use]
     pub fn new(
         service: Arc<SchedulerService>,
@@ -35,6 +39,11 @@ impl SchedulerTicker {
 
 #[async_trait]
 impl Ticker for SchedulerTicker {
+    /// Starts the ticker with the defined interval.
+    ///
+    /// - Spawns a new tokio task for running the service in the task pool for
+    ///   each tick.
+    /// - Handles graceful shutdown via the passed [`CancellationToken`].
     #[allow(clippy::ignored_unit_patterns)]
     async fn start(self) {
         let mut interval = self.interval;

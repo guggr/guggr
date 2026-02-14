@@ -4,11 +4,13 @@ use gen_proto_types::job::{
     v1::{Job, JobType},
 };
 
+/// Trait for converting Database types to protobuf types.
 pub trait FromDatabaseType<F> {
     fn from_database_type(value: F) -> Self;
 }
 
 impl FromDatabaseType<String> for JobType {
+    /// Maps job types stored in the database to string
     fn from_database_type(job_type_id: String) -> Self {
         match job_type_id.as_str() {
             "http" => Self::Http,
@@ -19,12 +21,14 @@ impl FromDatabaseType<String> for JobType {
 }
 
 impl FromDatabaseType<db_models::JobDetailsHttp> for HttpJobType {
+    /// Maps job details stored in the database to the protobuf model.
     fn from_database_type(value: db_models::JobDetailsHttp) -> Self {
         Self { url: value.url }
     }
 }
 
 impl FromDatabaseType<db_models::JobDetailsPing> for PingJobType {
+    /// Maps job details stored in the database to the protobuf model.
     fn from_database_type(value: db_models::JobDetailsPing) -> Self {
         Self { host: value.host }
     }
@@ -37,6 +41,7 @@ pub type DatabaseJobResult = (
 );
 
 pub trait JobFromDatabaseJobResult {
+    /// Maps job results stored in the database to the protobuf model.
     fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self;
 }
 

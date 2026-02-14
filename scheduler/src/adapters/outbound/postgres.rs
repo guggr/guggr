@@ -27,21 +27,17 @@ pub struct PostgresFetcher {
 }
 
 /// Errors for [`PostgresFetcher`]
-///
-/// - [`PostgresFetcherError::ConnectionError`] is raised, when the initial
-///   connection to the database failed, or the migrations could not be run. For
-///   more information see [`DbError`]
-/// - [`PostgresFetcherError::PoolGetConnectionError`] is raised, when no
-///   connection could be obtained from the connection pool
-/// - [`PostgresFetcherError::FetchJobsError`] is raised, when there was an
-///   error fetching the jobs for scheduling
 #[derive(Error, Debug)]
 pub enum PostgresFetcherError {
-    #[error("Database connection failed: {0}")]
+    /// Raised, when the initial connection to the database failed, or the
+    /// migrations could not be run. For more information see [`DbError`].
+    #[error("database connection failed: {0}")]
     ConnectionError(#[from] DbError),
-    #[error("Pool exhausted or timeout: {0}")]
+    /// Raised, when no connection could be obtained from the connection pool.
+    #[error("pool exhausted or timeout: {0}")]
     PoolGetConnectionError(#[from] diesel::r2d2::PoolError),
-    #[error("Failed to fetch jobs for scheduling: {0}")]
+    /// Raised, when there was an error fetching the jobs for scheduling.
+    #[error("failed to fetch jobs for scheduling: {0}")]
     FetchJobsError(#[from] diesel::result::Error),
 }
 
@@ -66,6 +62,9 @@ impl PostgresFetcher {
     /// url.
     ///
     /// Invokes the [`database_client::create_connection_pool`] method.
+    ///
+    /// # Errors
+    /// Returns an error if the connection pool creation failed.
     pub fn new(connection_url: &str) -> Result<Self, PostgresFetcherError> {
         let connection_pool = database_client::create_connection_pool(connection_url)?;
 
@@ -118,7 +117,7 @@ impl PostgresFetcher {
 impl JobFetcher for PostgresFetcher {
     async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobSchedulerError> {
         Ok(self.run_fetch_jobs_query().map_err(|err| {
-            error!("Database Error: {:?}", err);
+            error!("database error: {:?}", err);
             JobSchedulerError::from(err)
         })?)
     }
