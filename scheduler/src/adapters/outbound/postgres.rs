@@ -18,7 +18,7 @@ use thiserror::Error;
 use tracing::{debug, error};
 
 use crate::core::{
-    domain::{errors::JobSchedulerError, type_mapper::DatabaseJobResult},
+    domain::{errors::JobSchedulerError, type_mapper::DatabaseJob},
     ports::job_fetcher::JobFetcher,
 };
 
@@ -78,7 +78,7 @@ impl PostgresFetcher {
     ///
     /// Checks for unset [`last_scheduled`] field or where the [`run_every`]
     /// interval is exceeded.
-    fn run_fetch_jobs_query(&self) -> Result<Vec<DatabaseJobResult>, PostgresFetcherError> {
+    fn run_fetch_jobs_query(&self) -> Result<Vec<DatabaseJob>, PostgresFetcherError> {
         debug!("getting db connection");
         let mut conn = self.pool.get()?;
 
@@ -97,7 +97,7 @@ impl PostgresFetcher {
             .load(&mut conn)?;
 
         debug!("loading job details from db");
-        let db_jobs: Vec<DatabaseJobResult> = job::table
+        let db_jobs = job::table
             .filter(id.eq_any(&ids_to_lock))
             .left_join(job_details_http::table)
             .left_join(job_details_ping::table)
@@ -115,7 +115,7 @@ impl PostgresFetcher {
 
 #[async_trait]
 impl JobFetcher for PostgresFetcher {
-    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobSchedulerError> {
+    async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJob>, JobSchedulerError> {
         Ok(self.run_fetch_jobs_query().map_err(|err| {
             error!("database error: {:?}", err);
             JobSchedulerError::from(err)

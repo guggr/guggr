@@ -34,19 +34,19 @@ impl FromDatabaseType<db_models::JobDetailsPing> for PingJobType {
     }
 }
 
-pub type DatabaseJobResult = (
+pub type DatabaseJob = (
     db_models::Job,
     Option<db_models::JobDetailsHttp>,
     Option<db_models::JobDetailsPing>,
 );
 
-pub trait JobFromDatabaseJobResult {
+pub trait JobFromDatabaseJob {
     /// Maps job results stored in the database to the protobuf model.
-    fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self;
+    fn from_database_type(value: DatabaseJob, batch_id: String) -> Self;
 }
 
-impl JobFromDatabaseJobResult for Job {
-    fn from_database_type(value: DatabaseJobResult, batch_id: String) -> Self {
+impl JobFromDatabaseJob for Job {
+    fn from_database_type(value: DatabaseJob, batch_id: String) -> Self {
         Self {
             id: value.0.id,
             batch_id,

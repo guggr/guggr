@@ -5,7 +5,7 @@ use nanoid::nanoid;
 use tracing::{debug, error};
 
 use crate::core::{
-    domain::{errors::JobSchedulerError, type_mapper::JobFromDatabaseJobResult},
+    domain::{errors::JobSchedulerError, type_mapper::JobFromDatabaseJob},
     ports::{job_fetcher::JobFetcher, publisher::Publisher},
 };
 
@@ -88,9 +88,9 @@ mod tests {
     use diesel::data_types::PgInterval;
 
     use super::*;
-    use crate::{core::domain::type_mapper::DatabaseJobResult, telemetry::init_tracing};
+    use crate::{core::domain::type_mapper::DatabaseJob, telemetry::init_tracing};
 
-    fn mock_job() -> DatabaseJobResult {
+    fn mock_job() -> DatabaseJob {
         (
             Job {
                 id: "".to_owned(),
@@ -112,11 +112,11 @@ mod tests {
     }
 
     struct MockFetcher {
-        jobs: Mutex<Option<Vec<DatabaseJobResult>>>,
+        jobs: Mutex<Option<Vec<DatabaseJob>>>,
     }
 
     impl MockFetcher {
-        fn new(jobs: Vec<DatabaseJobResult>) -> Self {
+        fn new(jobs: Vec<DatabaseJob>) -> Self {
             Self {
                 jobs: Mutex::new(Some(jobs)),
             }
@@ -125,7 +125,7 @@ mod tests {
 
     #[async_trait]
     impl JobFetcher for MockFetcher {
-        async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJobResult>, JobSchedulerError> {
+        async fn fetch_jobs_batch(&self) -> Result<Vec<DatabaseJob>, JobSchedulerError> {
             let mut guard = self.jobs.lock().unwrap();
 
             // .take() returns Some(jobs) the first time, and None every time after
