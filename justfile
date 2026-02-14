@@ -64,7 +64,7 @@ fmt-rust:
 [group('rust')]
 [group('lint')]
 lint-rust:
-	cargo clippy
+	cargo clippy --all-features --all-targets -- -D warnings
 
 # Run nextest
 [group('rust')]
@@ -85,7 +85,7 @@ autoinherit:
 # Run clippy with pedantic settings
 [group('rust')]
 bashme:
-	cargo clippy -- -W clippy::nursery -W clippy::pedantic
+	cargo clippy --all-features --all-targets -- -W clippy::nursery -W clippy::pedantic
 
 # Compile the docs and open them
 [group('rust')]
