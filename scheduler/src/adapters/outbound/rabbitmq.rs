@@ -23,20 +23,16 @@ pub struct RabbitMQPublisher {
 }
 
 /// Errors for [`RabbitMQPublisher`]
-///
-/// - [`RabbitMQPublisher::CreateConnectionError`] is
-/// - [`RabbitMQPublisher::PoolGetConnectionError`] is
-/// - [`RabbitMQPublisher::RabbitMQInteractionError`] is
 #[derive(Error, Debug)]
 pub enum RabbitMQPublisherError {
-    /// Raised, the initial connection to `RabbitMQ` fails more information see
-    /// [`DbError`]
+    /// Raised, when the initial connection to `RabbitMQ` fails more information
+    /// see [`DbError`].
     #[error("RabbitMQ connection failed: {0}")]
     CreateConnectionError(#[from] deadpool_lapin::CreatePoolError),
-    /// Raised, when no connection could be obtained from the connection pool
+    /// Raised, when no connection could be obtained from the connection pool.
     #[error("pool exhausted or timeout: {0}")]
     PoolGetConnectionError(#[from] deadpool_lapin::PoolError),
-    /// Raised, when there was an error while interacting with `RabbitMQ`
+    /// Raised, when there was an error while interacting with `RabbitMQ`.
     #[error("failure while interacting with rabbitmq: {0}")]
     RabbitMQInteractionError(#[from] lapin::Error),
 }
