@@ -4,7 +4,10 @@ use gen_proto_types::job::v1::Job;
 use lapin::{
     self, BasicProperties,
     options::{BasicPublishOptions, QueueDeclareOptions},
-    types::{AMQPValue::LongString, FieldTable},
+    types::{
+        AMQPValue::{LongInt, LongString},
+        FieldTable,
+    },
 };
 use prost::Message;
 use thiserror::Error;
@@ -104,6 +107,7 @@ impl RabbitMQPublisher {
     fn quorum_args() -> FieldTable {
         let mut arguments = FieldTable::default();
         arguments.insert("x-queue-type".into(), LongString("quorum".into()));
+        arguments.insert("x-delivery-limit".into(), LongInt(5));
 
         arguments
     }
