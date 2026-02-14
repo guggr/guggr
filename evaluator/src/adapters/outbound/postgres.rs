@@ -162,10 +162,10 @@ impl PostgresAdapter {
 
         let mut conn = self.pool.get()?;
 
-        let reachable = if job_result.http.is_some() {
-            job_result.http.as_ref().unwrap().reachable
-        } else if job_result.ping.is_some() {
-            job_result.ping.as_ref().unwrap().reachable
+        let reachable = if let Some(http) = &job_result.http {
+            http.reachable
+        } else if let Some(ping) = &job_result.ping {
+            ping.reachable
         } else {
             return Err(PostgresAdapterError::NoResult(job_result.run_id.clone()));
         };
@@ -176,10 +176,10 @@ impl PostgresAdapter {
             .values(&job_run)
             .execute(&mut conn)?;
 
-        if job_result.http.is_some() {
-            self.write_job_result_http(&job_result.run_id, job_result.http.as_ref().unwrap())?;
-        } else if job_result.ping.is_some() {
-            self.write_job_result_ping(&job_result.run_id, job_result.ping.as_ref().unwrap())?;
+        if let Some(http) = &job_result.http {
+            self.write_job_result_http(&job_result.run_id, http)?;
+        } else if let Some(ping) = &job_result.ping {
+            self.write_job_result_ping(&job_result.run_id, ping)?;
         }
         Ok(())
     }
