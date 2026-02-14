@@ -54,7 +54,7 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
 ///
 /// Will return `Err` if the supplied byte slice is neither 4 nor 16 bytes
 /// long
-pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, &'static str> {
+pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, String> {
     match bytes.len() {
         4 => Ok(IpNet::from(IpAddr::V4(Ipv4Addr::new(
             bytes[0], bytes[1], bytes[2], bytes[3],
@@ -63,7 +63,7 @@ pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, &'static str> {
             let arr: [u8; 16] = bytes.try_into().map_err(|_| "bad ipv6 length")?;
             Ok(IpNet::from(IpAddr::V6(Ipv6Addr::from(arr))))
         }
-        _ => Err("ip bytes must be 4 (v4) or 16 (v6)"),
+        len => Err(format!("ip bytes must be 4 (v4) or 16 (v6), got: {len}")),
     }
 }
 
