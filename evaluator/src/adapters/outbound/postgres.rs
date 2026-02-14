@@ -19,7 +19,7 @@ use tracing::error;
 use crate::core::{
     domain::{
         errors::{JobEvaluatorError, TypeMapperError},
-        type_mappers::{FromProtobufType, FromProtobufTypeJobResult},
+        type_mapper::{FromProtobufType, FromProtobufTypeJobResult},
     },
     ports::database::DatabasePort,
 };

@@ -60,7 +60,7 @@ mod tests {
     use super::*;
     use crate::{
         adapters::outbound::postgres::PostgresAdapterError,
-        core::domain::type_mappers::{FromProtobufType, FromProtobufTypeJobResult},
+        core::domain::type_mapper::{FromProtobufType, FromProtobufTypeJobResult},
         telemetry::init_tracing,
     };
 

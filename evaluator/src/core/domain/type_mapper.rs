@@ -92,7 +92,7 @@ mod tests {
     use protocheck::types::Timestamp;
 
     use super::*;
-    use crate::core::domain::type_mappers::{FromProtobufType, FromProtobufTypeJobResult};
+    use crate::core::domain::type_mapper::{FromProtobufType, FromProtobufTypeJobResult};
 
     fn mock_ping_result(
         reachable: bool,
