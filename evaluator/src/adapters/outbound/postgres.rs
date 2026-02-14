@@ -16,9 +16,12 @@ use gen_proto_types::job_result::{
 use thiserror::Error;
 use tracing::error;
 
-use crate::{
-    core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort},
-    ipnet_from_bytes_host, naive_from_proto_ts, protocheck_duration_to_i32_millis,
+use crate::core::{
+    domain::{
+        errors::{JobEvaluatorError, TypeMapperError},
+        type_mappers::{FromProtobufType, FromProtobufTypeJobResult},
+    },
+    ports::database::DatabasePort,
 };
 
 pub struct PostgresAdapter {
@@ -48,7 +51,7 @@ pub enum PostgresAdapterError {
     UnknownJobId(String),
     #[error("No Result was attached to the JobResult: {0}")]
     NoResult(String),
-    #[error("Could not convert IP/Timestamp: {0}")]
+    #[error("Error while converting Timestamp/Duration/IP Address: {0}")]
     Conversion(String),
 }
 
@@ -62,6 +65,13 @@ impl From<PostgresAdapterError> for JobEvaluatorError {
 
             other => Self::Internal(other.to_string()),
         }
+    }
+}
+
+/// Allows for converting the TypeMapperError-specific errors to Postgres errors
+impl From<TypeMapperError> for PostgresAdapterError {
+    fn from(value: TypeMapperError) -> Self {
+        Self::Conversion(value.to_string())
     }
 }
 
@@ -105,17 +115,9 @@ impl PostgresAdapter {
         result: &HttpJobResult,
     ) -> Result<(), PostgresAdapterError> {
         use database_client::schema::job_result_http;
-        let mut conn = self.pool.get()?;
-
-        let result = JobResultHttp {
-            id: run_id.to_string(),
-            ip_address: ipnet_from_bytes_host(&result.ip_address)
-                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
-            status_code: result.status_code,
-            latency: protocheck_duration_to_i32_millis(result.latency.unwrap())
-                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
-            payload: result.payload.clone(),
-        };
+        let mut conn: diesel::r2d2::PooledConnection<ConnectionManager<PgConnection>> =
+            self.pool.get()?;
+        let result = JobResultHttp::from_protobuf_type(run_id, result)?;
         diesel::insert_into(job_result_http::table)
             .values(&result)
             .execute(&mut conn)?;
@@ -137,13 +139,7 @@ impl PostgresAdapter {
         use database_client::schema::job_result_ping;
         let mut conn = self.pool.get()?;
 
-        let result = JobResultPing {
-            id: run_id.to_string(),
-            ip_address: ipnet_from_bytes_host(result.ip_address.as_slice())
-                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
-            latency: protocheck_duration_to_i32_millis(result.latency.unwrap())
-                .map_err(|err| PostgresAdapterError::Conversion(err.to_string()))?,
-        };
+        let result = JobResultPing::from_protobuf_type(run_id, result)?;
         diesel::insert_into(job_result_ping::table)
             .values(&result)
             .execute(&mut conn)?;
@@ -176,14 +172,7 @@ impl PostgresAdapter {
             return Err(PostgresAdapterError::NoResult(job_result.run_id.clone()));
         };
 
-        let job_run = JobRun {
-            id: job_result.run_id.clone(),
-            job_id: job_result.id.clone(),
-            batch_id: job_result.batch_id.clone(),
-            triggered_notification: notified,
-            timestamp: naive_from_proto_ts(&job_result.timestamp.unwrap()).unwrap(),
-            reachable,
-        };
+        let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)?;
 
         diesel::insert_into(job_runs::table)
             .values(&job_run)
