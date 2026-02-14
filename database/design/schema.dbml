@@ -35,14 +35,29 @@ Table role [headercolor: #175e7a] {
 Table job_runs [headercolor: #175e7a] {
 	id text [ pk, not null, unique, note: 'Nano ID' ]
 	job_id text [ not null ]
+	batch_id text [ not null ]
 	timestamp timestamp [ not null ]
 	triggered_notification boolean [ not null ]
-	output text
+	reachable boolean [ not null ]
 }
 
 Table job_type [headercolor: #175e7a] {
 	id text [ pk, not null, unique ]
 	name text
+}
+
+Table job_result_ping [headercolor: #1ba406] {
+	id text [ pk, not null, unique ]
+	ip_address inet [ not null ]
+	latency integer [ not null ]
+}
+
+Table job_result_http [headercolor: #1ba406] {
+	id text [ pk, not null, unique ]
+	ip_address inet [ not null ]
+	status_code integer [ not null ]
+	latency integer [ not null ]
+	payload bytea [ not null ]
 }
 
 Ref fk_user_group_mapping_role_id_role {
@@ -57,8 +72,8 @@ Ref fk_user_group_mapping_user_id_user {
 	user_group_mapping.user_id > user.id [ delete: restrict, update: cascade ]
 }
 
-Ref fk_result_job_id_job {
-	result.job_id > job.id [ delete: cascade, update: cascade ]
+Ref fk_job_runs_job_id_job {
+	job_runs.job_id > job.id [ delete: cascade, update: cascade ]
 }
 
 Ref fk_job_group_id_group {
@@ -66,5 +81,13 @@ Ref fk_job_group_id_group {
 }
 
 Ref fk_job_job_type_id_job_type {
-	job.job_type_id > job_type.id [ delete: restrict, update: cascade ]
+	job.job_type_id > job_type.id [ delete: cascade, update: restrict ]
+}
+
+Ref fk_result_ping_id_job_runs {
+	job_result_ping.id - job_runs.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_result_http_id_job_runs {
+	job_result_http.id - job_runs.id [ delete: cascade, update: cascade ]
 }
