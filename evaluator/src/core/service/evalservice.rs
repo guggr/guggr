@@ -127,7 +127,7 @@ mod tests {
                 return Err(JobEvaluatorError::Internal(job_result.run_id.clone()));
             };
             let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)
-                .map_err(|err| PostgresAdapterError::from(err))?;
+                .map_err(PostgresAdapterError::from)?;
             *self.job_result.lock().unwrap() = Some(job_run);
             if job_result.http.is_some() {
                 self.write_job_result_http(&job_result.run_id, job_result.http.as_ref().unwrap())?;

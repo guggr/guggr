@@ -25,7 +25,7 @@ impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
         Ok(Self {
             id: run_id.to_string(),
             ip_address: ipnet_from_bytes_host(&value.ip_address)
-                .map_err(|err| TypeMapperError::IpAddress(err.to_string()))?,
+                .map_err(TypeMapperError::IpAddress)?,
             status_code: value.status_code,
             latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
                 .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
@@ -40,7 +40,7 @@ impl FromProtobufTypeJobResult<&PingJobResult> for db_models::JobResultPing {
         Ok(Self {
             id: run_id.to_string(),
             ip_address: ipnet_from_bytes_host(value.ip_address.as_slice())
-                .map_err(|err| TypeMapperError::IpAddress(err.to_string()))?,
+                .map_err(TypeMapperError::IpAddress)?,
             latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
                 .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
         })
@@ -84,7 +84,7 @@ impl FromProtobufType<&JobResult> for db_models::JobRun {
 #[cfg(test)]
 mod tests {
 
-    use std::{i64, net::Ipv4Addr, vec};
+    use std::{net::Ipv4Addr, vec};
 
     use database_client::models::{JobResultHttp, JobResultPing, JobRun};
     use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
