@@ -14,6 +14,9 @@ pub mod adapters;
 pub mod core;
 pub mod telemetry;
 
+/// # Errors
+///
+/// Exits after 5 pool creation tries with 10 seconds between each try
 pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
     let config = deadpool_lapin::Config {
         url: Some(connection_url.into()),
@@ -73,10 +76,10 @@ fn protocheck_duration_to_i32_millis(d: protocheck::types::Duration) -> Result<i
 
     let ms: i128 = secs.saturating_mul(1_000) + nanos / 1_000_000;
 
-    if ms > i128::from(i32::MAX) {
-        return Err("duration too large for i32 milliseconds");
+    if ms < i128::from(i32::MIN) {
+        return Err("duration too small for i32 milliseconds");
     }
-    Ok(ms as i32)
+    i32::try_from(ms).map_err(|_| "duration too large for i32 milliseconds")
 }
 
 fn naive_from_proto_ts(ts: &Timestamp) -> Option<NaiveDateTime> {

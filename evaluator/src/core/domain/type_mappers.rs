@@ -8,15 +8,19 @@ use crate::{
     core::domain::errors::TypeMapperError, ipnet_from_bytes_host, naive_from_proto_ts,
     protocheck_duration_to_i32_millis,
 };
-/// Trait for converting protobuf types to database types.
+/// Trait for converting protobuf [`JobResult`] sub-types to database types.
 pub trait FromProtobufTypeJobResult<F> {
+    /// # Errors
+    ///
+    /// Raises a [`TypeMapperError`] if the IP Address / Latency could not be
+    /// converted
     fn from_protobuf_type(run_id: &str, value: F) -> Result<Self, TypeMapperError>
     where
         Self: Sized;
 }
 
 impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
-    /// Maps protobuf `HttpJobResult` to its respective database model
+    /// Maps protobuf [`HttpJobResult`] to its respective database model
     fn from_protobuf_type(run_id: &str, value: &HttpJobResult) -> Result<Self, TypeMapperError> {
         Ok(Self {
             id: run_id.to_string(),
@@ -24,26 +28,30 @@ impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
                 .map_err(|err| TypeMapperError::IpAddress(err.to_string()))?,
             status_code: value.status_code,
             latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
-                .map_err(|err| TypeMapperError::Timestamp(err.to_string()))?,
+                .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
             payload: value.payload.clone(),
         })
     }
 }
 
 impl FromProtobufTypeJobResult<&PingJobResult> for db_models::JobResultPing {
-    //// Maps protobuf `PingJobResult` to its respective database model
+    /// Maps protobuf [`PingJobResult`] to its respective database model
     fn from_protobuf_type(run_id: &str, value: &PingJobResult) -> Result<Self, TypeMapperError> {
         Ok(Self {
             id: run_id.to_string(),
             ip_address: ipnet_from_bytes_host(value.ip_address.as_slice())
                 .map_err(|err| TypeMapperError::IpAddress(err.to_string()))?,
             latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
-                .map_err(|err| TypeMapperError::Timestamp(err.to_string()))?,
+                .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
         })
     }
 }
 
+/// Trait for converting the protobuf [`JobResult`] type to its database type.
 pub trait FromProtobufType<F> {
+    /// # Errors
+    ///
+    /// Raises a [`TypeMapperError`] if the timestamp could not be converted
     fn from_protobuf_type(
         notified: bool,
         reachable: bool,
@@ -54,7 +62,7 @@ pub trait FromProtobufType<F> {
 }
 
 impl FromProtobufType<&JobResult> for db_models::JobRun {
-    //// Maps protobuf `PingJobResult` to its respective database model
+    /// Maps protobuf [`JobResult`] to its respective database model
     fn from_protobuf_type(
         notified: bool,
         reachable: bool,

@@ -29,28 +29,26 @@ pub struct PostgresAdapter {
 }
 
 /// Errors for [`PostgresAdapter`]
-///
-/// - [`PostgresAdapterError::Connection`] is raised, when the initial
-///   connection to the database failed, or the migrations could not be run. For
-///   more information see [`DbError`]
-/// - [`PostgresAdapterError::Pool`] is raised, when no connection could be
-///   obtained from the connection pool
-/// - [`PostgresAdapterError::Result`] is raised, when there was an error while
-///   accessing the database
-/// - [`PostgresAdapterError::UnknownJobId`] is raised, when the supplied Job ID
-///   does not exist
 #[derive(Error, Debug)]
 pub enum PostgresAdapterError {
+    /// Raised, when the initial connection to the database failed, or the
+    /// migrations could not be run. For more information see [`DbError`]
     #[error("Database connection failed: {0}")]
     Connection(#[from] DbError),
+    /// Raised, when no connection could be obtained from the connection pool
     #[error("Pool exhausted or timeout: {0}")]
     Pool(#[from] diesel::r2d2::PoolError),
+    /// Raised, when there was an error while accessing the database
     #[error("Failed to interact with the database: {0}")]
     Result(#[from] diesel::result::Error),
+    /// Raised, when the supplied Job ID does not exist
     #[error("Unknown Job ID: {0}")]
     UnknownJobId(String),
+    /// Raised when no Result was attached to the [`JobResult`]
     #[error("No Result was attached to the JobResult: {0}")]
     NoResult(String),
+    /// Raised when a type of a [`JobResult`] could not be converted into a
+    /// Database model type
     #[error("Error while converting Timestamp/Duration/IP Address: {0}")]
     Conversion(String),
 }
@@ -78,7 +76,7 @@ impl From<TypeMapperError> for PostgresAdapterError {
 impl PostgresAdapter {
     /// # Errors
     ///
-    /// Will return `PostgresAdapterError` if no connection pool could be
+    /// Will return [`PostgresAdapterError`] if no connection pool could be
     /// created from the supplied database url
     pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
         Ok(Self {
@@ -88,7 +86,7 @@ impl PostgresAdapter {
 
     /// # Errors
     ///
-    /// Will return `PostgresAdapterError` if either
+    /// Will return [`PostgresAdapterError`] if either
     /// - no connection could be retrieved from the pool
     /// - no record for that `job_id` was found
     fn run_notification_enabled(&self, job_id: &str) -> Result<bool, PostgresAdapterError> {
@@ -104,7 +102,7 @@ impl PostgresAdapter {
     }
     /// # Errors
     ///
-    /// Will return `PostgresAdapterError` if either
+    /// Will return [`PostgresAdapterError`] if either
     /// - no connection could be retrieved from the pool
     /// - the latency could not be converted
     /// - the IP address could not be converted
@@ -126,7 +124,7 @@ impl PostgresAdapter {
     }
     /// # Errors
     ///
-    /// Will return `PostgresAdapterError` if either
+    /// Will return [`PostgresAdapterError`] if either
     /// - no connection could be retrieved from the pool
     /// - the latency could not be converted
     /// - the IP address could not be converted
@@ -149,11 +147,11 @@ impl PostgresAdapter {
 
     /// # Errors
     ///
-    /// Will return `PostgresAdapterError` if either
+    /// Will return [`PostgresAdapterError`] if either
     /// - no connection could be retrieved from the pool
     /// - the timestamp could not be converted
-    /// - the underlying `job_result` (`HttpJobResult` or `PingJobResult`) could
-    ///   not be processed
+    /// - the underlying `job_result` ([`HttpJobResult`] or [`PingJobResult`])
+    ///   could not be processed
     /// - the record could not be inserted into the database
     fn run_write_job_result(
         &self,

@@ -19,22 +19,16 @@ use crate::core::{
     service::evalservice::EvalService,
 };
 
-/// Errors for [`RabbitMQDriverError`]
-///
-/// - [`RabbitMQDriverError::JobResultDecode`] is raised when the `JobResult`
-///   message can't be decoded
-/// - [`RabbitMQDriverError::Connection`] is raised when the initial connection
-///   to rabbitmq failed
-/// - [`RabbitMQDriverError::Pool`] is raised, when no connection could be
-///   obtained from the pool
-/// - [`RabbitMQDriverError::Internal`] is raised when an
-///   [`JobEvaluatorError::Internal`] is raised
+/// Errors for [`RabbitMQDriver`]
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
+    /// Raised when the [`JobResult`] message can't be decoded
     #[error("error decoding job")]
     JobResultDecode(#[from] DecodeError),
+    /// Raised when the initial connection to rabbitmq failed
     #[error("connection error")]
     Connection(#[from] lapin::Error),
+    /// Raised, when no connection could be obtained from the pool
     #[error("get pool connection error")]
     Pool(#[from] deadpool_lapin::PoolError),
 }
@@ -65,7 +59,12 @@ impl RabbitMQDriver {
             queue_name,
         }
     }
-
+    /// # Errors
+    ///
+    /// Will return [`RabbitMQDriverError`] if:
+    /// - no connection could be retrieved from the pool
+    /// - the channel could not be created
+    /// - the queue could not be declared
     pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
         let connection = self.pool.get().await?;
 
@@ -99,8 +98,8 @@ impl RabbitMQDriver {
 
     /// # Errors
     ///
-    /// Will return `RabbitMQDriverError` if deliveries could not be `acked` or
-    /// `nacked`
+    /// Will return [`RabbitMQDriverError`] if deliveries could not be `acked`
+    /// or `nacked`
     pub async fn start(&self) -> Result<(), RabbitMQDriverError> {
         let connection = self.pool.get().await?;
 
@@ -157,6 +156,9 @@ impl RabbitMQDriver {
     }
 }
 
+/// # Errors
+///
+/// Will return [`RabbitMQDriverError`] if the delivery  could not be nacked
 async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, RabbitMQDriverError> {
     delivery
         .nack(BasicNackOptions {

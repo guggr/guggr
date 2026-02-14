@@ -1,25 +1,26 @@
 use thiserror::Error;
 
-/// Errors for [`JobEvaluatorError`]
-///
-/// - [`JobEvaluatorError::Unavailable`] is raised when either the database or
-///   rabbitmq is unavailable
-/// - [`JobEvaluatorError::Internal`] is raised when an issue occurred while
-///   processing a job
+/// Errors for the `EvalService`
 #[derive(Debug, Error)]
 pub enum JobEvaluatorError {
+    /// Raised when either the database or rabbitmq is unavailable
     #[error("Rabbitmq or postgres is currently unavailable")]
     Unavailable,
+    /// Raised when an issue occurred while processing a job
     #[error("Internal error: {0}")]
     Internal(String),
 }
 
+/// Errors for the typer mappers
 #[derive(Debug, Error)]
 pub enum TypeMapperError {
+    /// Raised when the Timestamp could not be converted
     #[error("Could not convert the supplied timestamp: {0}")]
     Timestamp(String),
+    /// Raised when the IP Address could not be converted
     #[error("Could not convert the supplied IP Address: {0}")]
     IpAddress(String),
+    /// Raised when the Latency could not be converted
     #[error("Could not convert the supplied Latency: {0}")]
     Latency(String),
 }
