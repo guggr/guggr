@@ -119,12 +119,10 @@ mod tests {
             job_result: &JobResult,
             notified: bool,
         ) -> Result<(), JobEvaluatorError> {
-            let reachable = if let Some(http) = &job_result.http {
-                http.reachable
-            } else if let Some(ping) = &job_result.ping {
-                ping.reachable
-            } else {
-                return Err(JobEvaluatorError::Internal(job_result.run_id.clone()));
+            let reachable = match (&job_result.http, &job_result.ping) {
+                (Some(http), _) => http.reachable,
+                (_, Some(ping)) => ping.reachable,
+                _ => return Err(JobEvaluatorError::Internal(job_result.run_id.clone())),
             };
             let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)
                 .map_err(PostgresAdapterError::from)?;
