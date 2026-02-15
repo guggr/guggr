@@ -73,7 +73,7 @@ impl From<TypeMapperError> for PostgresAdapterError {
 }
 
 impl PostgresAdapter {
-    /// Creates a new PostgresAdapter
+    /// Creates a new `PostgresAdapter`
     ///
     /// # Errors
     ///

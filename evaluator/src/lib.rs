@@ -14,7 +14,7 @@ pub mod adapters;
 pub mod core;
 pub mod telemetry;
 
-/// Creates a new RabbitMQ Connection Pool
+/// Creates a new `RabbitMQ` Connection Pool
 ///
 /// # Errors
 ///
@@ -36,10 +36,9 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> 
             Err(e) => {
                 retry_count += 1;
                 if retry_count > 5 {
-                    error!("error creating rabbitmq pool after 5 retries: {}", e);
+                    error!("error creating rabbitmq pool after 5 retries: {e}");
                     return Err(format!(
-                        "Could not create rabbitmq pool after 5 retries {}",
-                        e
+                        "Could not create rabbitmq pool after 5 retries {e}"
                     ));
                 }
 
@@ -55,7 +54,7 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> 
     Ok(pool)
 }
 
-/// Converts a byte vector to an IpNet IP address
+/// Converts a byte vector to an `IpNet` IP address
 ///
 /// # Errors
 ///
@@ -92,7 +91,7 @@ fn protocheck_duration_to_i32_millis(d: protocheck::types::Duration) -> Result<i
 }
 
 fn naive_from_proto_ts(ts: &Timestamp) -> Result<NaiveDateTime, String> {
-    Ok(DateTime::from_timestamp(ts.seconds, ts.nanos as u32)
+    DateTime::from_timestamp(ts.seconds, ts.nanos.cast_unsigned())
         .map(|dt| dt.naive_local())
-        .ok_or_else(|| format!("Could not create a NaiveDateTime from {}", ts))?)
+        .ok_or_else(|| format!("Could not create a NaiveDateTime from {ts}"))
 }

@@ -99,7 +99,7 @@ impl RabbitMQDriver {
 
         args
     }
-    /// Starts the RabbitMQ consumption and evaluation of retrieved jobs
+    /// Starts the `RabbitMQ` consumption and evaluation of retrieved jobs
     ///
     /// # Errors
     ///

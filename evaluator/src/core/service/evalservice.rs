@@ -20,7 +20,7 @@ impl EvalService {
     pub fn new(postgres_adapter: Arc<dyn StoragePort>) -> Self {
         Self { postgres_adapter }
     }
-    /// Evaluates a protobuf JobResult, conditionally notifies and dumps the
+    /// Evaluates a protobuf `JobResult`, conditionally notifies and dumps the
     /// Result into the database
     ///
     /// # Errors
@@ -54,7 +54,7 @@ mod tests {
     use std::{net::Ipv4Addr, sync::Mutex, vec};
 
     use async_trait::async_trait;
-    use database_client::models::{Job, JobResultHttp, JobResultPing, JobRun};
+    use database_client::models::{JobResultHttp, JobResultPing, JobRun};
     use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
     use ipnet::Ipv4Net;
     use protocheck::types::Timestamp;

@@ -101,7 +101,7 @@ impl FromProtobufType<&JobResult> for db_models::JobRun {
                     TypeMapperError::Timestamp("timestamp is missing".to_string())
                 })?,
             )
-            .map_err(|e| TypeMapperError::Timestamp(e))?,
+            .map_err(TypeMapperError::Timestamp)?,
             reachable,
         })
     }
