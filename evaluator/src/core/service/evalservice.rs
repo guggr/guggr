@@ -17,7 +17,7 @@ impl Clone for EvalService {
 }
 
 impl EvalService {
-    pub fn new(postgres_adapter: Arc<dyn DatabasePort + Send + Sync>) -> Self {
+    pub fn new(postgres_adapter: Arc<dyn DatabasePort>) -> Self {
         Self { postgres_adapter }
     }
     /// Evaluates a protobuf JobResult, conditionally notifies and dumps the
