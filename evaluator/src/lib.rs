@@ -14,6 +14,8 @@ pub mod adapters;
 pub mod core;
 pub mod telemetry;
 
+/// Creates a new RabbitMQ Connection Pool
+///
 /// # Errors
 ///
 /// Exits after 5 pool creation tries with 10 seconds between each try
@@ -53,6 +55,8 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> 
     Ok(pool)
 }
 
+/// Converts a byte vector to an IpNet IP address
+///
 /// # Errors
 ///
 /// Will return `Err` if the supplied byte slice is neither 4 nor 16 bytes
@@ -70,6 +74,8 @@ pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, String> {
     }
 }
 
+/// Converts a protocheck Duration to an i32
+///
 /// # Errors
 ///
 /// Will return `Err` if the supplied timestamp is larger than an i32

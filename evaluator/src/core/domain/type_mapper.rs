@@ -21,6 +21,11 @@ pub trait FromProtobufTypeJobResult<F> {
 
 impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
     /// Maps protobuf [`HttpJobResult`] to its respective database model
+    ///
+    /// # Errors
+    ///
+    /// Raises a [`TypeMapperError`] if the IP Address / Latency could not be
+    /// converted
     fn from_protobuf_type(run_id: &str, value: &HttpJobResult) -> Result<Self, TypeMapperError> {
         Ok(Self {
             id: run_id.to_string(),
@@ -36,6 +41,11 @@ impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
 
 impl FromProtobufTypeJobResult<&PingJobResult> for db_models::JobResultPing {
     /// Maps protobuf [`PingJobResult`] to its respective database model
+    ///
+    /// # Errors
+    ///
+    /// Raises a [`TypeMapperError`] if the IP Address / Latency could not be
+    /// converted
     fn from_protobuf_type(run_id: &str, value: &PingJobResult) -> Result<Self, TypeMapperError> {
         Ok(Self {
             id: run_id.to_string(),
@@ -63,6 +73,11 @@ pub trait FromProtobufType<F> {
 
 impl FromProtobufType<&JobResult> for db_models::JobRun {
     /// Maps protobuf [`JobResult`] to its respective database model
+    ///
+    /// # Errors
+    ///
+    /// Raises a [`TypeMapperError`] if the IP Address / Latency could not be
+    /// converted
     fn from_protobuf_type(
         notified: bool,
         reachable: bool,

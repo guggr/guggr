@@ -20,7 +20,9 @@ impl EvalService {
     pub fn new(postgres_adapter: Arc<dyn DatabasePort + Send + Sync>) -> Self {
         Self { postgres_adapter }
     }
-
+    /// Evaluates a protobuf JobResult, conditionally notifies and dumps the
+    /// Result into the database
+    ///
     /// # Errors
     ///
     /// Will return `Err` if the `notification` setting could not be

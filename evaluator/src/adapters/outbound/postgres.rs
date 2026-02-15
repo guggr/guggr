@@ -73,6 +73,8 @@ impl From<TypeMapperError> for PostgresAdapterError {
 }
 
 impl PostgresAdapter {
+    /// Creates a new PostgresAdapter
+    ///
     /// # Errors
     ///
     /// Will return [`PostgresAdapterError`] if no connection pool could be
@@ -83,6 +85,8 @@ impl PostgresAdapter {
         })
     }
 
+    /// Checks if the notification bool is enabled for a given job
+    ///
     /// # Errors
     ///
     /// Will return [`PostgresAdapterError`] if either
@@ -99,6 +103,9 @@ impl PostgresAdapter {
             None => Err(PostgresAdapterError::UnknownJobId(job_id.to_string())),
         }
     }
+
+    /// Writes a given HTTP Job Result into the Database
+    ///
     /// # Errors
     ///
     /// Will return [`PostgresAdapterError`] if either
@@ -119,6 +126,9 @@ impl PostgresAdapter {
 
         Ok(())
     }
+
+    /// Writes a given Ping Job Result into the Database
+    ///
     /// # Errors
     ///
     /// Will return [`PostgresAdapterError`] if either
@@ -141,6 +151,8 @@ impl PostgresAdapter {
         Ok(())
     }
 
+    /// Writes a given Job Result into the Database
+    ///
     /// # Errors
     ///
     /// Will return [`PostgresAdapterError`] if either

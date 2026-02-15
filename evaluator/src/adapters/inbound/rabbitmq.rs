@@ -60,6 +60,9 @@ impl RabbitMQDriver {
             queue_name,
         }
     }
+
+    /// Declares the used queue
+    ///
     /// # Errors
     ///
     /// Will return [`RabbitMQDriverError`] if:
@@ -96,7 +99,8 @@ impl RabbitMQDriver {
 
         args
     }
-
+    /// Starts the RabbitMQ consumption and evaluation of retrieved jobs
+    ///
     /// # Errors
     ///
     /// Will return [`RabbitMQDriverError`] if deliveries could not be `acked`
@@ -156,7 +160,9 @@ impl RabbitMQDriver {
         }
     }
 }
-
+/// Sends a Negative Acknowledgment (NACK) and conditionally requeues the
+/// message
+///
 /// # Errors
 ///
 /// Will return [`RabbitMQDriverError`] if the delivery  could not be nacked
