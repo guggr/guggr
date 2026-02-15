@@ -60,15 +60,14 @@ async fn main() -> Result<()> {
         }
         _ = tokio::signal::ctrl_c() => {
             info!("received ctrl-c signal. exiting evaluator");
-            rabbitmq_pool.close();
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
 
         _ = sigterm.recv() => {
             info!("received SIGTERM, exiting evaluator");
-            rabbitmq_pool.close();
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
     }
+    rabbitmq_pool.close();
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
     Ok(())
 }
