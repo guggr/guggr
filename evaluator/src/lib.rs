@@ -91,6 +91,8 @@ fn protocheck_duration_to_i32_millis(d: protocheck::types::Duration) -> Result<i
     i32::try_from(ms).map_err(|_| "duration too large for i32 milliseconds")
 }
 
-fn naive_from_proto_ts(ts: &Timestamp) -> Option<NaiveDateTime> {
-    DateTime::from_timestamp(ts.seconds, ts.nanos as u32).map(|dt| dt.naive_local())
+fn naive_from_proto_ts(ts: &Timestamp) -> Result<NaiveDateTime, String> {
+    Ok(DateTime::from_timestamp(ts.seconds, ts.nanos as u32)
+        .map(|dt| dt.naive_local())
+        .ok_or_else(|| format!("Could not create a NaiveDateTime from {}", ts))?)
 }

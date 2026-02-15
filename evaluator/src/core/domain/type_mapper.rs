@@ -32,8 +32,12 @@ impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
             ip_address: ipnet_from_bytes_host(&value.ip_address)
                 .map_err(TypeMapperError::IpAddress)?,
             status_code: value.status_code,
-            latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
-                .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
+            latency: protocheck_duration_to_i32_millis(
+                value
+                    .latency
+                    .ok_or_else(|| TypeMapperError::Latency("latency is missing".to_string()))?,
+            )
+            .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
             payload: value.payload.clone(),
         })
     }
@@ -51,8 +55,12 @@ impl FromProtobufTypeJobResult<&PingJobResult> for db_models::JobResultPing {
             id: run_id.to_string(),
             ip_address: ipnet_from_bytes_host(value.ip_address.as_slice())
                 .map_err(TypeMapperError::IpAddress)?,
-            latency: protocheck_duration_to_i32_millis(value.latency.unwrap())
-                .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
+            latency: protocheck_duration_to_i32_millis(
+                value
+                    .latency
+                    .ok_or_else(|| TypeMapperError::Latency("latency is missing".to_string()))?,
+            )
+            .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
         })
     }
 }
@@ -88,9 +96,12 @@ impl FromProtobufType<&JobResult> for db_models::JobRun {
             job_id: value.id.clone(),
             batch_id: value.batch_id.clone(),
             triggered_notification: notified,
-            // there is always a timestamp so it should be safe to unwrap
-            timestamp: naive_from_proto_ts(&value.timestamp.unwrap())
-                .ok_or_else(|| TypeMapperError::Timestamp(value.timestamp.unwrap().to_string()))?,
+            timestamp: naive_from_proto_ts(
+                &value.timestamp.ok_or_else(|| {
+                    TypeMapperError::Timestamp("timestamp is missing".to_string())
+                })?,
+            )
+            .map_err(|e| TypeMapperError::Timestamp(e))?,
             reachable,
         })
     }
@@ -193,7 +204,9 @@ mod tests {
         let err = JobRun::from_protobuf_type(false, false, &job).unwrap_err();
         assert_eq!(
             err,
-            TypeMapperError::Timestamp("+292277026596-12-04T15:30:07Z".to_string())
+            TypeMapperError::Timestamp(
+                "Could not create a NaiveDateTime from +292277026596-12-04T15:30:07Z".to_string()
+            )
         )
     }
 
