@@ -15,7 +15,7 @@ use thiserror::Error;
 use tracing::{debug, error, info};
 
 use crate::core::{
-    domain::errors::JobEvaluatorError, ports::rabbitmq_driver::RabbitMQDriverPort,
+    domain::errors::JobEvaluatorError, ports::message_consumer::MessageConsumerPort,
     service::evalservice::EvalService,
 };
 
@@ -171,7 +171,7 @@ async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, Rabbi
 }
 
 #[async_trait]
-impl RabbitMQDriverPort for RabbitMQDriver {
+impl MessageConsumerPort for RabbitMQDriver {
     async fn setup(&self) -> Result<(), JobEvaluatorError> {
         self.setup_schema().await.map_err(|err| {
             error!("RabbitMQDriver Error: {:?}", err);

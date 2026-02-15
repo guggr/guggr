@@ -1,2 +1,2 @@
 pub mod database;
-pub mod rabbitmq_driver;
+pub mod message_consumer;
