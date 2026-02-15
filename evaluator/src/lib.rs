@@ -17,7 +17,7 @@ pub mod telemetry;
 /// # Errors
 ///
 /// Exits after 5 pool creation tries with 10 seconds between each try
-pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
+pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> {
     let config = deadpool_lapin::Config {
         url: Some(connection_url.into()),
         ..Default::default()
@@ -35,7 +35,10 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, ()> {
                 retry_count += 1;
                 if retry_count > 5 {
                     error!("error creating rabbitmq pool after 5 retries: {}", e);
-                    std::process::exit(1);
+                    return Err(format!(
+                        "Could not create rabbitmq pool after 5 retries {}",
+                        e
+                    ));
                 }
 
                 warn!(
