@@ -139,9 +139,8 @@ mod tests {
 
         let err = JobResultPing::from_protobuf_type("abc", &ping_job).unwrap_err();
         assert_eq!(
-            err.to_string(),
+            err,
             TypeMapperError::IpAddress("ip bytes must be 4 (v4) or 16 (v6), got: 3".to_string())
-                .to_string()
         );
     }
 
@@ -155,9 +154,8 @@ mod tests {
 
         let err = JobResultPing::from_protobuf_type("abc", &ping_job).unwrap_err();
         assert_eq!(
-            err.to_string(),
+            err,
             TypeMapperError::Latency("duration too large for i32 milliseconds".to_string())
-                .to_string()
         );
     }
 
@@ -179,8 +177,8 @@ mod tests {
 
         let err = JobRun::from_protobuf_type(false, false, &job).unwrap_err();
         assert_eq!(
-            err.to_string(),
-            TypeMapperError::Timestamp("+292277026596-12-04T15:30:07Z".to_string()).to_string()
+            err,
+            TypeMapperError::Timestamp("+292277026596-12-04T15:30:07Z".to_string())
         )
     }
 

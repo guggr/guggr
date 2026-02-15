@@ -194,10 +194,7 @@ mod tests {
             },
         );
         let err = service.evaluate_job_result(&job).await.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            JobEvaluatorError::Internal("bogus".to_string()).to_string()
-        )
+        assert_eq!(err, JobEvaluatorError::Internal("bogus".to_string()))
     }
 
     #[tokio::test]
