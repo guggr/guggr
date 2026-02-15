@@ -37,7 +37,8 @@ pub enum RabbitMQDriverError {
 impl From<RabbitMQDriverError> for JobEvaluatorError {
     fn from(value: RabbitMQDriverError) -> Self {
         match value {
-            RabbitMQDriverError::Connection(_) | RabbitMQDriverError::Pool(_) => Self::Unavailable,
+            RabbitMQDriverError::Connection(e) => Self::Unavailable(e.to_string()),
+            RabbitMQDriverError::Pool(e) => Self::Unavailable(e.to_string()),
 
             other => Self::Internal(other.to_string()),
         }
@@ -136,10 +137,10 @@ impl RabbitMQDriver {
                                     error!("evaluating job {} failed: {}", &job_result.id, e);
                                     nack_delivery(&delivery, false).await?;
                                 }
-                                JobEvaluatorError::Unavailable => {
+                                JobEvaluatorError::Unavailable(e) => {
                                     error!(
-                                        "evaluating job {} failed because no connection to the database could be made",
-                                        &job_result.id
+                                        "evaluating job {} failed because no connection to the database could be made: {}",
+                                        &job_result.id, e
                                     );
                                     nack_delivery(&delivery, true).await?;
                                 }

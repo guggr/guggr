@@ -57,9 +57,8 @@ pub enum PostgresAdapterError {
 impl From<PostgresAdapterError> for JobEvaluatorError {
     fn from(value: PostgresAdapterError) -> Self {
         match value {
-            PostgresAdapterError::Connection(_) | PostgresAdapterError::Pool(_) => {
-                Self::Unavailable
-            }
+            PostgresAdapterError::Connection(e) => Self::Unavailable(e.to_string()),
+            PostgresAdapterError::Pool(e) => Self::Unavailable(e.to_string()),
 
             other => Self::Internal(other.to_string()),
         }

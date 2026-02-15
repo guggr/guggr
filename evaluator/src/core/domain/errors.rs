@@ -4,8 +4,8 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum JobEvaluatorError {
     /// Raised when either the database or rabbitmq is unavailable
-    #[error("Rabbitmq or postgres is currently unavailable")]
-    Unavailable,
+    #[error("Database/RabbitMQ is currently unavailable: {0}")]
+    Unavailable(String),
     /// Raised when an issue occurred while processing a job
     #[error("Internal error: {0}")]
     Internal(String),
