@@ -5,7 +5,7 @@ use gen_proto_types::job_result::v1::JobResult;
 use crate::core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort};
 
 pub struct EvalService {
-    postgres_adapter: Arc<dyn DatabasePort + Send + Sync>,
+    postgres_adapter: Arc<dyn DatabasePort>,
 }
 
 impl Clone for EvalService {
