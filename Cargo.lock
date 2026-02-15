@@ -20,7 +20,7 @@ dependencies = [
  "async-trait",
  "config",
  "deadpool-lapin",
- "futures-lite",
+ "futures-util",
  "gen-proto-types",
  "hostname",
  "httpmock",

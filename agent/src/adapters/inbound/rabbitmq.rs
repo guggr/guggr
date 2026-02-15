@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use agent::generate_run_id;
 use deadpool_lapin::Pool;
-use futures_lite::StreamExt;
+use futures_util::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
     message::Delivery,
@@ -12,9 +14,10 @@ use lapin::{
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
+use tokio::sync::{Semaphore, mpsc};
 use tracing::{error, info};
 
-use crate::core::service::jobservice::{JobService, JobServiceError};
+use crate::core::service::jobservice::{AgentError, JobService, JobServiceError};
 
 #[derive(Debug, Error)]
 pub enum RabbitMQDriverError {
@@ -89,21 +92,51 @@ impl RabbitMQDriver {
             )
             .await?;
 
+        // Async limitations
+        let (tx, mut rx) = mpsc::channel(50);
+        // Limit to 20 tasks simultaneously
+        let semaphore = Arc::new(Semaphore::new(20));
+
         info!("starting consume");
 
         loop {
-            if let Some(delivery_result) = consumer.next().await {
-                let delivery = delivery_result?;
-                let service = self.service.clone();
-                let run_id = generate_run_id();
-                tokio::spawn(async move {
-                    process_delivery(delivery, service, run_id).await?;
+            tokio::select! {
+                // Read messages, waits if semaphore is full
+                permit = semaphore.clone().acquire_owned() => {
+                    let permit = permit?;
 
-                    Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-                })
-                .await??;
+                    if let Some(delivery_result) = consumer.next().await {
+                        let delivery = delivery_result?;
+                        let service = self.service.clone();
+                        let run_id = generate_run_id();
+
+                        let tx_clone = tx.clone();
+
+                        tokio::spawn(async move {
+
+                            // move into task, is freed when dropped at the end of the task
+                            let _permit = permit;
+
+                            if let Err(e) = process_delivery(delivery, service, run_id).await {
+                                // Send error to main task
+                                let _ = tx_clone.send(e).await;
+                            }
+                        });
+                    } else {
+                        break;
+                    }
+                }
+                // Collect errors
+                Some(err) = rx.recv() => {
+                    if err.downcast_ref::<AgentError>().is_some() {
+                        return Err(err)
+                    }
+                    error!("error happened while processing delivery: {}", err);
+                }
+
             }
         }
+        Ok(())
     }
 }
 
