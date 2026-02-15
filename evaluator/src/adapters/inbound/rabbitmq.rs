@@ -12,7 +12,7 @@ use lapin::{
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use crate::core::{
     domain::errors::JobEvaluatorError, ports::rabbitmq_driver::RabbitMQDriverPort,
@@ -126,10 +126,10 @@ impl RabbitMQDriver {
                 let service = self.service.clone();
                 match JobResult::decode(&delivery.data[..]) {
                     Ok(job_result) => {
-                        info!("received job: {:?}", &job_result);
+                        debug!("received job: {:?}", &job_result);
                         match service.evaluate_job_result(&job_result).await {
                             Ok(()) => {
-                                info!("successfully executed job with id {}", &job_result.id);
+                                debug!("successfully executed job with id {}", &job_result.id);
                                 delivery.ack(BasicAckOptions { multiple: false }).await?;
                             }
                             Err(error) => match error {
