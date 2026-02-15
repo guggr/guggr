@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use database_client::{
     DbError, create_connection_pool,
     models::{Job, JobResultHttp, JobResultPing, JobRun},
-    schema::job::id,
+    schema::{job::id, job_result_http, job_result_ping, job_runs},
 };
 use diesel::{
     PgConnection,
@@ -111,9 +111,7 @@ impl PostgresAdapter {
         run_id: &str,
         result: &HttpJobResult,
     ) -> Result<(), PostgresAdapterError> {
-        use database_client::schema::job_result_http;
-        let mut conn: diesel::r2d2::PooledConnection<ConnectionManager<PgConnection>> =
-            self.pool.get()?;
+        let mut conn = self.pool.get()?;
         let result = JobResultHttp::from_protobuf_type(run_id, result)?;
         diesel::insert_into(job_result_http::table)
             .values(&result)
@@ -133,7 +131,6 @@ impl PostgresAdapter {
         run_id: &str,
         result: &PingJobResult,
     ) -> Result<(), PostgresAdapterError> {
-        use database_client::schema::job_result_ping;
         let mut conn = self.pool.get()?;
 
         let result = JobResultPing::from_protobuf_type(run_id, result)?;
@@ -157,8 +154,6 @@ impl PostgresAdapter {
         job_result: &JobResult,
         notified: bool,
     ) -> Result<(), PostgresAdapterError> {
-        use database_client::schema::job_runs;
-
         let mut conn = self.pool.get()?;
 
         let reachable = if let Some(http) = &job_result.http {
