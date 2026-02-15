@@ -39,7 +39,13 @@ impl RabbitMQPublisher {
         Self { pool, queue_name }
     }
 
-    pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
+    /// Sets up the `RabbitMQ` queue for publishing job results.
+    ///
+    /// # Errors
+    /// Raises an [`RabbitMQDriverError`] if there is either a problem with
+    /// acquiring a connection from the pool, creating a channel on the
+    /// connection or declaring the queue.
+    pub async fn setup_queue(&self) -> Result<(), RabbitMQDriverError> {
         let connection = self.pool.get().await?;
 
         let channel = connection.create_channel().await?;
@@ -73,6 +79,13 @@ impl RabbitMQPublisher {
 
 #[async_trait]
 impl PublisherPort for RabbitMQPublisher {
+    /// Publishes the given [`JobResult`] to the corresponding `RabbitMQ` queue.
+    ///
+    /// # Errors
+    /// Raises a [`JobServiceError`] when there is a problem with
+    /// - getting a connection from the `RabbitMQ` pool
+    /// - creating a channel on the `RabbitMQ` connection
+    /// - publishing the result to the `RabbitMQ` queue
     async fn publish_result(&self, job_result: &JobResult) -> Result<(), JobServiceError> {
         let encoded_job = job_result.encode_to_vec();
 

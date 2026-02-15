@@ -44,7 +44,13 @@ impl RabbitMQDriver {
         }
     }
 
-    pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
+    /// Sets up the `RabbitMQ` queue for reading jobs.
+    ///
+    /// # Errors
+    /// Raises an [`RabbitMQDriverError`] if there is either a problem with
+    /// acquiring a connection from the pool, creating a channel on the
+    /// connection or declaring the queue.
+    pub async fn setup_queues(&self) -> Result<(), RabbitMQDriverError> {
         let connection = self.pool.get().await?;
 
         let channel = connection.create_channel().await?;
@@ -75,6 +81,17 @@ impl RabbitMQDriver {
         args
     }
 
+    /// Starts consuming the jobs from the `RabbitMQ` job queue and processing
+    /// them.
+    ///
+    /// # Errors
+    /// Raises an error if there was a problem with
+    /// - retrieving a connection from the `RabbitMQ` pool
+    /// - with creating a channel
+    /// - with creating a consumer on the channel
+    /// - owning a permit of the Semaphore limiting the concurrent tasks
+    /// - the received delivery
+    /// - processing the delivery
     pub async fn start(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let connection = self.pool.get().await?;
 
@@ -140,6 +157,14 @@ impl RabbitMQDriver {
     }
 }
 
+/// Decodes a given delivery and hands the job over to the [`JobService`] to
+/// process the job.
+///
+/// # Errors
+/// Raises an error if there was a problem with
+/// - decoding the delivery into a job [`Job`]
+/// - The processing of the job throws an error. For more information see
+///   [`JobService::process_job`]
 #[tracing::instrument(skip(delivery, service), fields(run_id = %run_id))]
 async fn process_delivery(
     delivery: Delivery,
@@ -180,6 +205,11 @@ async fn process_delivery(
     }
 }
 
+/// 'Nacks' a delivery
+///
+/// # Errors
+/// Raises an [`RabbitMQError`] when there is a problem with the `RabbitMQ`
+/// connection.
 async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, RabbitMQDriverError> {
     delivery
         .nack(BasicNackOptions {
