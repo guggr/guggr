@@ -52,7 +52,7 @@ mod tests {
     use std::{net::Ipv4Addr, sync::Mutex, vec};
 
     use async_trait::async_trait;
-    use database_client::models::{JobResultHttp, JobResultPing, JobRun};
+    use database_client::models::{Job, JobResultHttp, JobResultPing, JobRun};
     use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
     use ipnet::Ipv4Net;
     use protocheck::types::Timestamp;
@@ -244,6 +244,25 @@ mod tests {
         job.ping = Some(ping_job);
         assert!(service.evaluate_job_result(&job).await.is_ok());
         assert_eq!(*mock_for_assert.notified.lock().unwrap(), Some(false));
+    }
+
+    #[tokio::test]
+    async fn empty_job() {
+        init();
+
+        let mock_adapter = Arc::from(MockDatabase::new());
+
+        let service = EvalService::new(mock_adapter);
+        let job = mock_result(
+            "enabled".to_string(),
+            Timestamp {
+                seconds: 0,
+                nanos: 0,
+            },
+        );
+
+        let err = service.evaluate_job_result(&job).await.unwrap_err();
+        assert_eq!(err, JobEvaluatorError::Internal("abcd".to_string()));
     }
 
     #[tokio::test]
