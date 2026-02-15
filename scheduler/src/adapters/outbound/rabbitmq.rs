@@ -26,7 +26,7 @@ pub struct RabbitMQPublisher {
 #[derive(Error, Debug)]
 pub enum RabbitMQPublisherError {
     /// Raised, when the initial connection to `RabbitMQ` fails more information
-    /// see [`DbError`].
+    /// see [`deadpool_lapin::CreatePoolError`].
     #[error("RabbitMQ connection failed: {0}")]
     CreateConnectionError(#[from] deadpool_lapin::CreatePoolError),
     /// Raised, when no connection could be obtained from the connection pool.

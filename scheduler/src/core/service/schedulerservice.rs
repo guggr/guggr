@@ -31,7 +31,7 @@ impl SchedulerService {
     /// # Error Handling
     /// Logs an error if
     /// - a [`JobType::Unspecified`] is encountered
-    /// - publishing the job the job failed
+    /// - publishing the job that failed
     ///
     /// This does not stop the run from continuing, further jobs are published
     /// even if an error was logged.
