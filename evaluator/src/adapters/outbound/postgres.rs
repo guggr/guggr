@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use database_client::{
     DbError, create_connection_pool,
     models::{Job, JobResultHttp, JobResultPing, JobRun},
-    schema::{job::id, job_result_http, job_result_ping, job_runs},
+    schema::{
+        job::{dsl::job, id},
+        job_result_http, job_result_ping, job_runs,
+    },
 };
 use diesel::{
     PgConnection,
@@ -93,8 +96,6 @@ impl PostgresAdapter {
     /// - no connection could be retrieved from the pool
     /// - no record for that `job_id` was found
     fn run_notification_enabled(&self, job_id: &str) -> Result<bool, PostgresAdapterError> {
-        use database_client::schema::job::dsl::job;
-
         let mut conn = self.pool.get()?;
 
         let record: Option<Job> = job.filter(id.eq(job_id)).first(&mut conn).optional()?;
