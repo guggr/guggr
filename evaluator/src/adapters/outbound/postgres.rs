@@ -21,7 +21,7 @@ use crate::core::{
         errors::{JobEvaluatorError, TypeMapperError},
         type_mapper::{FromProtobufType, FromProtobufTypeJobResult},
     },
-    ports::database::DatabasePort,
+    ports::storage::StoragePort,
 };
 
 pub struct PostgresAdapter {
@@ -192,7 +192,7 @@ impl PostgresAdapter {
 }
 
 #[async_trait]
-impl DatabasePort for PostgresAdapter {
+impl StoragePort for PostgresAdapter {
     async fn notification_enabled(&self, job_id: &str) -> Result<bool, JobEvaluatorError> {
         self.run_notification_enabled(job_id).map_err(|err| {
             error!("Database Error: {:?}", err);

@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use gen_proto_types::job_result::v1::JobResult;
 
-use crate::core::{domain::errors::JobEvaluatorError, ports::database::DatabasePort};
+use crate::core::{domain::errors::JobEvaluatorError, ports::storage::StoragePort};
 
 pub struct EvalService {
-    postgres_adapter: Arc<dyn DatabasePort>,
+    postgres_adapter: Arc<dyn StoragePort>,
 }
 
 impl Clone for EvalService {
@@ -17,7 +17,7 @@ impl Clone for EvalService {
 }
 
 impl EvalService {
-    pub fn new(postgres_adapter: Arc<dyn DatabasePort>) -> Self {
+    pub fn new(postgres_adapter: Arc<dyn StoragePort>) -> Self {
         Self { postgres_adapter }
     }
     /// Evaluates a protobuf JobResult, conditionally notifies and dumps the
@@ -105,7 +105,7 @@ mod tests {
     }
 
     #[async_trait]
-    impl DatabasePort for MockDatabase {
+    impl StoragePort for MockDatabase {
         async fn notification_enabled(&self, job_id: &str) -> Result<bool, JobEvaluatorError> {
             let val = match job_id {
                 "enabled" => true,

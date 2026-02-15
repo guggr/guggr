@@ -1,2 +1,2 @@
-pub mod database;
 pub mod message_consumer;
+pub mod storage;
