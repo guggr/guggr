@@ -2,4 +2,4 @@
     just --list evaluator
 
 run:
-    env $(cat .env.example | xargs) cargo run
+    env $(cat .env | xargs) cargo run --bin evaluator
