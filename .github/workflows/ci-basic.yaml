@@ -94,7 +94,7 @@ jobs:
       - name: Check
         working-directory: frontend/web
         run: pnpm check
-      - name: Check
+      - name: Test build
         working-directory: frontend/web
         run: pnpm build
 
