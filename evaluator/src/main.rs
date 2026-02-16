@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result};
 use config::{PostgresConfig, RabbitMQConfig};
 use evaluator::{
     adapters::{inbound::rabbitmq::RabbitMQDriver, outbound::postgres::PostgresAdapter},
@@ -24,9 +24,7 @@ async fn main() -> Result<()> {
 
     debug!("creating rabbitmq pool");
     let rabbitmq_pool =
-        evaluator::create_rabbitmq_pool(&rabbitmq_config.rabbitmq_connection_url(false))
-            .await
-            .map_err(|e| anyhow!(e))?;
+        evaluator::create_rabbitmq_pool(&rabbitmq_config.rabbitmq_connection_url(false)).await?;
 
     debug!("initializing postgres adapter and running pending migrations on the database");
     let postgres_adapter = Arc::from(

@@ -3,6 +3,7 @@ use std::{
     time::Duration,
 };
 
+use anyhow::bail;
 use chrono::{DateTime, NaiveDateTime};
 use deadpool_lapin::{Pool, Runtime};
 use ipnet::IpNet;
@@ -19,7 +20,7 @@ pub mod telemetry;
 /// # Errors
 ///
 /// Exits after 5 pool creation tries with 10 seconds between each try
-pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> {
+pub async fn create_rabbitmq_pool(connection_url: &str) -> anyhow::Result<Pool> {
     let config = deadpool_lapin::Config {
         url: Some(connection_url.into()),
         ..Default::default()
@@ -37,9 +38,7 @@ pub async fn create_rabbitmq_pool(connection_url: &str) -> Result<Pool, String> 
                 retry_count += 1;
                 if retry_count > 5 {
                     error!("error creating rabbitmq pool after 5 retries: {e}");
-                    return Err(format!(
-                        "Could not create rabbitmq pool after 5 retries {e}"
-                    ));
+                    bail!("Could not create rabbitmq pool after 5 retries {e}")
                 }
 
                 warn!(
