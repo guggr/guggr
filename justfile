@@ -3,6 +3,8 @@
 
 # Contains database-specific recipes
 mod db 'database/db.just'
+# Contains evaluator-specific recipes
+mod evaluator 'evaluator/evaluator.just'
 # Contains scheduler-specific recipes
 mod scheduler 'scheduler/scheduler.just'
 

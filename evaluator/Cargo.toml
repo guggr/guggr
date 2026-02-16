@@ -1,0 +1,24 @@
+[package]
+name = "evaluator"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+gen-proto-types.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
+thiserror = { workspace = true }
+config = { workspace = true }
+prost = { workspace = true }
+database-client = {workspace = true}
+diesel = { workspace = true, features = ["postgres", "chrono"] }
+chrono = { workspace = true }
+tracing.workspace = true
+deadpool-lapin = { workspace = true }
+futures-lite = { workspace = true }
+lapin = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
+protocheck = { workspace = true }
+ipnet = { workspace = true }
