@@ -157,25 +157,42 @@ jobs:
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
 
+  fetch-depth:
+    name: 🧮 calculate fetch depth
+    runs-on: ubuntu-24.04
+    outputs:
+      depth: ${{ steps.depth-push.outputs.depth || steps.depth-pr.outputs.depth }}
+      branch: ${{ steps.depth-push.outputs.branch || steps.depth-pr.outputs.branch }}
+    env:
+      COMMITS_JSON: ${{ toJson(github.event.commits) }}
+    steps:
+      - name: Set depth push
+        id: depth-push
+        shell: bash
+        if: github.event_name == 'push'
+        env:
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+        run: |
+          COUNT=$(echo "$COMMITS_JSON" | jq 'length')
+          echo "depth=$((COUNT + 2))" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+      - name: Set depth PR
+        id: depth-pr
+        shell: bash
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "depth=$((${{ github.event.pull_request.commits }}+2))" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+
   trufflehog:
     name: 🔐 secret scanning
     runs-on: ubuntu-24.04
+    needs: fetch-depth
     steps:
-      - name: Calculate fetch depth
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
-            echo "depth=$(($(jq length <<< '${{ toJson(github.event.commits) }}') + 2))" >> $GITHUB_ENV
-            echo "branch=${{ github.ref_name }}" >> $GITHUB_ENV
-          fi
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "depth=$((${{ github.event.pull_request.commits }}+2))" >> $GITHUB_ENV
-            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
-          fi
       - uses: actions/checkout@v6.0.2
         with:
-          ref: ${{env.branch}}
-          fetch-depth: ${{env.depth}}
+          ref: ${{needs.fetch-depth.outputs.branch}}
+          fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
         uses: trufflesecurity/trufflehog@v3.93.3
         with:
