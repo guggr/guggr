@@ -29,6 +29,7 @@ jobs:
     outputs:
       rust: ${{ steps.filter.outputs.rust }}
       pnpm: ${{ steps.filter.outputs.pnpm }}
+      frontend: ${{ steps.filter.outputs.frontend }}
       go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
     steps:
@@ -54,6 +55,8 @@ jobs:
               - '**/*.json'
               - '**/*.sql'
               - '!charts/**'
+            frontend:
+              - frontend/web/**
             go:
               - api-service/**
               - '**/*.go'
@@ -61,8 +64,8 @@ jobs:
               - '**/go.mod'
             helm: charts/**
 
-  pnpm-lint:
-    name: 🐛 formatting & linting - pnpm
+  pnpm-fmt:
+    name: 🐛 formatting - pnpm
     needs: changes
     if: ${{ needs.changes.outputs.pnpm == 'true' }}
     runs-on: ubuntu-24.04
@@ -75,8 +78,25 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check
         run: pnpm check
-  #      - name: Build
-  #        run: pnpm build
+
+  pnpm-lint-frontend:
+    name: 🐛 formatting & linting - pnpm (frontend)
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+      #   cache: true - key will be available in next action release
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check
+        working-directory: frontend/web
+        run: pnpm check
+      - name: Test build
+        working-directory: frontend/web
+        run: pnpm build
 
   go-lint:
     if: ${{ false }} # wait for go setup so this does not fail
