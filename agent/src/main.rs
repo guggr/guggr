@@ -81,16 +81,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         _ = tokio::signal::ctrl_c() => {
             info!("received ctrl-c signal. exiting agent");
-            rabbitmq_pool.close();
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
 
         _ = sigterm.recv() => {
             info!("received SIGTERM, exiting agent");
-            rabbitmq_pool.close();
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
     }
+
+    rabbitmq_pool.close();
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     Ok(())
 }
