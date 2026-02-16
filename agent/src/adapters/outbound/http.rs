@@ -18,12 +18,14 @@ use crate::core::{
 
 pub struct HttpAdapter {
     client: reqwest::Client,
+    backup_endpoint: Option<String>,
 }
 
 impl HttpAdapter {
-    pub fn new() -> Self {
+    pub fn new(backup_endpoint: Option<String>) -> Self {
         Self {
             client: reqwest::Client::new(),
+            backup_endpoint,
         }
     }
 }
@@ -56,9 +58,12 @@ impl MonitorPort for HttpAdapter {
         let (res, reachable) = match response {
             Ok(res) => (Some(res), true),
             Err(error) => {
-                if self.client.head("http://gug.gr").send().await.is_err() {
-                    // Error on agent side return agent error
-                    return Err(JobServiceError::AgentIssue(AgentError::Http(error).into()));
+                if self.backup_endpoint.is_some() {
+                    let backup_endpoint = self.backup_endpoint.clone().unwrap();
+                    if self.client.head(backup_endpoint).send().await.is_err() {
+                        // Error on agent side return agent error
+                        return Err(JobServiceError::AgentIssue(AgentError::Http(error).into()));
+                    }
                 }
                 (None, false)
             }
@@ -139,7 +144,7 @@ mod tests {
 
         let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
 
-        let http_adapter = HttpAdapter::new();
+        let http_adapter = HttpAdapter::new(None);
         let res: JobResult = http_adapter.execute(&job, run_id.clone()).await.unwrap();
         mock.assert();
         assert_eq!(
@@ -176,7 +181,7 @@ mod tests {
 
         let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
 
-        let http_adapter = HttpAdapter::new();
+        let http_adapter = HttpAdapter::new(None);
         let res = http_adapter.execute(&job, run_id.clone()).await.unwrap();
         assert_eq!(
             res,

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
-use config::RabbitMQConfig;
+use config::{AgentConfig, RabbitMQConfig};
 use gen_proto_types::job::v1::JobType;
 use tokio::{select, signal::unix::SignalKind};
 use tracing::{error, info};
@@ -23,16 +23,23 @@ pub mod core;
 async fn main() -> Result<(), Box<dyn Error>> {
     agent::init_tracing();
 
-    let config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
+    let rabbit_mq_config =
+        RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE", "RABBITMQ_JOB_RESULT_QUEUE"])?;
+    let agent_config = AgentConfig::from_env();
 
-    let rabbitmq_pool = agent::create_rabbitmq_pool(&config.rabbitmq_connection_url(false)).await?;
+    let rabbitmq_pool =
+        agent::create_rabbitmq_pool(&rabbit_mq_config.rabbitmq_connection_url(false)).await?;
 
     // Outbound adapter
-    let http_adapter = Arc::new(HttpAdapter::new());
-    let ping_adapter = Arc::new(PingAdapter::new());
+    let http_adapter = Arc::new(HttpAdapter::new(
+        agent_config.http_backup_endpoint().clone(),
+    ));
+    let ping_adapter = Arc::new(PingAdapter::new(
+        agent_config.ping_backup_endpoint().clone(),
+    ));
     let rabbitmq_publisher = Arc::new(RabbitMQPublisher::new(
         rabbitmq_pool.clone(),
-        config.rabbitmq_queue_name(1).unwrap(),
+        rabbit_mq_config.rabbitmq_queue_name(1).unwrap(),
     ));
 
     rabbitmq_publisher.setup_queue().await?;
@@ -48,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Inbound adapter
     let rabbitmq_driver = RabbitMQDriver::new(
         rabbitmq_pool.clone(),
-        config.rabbitmq_queue_name(0).unwrap(),
+        rabbit_mq_config.rabbitmq_queue_name(0).unwrap(),
         job_service,
     );
     rabbitmq_driver.setup_queues().await?;

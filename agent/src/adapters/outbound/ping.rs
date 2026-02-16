@@ -3,7 +3,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use agent::ToProto;
+use agent::{ToProto, resolve_domain};
 use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
@@ -19,11 +19,13 @@ use crate::core::{
     service::jobservice::{AgentError, JobServiceError},
 };
 
-pub struct PingAdapter {}
+pub struct PingAdapter {
+    backup_endpoint: Option<String>,
+}
 
 impl PingAdapter {
-    pub const fn new() -> Self {
-        Self {}
+    pub const fn new(backup_endpoint: Option<String>) -> Self {
+        Self { backup_endpoint }
     }
 }
 
@@ -53,22 +55,7 @@ impl MonitorPort for PingAdapter {
             .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
 
         // Check if domain provided or IP
-        let host_ip = if let Ok(ip) = ping_details.host.parse::<IpAddr>() {
-            ip
-        } else {
-            debug!("ping adapter received domain. trying to resolve it...");
-            if let Some(ip) = agent::resolve_domain(ping_details.host.clone()).await {
-                ip
-            } else {
-                error!(
-                    "ping adapter could not resolve domain {}",
-                    ping_details.host
-                );
-                return Err(JobServiceError::AgentIssue(
-                    "could not resolve domain for ping job".into(),
-                ));
-            }
-        };
+        let host_ip = get_pinger_host(ping_details.host.clone()).await?;
 
         let mut pinger = client.pinger(host_ip, PingIdentifier(random())).await;
 
@@ -101,13 +88,13 @@ impl MonitorPort for PingAdapter {
                 }
             }
             Err(e) => {
-                pinger.host = "1.1.1.1"
-                    .parse::<IpAddr>()
-                    .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
-                if pinger.ping(PingSequence(0), &[0; 8]).await.is_err() {
-                    return Err(JobServiceError::AgentIssue(
-                        AgentError::Ping(e.into()).into(),
-                    ));
+                if self.backup_endpoint.is_some() {
+                    pinger.host = get_pinger_host(ping_details.host.clone()).await?;
+                    if pinger.ping(PingSequence(0), &[0; 8]).await.is_err() {
+                        return Err(JobServiceError::AgentIssue(
+                            AgentError::Ping(e.into()).into(),
+                        ));
+                    }
                 }
                 JobResult {
                     id: job.id.clone(),
@@ -133,6 +120,22 @@ fn get_timestamp() -> Result<Timestamp, JobServiceError> {
         .duration_since(UNIX_EPOCH)
         .map_err(|e| JobServiceError::AgentIssue(e.into()))?
         .to_proto())
+}
+
+async fn get_pinger_host(host: String) -> Result<IpAddr, JobServiceError> {
+    if let Ok(ip) = host.parse::<IpAddr>() {
+        Ok(ip)
+    } else {
+        debug!("ping adapter received domain. trying to resolve it...");
+        if let Some(ip) = resolve_domain(host.clone()).await {
+            Ok(ip)
+        } else {
+            error!("ping adapter could not resolve domain {}", host);
+            Err(JobServiceError::AgentIssue(
+                "could not resolve domain for ping job".into(),
+            ))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -161,7 +164,7 @@ mod tests {
 
         let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
 
-        let ping_adapter = PingAdapter::new();
+        let ping_adapter = PingAdapter::new(None);
         let res = ping_adapter.execute(&job, run_id.clone()).await.unwrap();
         assert_eq!(
             res,
@@ -201,7 +204,7 @@ mod tests {
 
         let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
 
-        let ping_adapter = PingAdapter::new();
+        let ping_adapter = PingAdapter::new(None);
         let res = ping_adapter.execute(&job, run_id.clone()).await.unwrap();
         let expected_result_alt_1 = JobResult {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
@@ -251,7 +254,7 @@ mod tests {
 
         let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
 
-        let ping_adapter = PingAdapter::new();
+        let ping_adapter = PingAdapter::new(None);
         let res = ping_adapter.execute(&job, run_id.clone()).await.unwrap();
         assert_eq!(
             res,

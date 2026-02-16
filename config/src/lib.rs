@@ -1,8 +1,10 @@
+mod agent;
 mod postgres;
 mod rabbitmq;
 
 use std::env;
 
+pub use agent::AgentConfig;
 pub use postgres::PostgresConfig;
 pub use rabbitmq::RabbitMQConfig;
 use thiserror::Error;
