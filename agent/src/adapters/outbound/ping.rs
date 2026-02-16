@@ -29,6 +29,18 @@ impl PingAdapter {
 
 #[async_trait]
 impl MonitorPort for PingAdapter {
+    /// Executes a provided Job with
+    /// [`gen_proto_types::job::types::v1::PingJobType`]. If the destination
+    /// is not reachable, it optionally checks whether a configured "backup ip"
+    /// is reachable.
+    ///
+    /// # Errors
+    /// Returns a [`JobServiceError`] if there is a problem with
+    /// - creating a Ping [`Client`]
+    /// - resolving a given domain
+    /// - parsing an IP address
+    /// - reaching the "backup ip"
+    /// - getting the current timestamp
     async fn execute(&self, job: &Job, run_id: String) -> Result<JobResult, JobServiceError> {
         let ping_details = job.ping.as_ref().unwrap();
 

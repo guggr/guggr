@@ -30,6 +30,17 @@ impl HttpAdapter {
 
 #[async_trait]
 impl MonitorPort for HttpAdapter {
+    /// Executes a provided Job with
+    /// [`gen_proto_types::job::types::v1::HttpJobType`]. If the destination
+    /// is not reachable, it optionally checks whether a configured "backup
+    /// endpoint" is reachable.
+    ///
+    /// # Errors
+    /// Returns a [`JobServiceError`] if there is a problem with
+    /// - reaching the "backup endpoint"
+    /// - getting the current timestamp
+    /// - getting the remote ip address
+    /// - getting the payload from the defined endpoint
     async fn execute(&self, job: &Job, run_id: String) -> Result<JobResult, JobServiceError> {
         let http_details = job.http.as_ref().unwrap();
 
