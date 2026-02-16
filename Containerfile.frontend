@@ -13,6 +13,6 @@ COPY frontend/web frontend/web
 RUN cd frontend/web && pnpm build
 
 
-FROM docker.io/nginxinc/nginx-unprivileged:alpine-slim
+FROM docker.io/nginxinc/nginx-unprivileged:1.29.5-alpine-slim
 
 COPY --from=build /app/frontend/web/dist /usr/share/nginx/html
