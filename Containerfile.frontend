@@ -1,0 +1,18 @@
+FROM docker.io/node:24-slim AS build
+
+RUN corepack enable
+WORKDIR /app
+
+# deps
+COPY pnpm-lock.yaml pnpm-workspace.yaml .
+COPY package.json .
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+COPY frontend/web/package.json frontend/web/package.json
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store cd frontend && pnpm install --frozen-lockfile
+COPY frontend/web frontend/web
+RUN cd frontend/web && pnpm build
+
+
+FROM docker.io/nginxinc/nginx-unprivileged:alpine-slim
+
+COPY --from=build /app/frontend/web/dist /usr/share/nginx/html
