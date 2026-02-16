@@ -1,0 +1,22 @@
+[package]
+name = "scheduler"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+config = { workspace = true }
+database-client = { workspace = true }
+deadpool-lapin = { workspace = true }
+diesel = { workspace = true, features = ["postgres", "chrono"] }
+gen-proto-types.workspace = true
+lapin = { workspace = true }
+nanoid = { workspace = true }
+prost.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal"] }
+tokio-util = { workspace = true, features = ["rt"] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
