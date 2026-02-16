@@ -153,7 +153,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo nextest run --no-tests warn --all-features --all-targets
+      - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
 

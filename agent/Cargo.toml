@@ -1,0 +1,27 @@
+[package]
+name = "agent"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+gen-proto-types.workspace = true
+tracing = { workspace = true }
+protocheck = { workspace = true }
+rand = { workspace = true }
+surge-ping = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
+thiserror = { workspace = true }
+config = { workspace = true }
+lapin = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
+prost = { workspace = true }
+deadpool-lapin = { workspace = true }
+hostname = { workspace = true }
+nanoid = { workspace = true }
+futures-util = { workspace = true }
+
+[dev-dependencies]
+httpmock = { workspace = true }
