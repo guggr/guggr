@@ -1,0 +1,23 @@
+{
+	"name": "guggr-web",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@10.28.0",
+	"version": "0.1.0",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro"
+	},
+	"devDependencies": {
+		"@astrojs/svelte": "^7.2.5",
+		"@lucide/svelte": "^0.564.0",
+		"@tailwindcss/vite": "^4.1.18",
+		"astro": "^5.17.2",
+		"daisyui": "^5.5.18",
+		"svelte": "^5.51.2",
+		"tailwindcss": "^4.1.18",
+		"typescript": "^5.9.3"
+	}
+}
