@@ -5,6 +5,7 @@
 
 use chrono::NaiveDateTime;
 use diesel::{data_types::PgInterval, prelude::*};
+use ipnet::IpNet;
 
 use crate::schema::*;
 #[derive(Queryable, Debug, Identifiable, Insertable)]
@@ -28,14 +29,46 @@ pub struct Job {
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_details_http)]
+pub struct JobDetailsHttp {
+    pub id: String,
+    pub url: String,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_details_ping)]
+pub struct JobDetailsPing {
+    pub id: String,
+    pub host: String,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_result_http)]
+pub struct JobResultHttp {
+    pub id: String,
+    pub ip_address: IpNet,
+    pub status_code: i32,
+    pub latency: i32,
+    pub payload: Vec<u8>,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[diesel(table_name = job_result_ping)]
+pub struct JobResultPing {
+    pub id: String,
+    pub ip_address: IpNet,
+    pub latency: i32,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable)]
 #[diesel(table_name = job_runs)]
 pub struct JobRun {
     pub id: String,
     pub job_id: String,
     pub timestamp: NaiveDateTime,
     pub triggered_notification: bool,
-    pub output: Option<String>,
     pub batch_id: String,
+    pub reachable: bool,
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable)]
