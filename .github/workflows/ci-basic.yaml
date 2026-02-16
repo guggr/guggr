@@ -64,8 +64,8 @@ jobs:
               - '**/go.mod'
             helm: charts/**
 
-  pnpm-lint:
-    name: 🐛 formatting & linting - pnpm
+  pnpm-fmt:
+    name: 🐛 formatting - pnpm
     needs: changes
     if: ${{ needs.changes.outputs.pnpm == 'true' }}
     runs-on: ubuntu-24.04
