@@ -77,7 +77,7 @@ repos:
         name: run clippy
         types: [rust]
         language: system
-        entry: cargo clippy
+        entry: cargo clippy --all-features --all-targets -- -D warnings
         pass_filenames: false
 
       - id: cargo-nextest
