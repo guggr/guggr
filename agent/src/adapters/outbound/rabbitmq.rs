@@ -70,7 +70,7 @@ impl RabbitMQPublisher {
         args.insert("x-queue-type".into(), LongString("quorum".into()));
         // set maximum delivery limit until messages get pushed into dead letter
         // exchange
-        args.insert("delivery-limit".into(), LongInt(5));
+        args.insert("x-delivery-limit".into(), LongInt(5));
         // TODO: specify dead letter exchange in setup schema
 
         args
