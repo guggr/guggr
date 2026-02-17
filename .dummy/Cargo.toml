@@ -1,0 +1,11 @@
+# This only exists so dependabot can bump these two dependencies that
+# are used in the Dockerfile
+[package]
+name = "dummy"
+version = "0.1.0"
+edition = "2024"
+authors = ["guggr"]
+
+[dependencies]
+openssl-sys = "0.9.111"
+pq-sys = "0.7.5"

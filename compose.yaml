@@ -10,6 +10,11 @@ services:
       RABBITMQ_DEFAULT_PASS: guggr
     volumes:
       - rabbitmq:/var/lib/rabbitmq/
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_port_connectivity']
+      interval: 1s
+      timeout: 1s
+      retries: 15
     restart: unless-stopped
   postgres:
     image: docker.io/postgres:18.1-alpine3.23
@@ -22,6 +27,64 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data/
       - ./database/scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U guggr']
+      interval: 1s
+      timeout: 1s
+      retries: 15
+    restart: unless-stopped
+
+  evaluator:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+      args:
+        BIN: evaluator
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+      args:
+        BIN: scheduler
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      # There is a race condition between the scheduler and evaluator
+      # for running db migrations on an uninitialized database.
+      # This remediates it for now
+      evaluator:
+        condition: service_started
+    env_file:
+      - .env
+    restart: unless-stopped
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+      args:
+        BIN: agent
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - 8080:8080
     restart: unless-stopped
 
 volumes:
