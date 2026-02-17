@@ -57,7 +57,7 @@ mod tests {
     use database_client::models::{JobResultHttp, JobResultPing, JobRun};
     use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
     use ipnet::Ipv4Net;
-    use protocheck::types::Timestamp;
+    use protify::proto_types::Timestamp;
 
     use super::*;
     use crate::{
@@ -141,11 +141,11 @@ mod tests {
     fn mock_ping_result(
         reachable: bool,
         ip: Vec<u8>,
-        latency: protocheck::types::Duration,
+        latency: protify::proto_types::Duration,
     ) -> PingJobResult {
         PingJobResult {
             reachable,
-            ip_address: ip,
+            ip_address: ip.into(),
             latency: Some(latency),
         }
     }
@@ -153,15 +153,15 @@ mod tests {
     fn mock_http_result(
         reachable: bool,
         ip: Vec<u8>,
-        latency: protocheck::types::Duration,
+        latency: protify::proto_types::Duration,
         status_code: i32,
     ) -> HttpJobResult {
         HttpJobResult {
             reachable,
-            ip_address: ip,
+            ip_address: ip.into(),
             status_code,
             latency: Some(latency),
-            payload: vec![],
+            payload: vec![].into(),
         }
     }
 
@@ -207,7 +207,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![0, 0, 0, 0],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
         );
         let mut job = mock_result(
             "enabled".to_string(),
@@ -232,7 +232,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![0, 0, 0, 0],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
         );
         let mut job = mock_result(
             "disabled".to_string(),
@@ -276,7 +276,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
         );
         let mut job = mock_result(
             "disabled".to_string(),
@@ -310,7 +310,7 @@ mod tests {
         let http_job = mock_http_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
             200,
         );
         let mut job = mock_result(

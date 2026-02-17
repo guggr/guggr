@@ -2,7 +2,7 @@ use std::{error::Error, net::IpAddr, time::Duration};
 
 use deadpool_lapin::{Pool, Runtime};
 use nanoid::nanoid;
-use protocheck::types::Timestamp;
+use protify::proto_types::Timestamp;
 use tokio::{net::lookup_host, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -11,9 +11,9 @@ pub trait ToProto<T> {
     fn to_proto(&self) -> T;
 }
 
-impl ToProto<protocheck::types::Duration> for Duration {
-    fn to_proto(&self) -> protocheck::types::Duration {
-        protocheck::types::Duration {
+impl ToProto<protify::proto_types::Duration> for Duration {
+    fn to_proto(&self) -> protify::proto_types::Duration {
+        protify::proto_types::Duration {
             // Theoretically u64 can be bigger than i64 but that only happens when working with
             // times very far in the future
             seconds: self.as_secs().cast_signed(),

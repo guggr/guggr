@@ -7,7 +7,7 @@ use anyhow::bail;
 use chrono::{DateTime, NaiveDateTime};
 use deadpool_lapin::{Pool, Runtime};
 use ipnet::IpNet;
-use protocheck::types::Timestamp;
+use protify::proto_types::Timestamp;
 use tokio::time::sleep;
 use tracing::{error, info, warn};
 
@@ -72,12 +72,12 @@ pub fn ipnet_from_bytes_host(bytes: &[u8]) -> Result<IpNet, String> {
     }
 }
 
-/// Converts a protocheck Duration to an i32
+/// Converts a protify Duration to an i32
 ///
 /// # Errors
 ///
 /// Will return `Err` if the supplied timestamp is larger than an i32
-fn protocheck_duration_to_i32_millis(d: protocheck::types::Duration) -> Result<i32, &'static str> {
+fn protify_duration_to_i32_millis(d: protify::proto_types::Duration) -> Result<i32, &'static str> {
     let secs: i128 = i128::from(d.seconds);
     let nanos: i128 = i128::from(d.nanos);
 
