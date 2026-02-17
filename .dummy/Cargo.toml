@@ -4,7 +4,7 @@
 name = "dummy"
 version = "0.1.0"
 edition = "2024"
-authors = ["Guggr"]
+authors = ["guggr"]
 
 [dependencies]
 openssl-sys = "0.9.111"
