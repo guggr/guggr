@@ -1,5 +1,6 @@
 [workspace]
 members = ["gen/proto_types", "config", "database/database-client", "agent", "evaluator", "scheduler"]
+exclude = [".dummy"]
 
 resolver = "3"
 
