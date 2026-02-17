@@ -3,6 +3,12 @@
 
 # Contains database-specific recipes
 mod db 'database/db.just'
+# Contains evaluator-specific recipes
+mod evaluator 'evaluator/evaluator.just'
+# Contains scheduler-specific recipes
+mod scheduler 'scheduler/scheduler.just'
+
+mod agent 'agent/agent.just'
 
 alias c := check
 alias f := fmt
@@ -64,13 +70,13 @@ fmt-rust:
 [group('rust')]
 [group('lint')]
 lint-rust:
-	cargo clippy
+	cargo clippy --all-features --all-targets -- -D warnings
 
 # Run nextest
 [group('rust')]
 [group('test')]
-test-rust:
-	cargo nextest run --no-tests warn
+test-rust profile="default":
+	cargo nextest run --no-tests warn {{ if profile != "default" { "-P " + profile } else { "" } }}
 
 # Run machete
 [group('rust')]
@@ -85,7 +91,7 @@ autoinherit:
 # Run clippy with pedantic settings
 [group('rust')]
 bashme:
-	cargo clippy -- -W clippy::nursery -W clippy::pedantic
+	cargo clippy --all-features --all-targets -- -W clippy::nursery -W clippy::pedantic
 
 # Compile the docs and open them
 [group('rust')]

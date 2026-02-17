@@ -29,6 +29,7 @@ jobs:
     outputs:
       rust: ${{ steps.filter.outputs.rust }}
       pnpm: ${{ steps.filter.outputs.pnpm }}
+      frontend: ${{ steps.filter.outputs.frontend }}
       go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
     steps:
@@ -54,6 +55,8 @@ jobs:
               - '**/*.json'
               - '**/*.sql'
               - '!charts/**'
+            frontend:
+              - frontend/web/**
             go:
               - api-service/**
               - '**/*.go'
@@ -61,8 +64,8 @@ jobs:
               - '**/go.mod'
             helm: charts/**
 
-  pnpm-lint:
-    name: 🐛 formatting & linting - pnpm
+  pnpm-fmt:
+    name: 🐛 formatting - pnpm
     needs: changes
     if: ${{ needs.changes.outputs.pnpm == 'true' }}
     runs-on: ubuntu-24.04
@@ -75,8 +78,25 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check
         run: pnpm check
-  #      - name: Build
-  #        run: pnpm build
+
+  pnpm-lint-frontend:
+    name: 🐛 formatting & linting - pnpm (frontend)
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+      #   cache: true - key will be available in next action release
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check
+        working-directory: frontend/web
+        run: pnpm check
+      - name: Test build
+        working-directory: frontend/web
+        run: pnpm build
 
   go-lint:
     if: ${{ false }} # wait for go setup so this does not fail
@@ -148,34 +168,51 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: cargo-bins/cargo-binstall@v1.17.4
+      - uses: cargo-bins/cargo-binstall@v1.17.5
       - run: cargo binstall cargo-nextest
       - uses: Swatinem/rust-cache@v2.8.2
         with:
           cache-on-failure: true
-      - run: cargo nextest run --no-tests warn --all-features --all-targets
+      - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
+
+  fetch-depth:
+    name: 🧮 calculate fetch depth
+    runs-on: ubuntu-24.04
+    outputs:
+      depth: ${{ steps.depth-push.outputs.depth || steps.depth-pr.outputs.depth }}
+      branch: ${{ steps.depth-push.outputs.branch || steps.depth-pr.outputs.branch }}
+    env:
+      COMMITS_JSON: ${{ toJson(github.event.commits) }}
+    steps:
+      - name: Set depth push
+        id: depth-push
+        shell: bash
+        if: github.event_name == 'push'
+        env:
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+        run: |
+          COUNT=$(echo "$COMMITS_JSON" | jq 'length')
+          echo "depth=$((COUNT + 2))" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+      - name: Set depth PR
+        id: depth-pr
+        shell: bash
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "depth=$((${{ github.event.pull_request.commits }}+2))" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
 
   trufflehog:
     name: 🔐 secret scanning
     runs-on: ubuntu-24.04
+    needs: fetch-depth
     steps:
-      - name: Calculate fetch depth
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
-            echo "depth=$(($(jq length <<< '${{ toJson(github.event.commits) }}') + 2))" >> $GITHUB_ENV
-            echo "branch=${{ github.ref_name }}" >> $GITHUB_ENV
-          fi
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "depth=$((${{ github.event.pull_request.commits }}+2))" >> $GITHUB_ENV
-            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
-          fi
       - uses: actions/checkout@v6.0.2
         with:
-          ref: ${{env.branch}}
-          fetch-depth: ${{env.depth}}
+          ref: ${{needs.fetch-depth.outputs.branch}}
+          fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
         uses: trufflesecurity/trufflehog@v3.93.3
         with:

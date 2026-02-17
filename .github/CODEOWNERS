@@ -13,6 +13,7 @@ charts/					@melo-afk
 .pre-commit-config.yaml	@melo-afk
 .gitlint				@melo-afk
 .golangci.yaml			@melo-afk
+evaluator/              @melo-afk
 
 agent/		@philxws692
 flake.lock	@philxws692

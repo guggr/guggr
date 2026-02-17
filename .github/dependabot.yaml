@@ -5,12 +5,12 @@ updates:
     schedule:
       interval: 'weekly'
 
-  # wait till a dockerfile / go.sum exists. Otherwise dependabot complains
-  #  - package-ecosystem: 'docker'
-  #    directory: '/'
-  #    schedule:
-  #      interval: 'weekly'
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 
+  # wait till a go.sum exists. Otherwise dependabot complains
   #  - package-ecosystem: 'gomod'
   #    directory: '/'
   #    schedule:
@@ -26,7 +26,12 @@ updates:
     schedule:
       interval: 'weekly'
 
-  - package-ecosystem: 'rust-toolchain'
+  - package-ecosystem: 'cargo'
     directory: '/'
+    schedule:
+      interval: 'weekly'
+
+  - package-ecosystem: 'cargo'
+    directory: '/.dummy'
     schedule:
       interval: 'weekly'

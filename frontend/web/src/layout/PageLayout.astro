@@ -1,0 +1,26 @@
+---
+import '@/style.css';
+
+const { title } = Astro.props;
+
+interface Props {
+	/** title will be suffixed with ' | guggr' */
+	title?: string;
+}
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		{/* TODO favicon */}
+		{/* <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> */}
+		<meta name="viewport" content="width=device-width" />
+		<title>{title ? `${title} | guggr` : 'guggr'}</title>
+	</head>
+
+	<body class="flex min-h-screen flex-col justify-between">
+		<div>
+			<slot />
+		</div>
+	</body>
+</html>
