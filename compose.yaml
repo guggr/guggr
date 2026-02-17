@@ -37,7 +37,7 @@ services:
   evaluator:
     build:
       context: .
-      dockerfile: Containerfile.rust
+      dockerfile: Dockerfile.rust
       args:
         BIN: evaluator
     depends_on:
@@ -51,7 +51,7 @@ services:
   scheduler:
     build:
       context: .
-      dockerfile: Containerfile.rust
+      dockerfile: Dockerfile.rust
       args:
         BIN: scheduler
     depends_on:
@@ -70,7 +70,7 @@ services:
   agent:
     build:
       context: .
-      dockerfile: Containerfile.rust
+      dockerfile: Dockerfile.rust
       args:
         BIN: agent
     depends_on:
@@ -82,7 +82,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Containerfile.frontend
+      dockerfile: Dockerfile.frontend
     ports:
       - 8080:8080
     restart: unless-stopped
