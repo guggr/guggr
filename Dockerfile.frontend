@@ -1,4 +1,4 @@
-FROM docker.io/node:24-slim AS build
+FROM docker.io/node:24.13-slim AS build
 
 RUN corepack enable
 WORKDIR /app
