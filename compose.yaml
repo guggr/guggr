@@ -79,6 +79,18 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+  api-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+      args:
+        BIN: api-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
   frontend:
     build:
       context: .
