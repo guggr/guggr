@@ -1,4 +1,5 @@
 ---
+import Navbar from '@/components/shared/Navbar.astro';
 import '@/style.css';
 
 const { title } = Astro.props;
@@ -20,6 +21,8 @@ interface Props {
 
 	<body class="bg-base-200 flex min-h-screen flex-col justify-between">
 		<div class="flex grow flex-col">
+			<Navbar />
+
 			<slot />
 		</div>
 	</body>
