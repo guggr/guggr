@@ -7,6 +7,8 @@ mod db 'database/db.just'
 mod evaluator 'evaluator/evaluator.just'
 # Contains scheduler-specific recipes
 mod scheduler 'scheduler/scheduler.just'
+# Contains api-service-specific recipes
+mod api-service 'api-service/api-service.just'
 
 mod agent 'agent/agent.just'
 
