@@ -5,3 +5,4 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
