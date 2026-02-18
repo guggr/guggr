@@ -1,3 +1,7 @@
+---
+import { HeartIcon } from '@lucide/svelte';
+---
+
 <footer class="bg-base-300 mt-12 p-10">
 	<div class="footer sm:footer-horizontal mx-auto max-w-lg">
 		<aside>
@@ -26,7 +30,13 @@
 
 	<aside>
 		<p class="text-base-content/60 pt-10 text-center text-sm">
-			Copyright © {new Date().getFullYear()} - All right reserved by guggr
+			Made with <HeartIcon size="20" class="inline text-red-500/80" />
+			<span class="sr-only">love</span> on <a
+				href="https://github.com/guggr/guggr"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="link link-hover">GitHub</a
+			>
 		</p>
 	</aside>
 </footer>
