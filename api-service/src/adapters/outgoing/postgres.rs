@@ -13,7 +13,7 @@ use crate::core::{
 };
 
 pub struct PostgresAdapter {
-    pool: Pool<ConnectionManager<PgConnection>>,
+    pub group: PostgresGroupAdapter,
 }
 
 /// Errors for [`PostgresAdapter`]
@@ -54,14 +54,26 @@ impl PostgresAdapter {
     /// Will return [`PostgresAdapterError`] if no connection pool could be
     /// created from the supplied database url
     pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
+        let pool = create_connection_pool(database_url)?;
         Ok(Self {
-            pool: create_connection_pool(database_url)?,
+            group: PostgresGroupAdapter::new(pool),
         })
     }
 }
 
+/// Sub-adapter of `PostgresAdapter`. Handles CRUD for the `group` table
+pub struct PostgresGroupAdapter {
+    pool: Pool<ConnectionManager<PgConnection>>,
+}
+
+impl PostgresGroupAdapter {
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
+    }
+}
+
 #[async_trait]
-impl Crud<Group> for PostgresAdapter {
+impl Crud<Group> for PostgresGroupAdapter {
     async fn create(&self, new_value: Group) -> Result<(), StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
@@ -113,4 +125,9 @@ impl Crud<Group> for PostgresAdapter {
 }
 
 #[async_trait]
-impl StoragePort for PostgresAdapter {}
+impl StoragePort for PostgresAdapter {
+    type GroupCrud = PostgresGroupAdapter;
+    fn group(&self) -> &Self::GroupCrud {
+        &self.group
+    }
+}

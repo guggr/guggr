@@ -12,9 +12,9 @@ pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
         id: "mycoolgroup".to_string(),
         name: "This group is cool".to_string(),
     };
-    postgres.create(group).await?;
+    postgres.group.create(group).await?;
 
-    let r: Option<Group> = postgres.get_by_id("mycoolgroup").await?;
+    let r: Option<Group> = postgres.group.get_by_id("mycoolgroup").await?;
     dbg!(r);
 
     let updategroup = Group {
@@ -22,18 +22,18 @@ pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
         name: "other description".to_string(),
     };
 
-    postgres.update(updategroup).await?;
+    postgres.group.update(updategroup).await?;
 
-    let r: Option<Group> = postgres.get_by_id("mycoolgroup").await?;
+    let r: Option<Group> = postgres.group.get_by_id("mycoolgroup").await?;
     dbg!(r);
 
-    let entries: Vec<Group> = postgres.list(5).await?;
+    let entries: Vec<Group> = postgres.group.list(5).await?;
     dbg!(entries);
 
     // this is kind of ugly, need to check how this can be done better
-    <PostgresAdapter as Crud<Group>>::delete(&postgres, "mycoolgroup").await?;
+    postgres.group.delete("mycoolgroup").await?;
 
-    let r: Option<Group> = postgres.get_by_id("mycoolgroup").await?;
+    let r: Option<Group> = postgres.group.get_by_id("mycoolgroup").await?;
     dbg!(r);
 
     Ok(())
