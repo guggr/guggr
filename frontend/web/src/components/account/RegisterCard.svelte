@@ -10,7 +10,7 @@
 	};
 </script>
 
-<FormCard title="Register" actionTitle="Register Now!" onsubmit={register} {subtext}>
+<FormCard title="Register" actionTitle="Register Now!" onsubmit={register}>
 	<label>
 		<span class="label my-1">E-Mail</span>
 		<input
@@ -43,8 +43,8 @@
 			placeholder="Password"
 		/>
 	</label>
-</FormCard>
 
-{#snippet subtext()}
-	Already have an Account? <a href="/login" class="link">Sign in instead!</a>
-{/snippet}
+	{#snippet subtext()}
+		Already have an Account? <a href="/login" class="link">Sign in instead!</a>
+	{/snippet}
+</FormCard>

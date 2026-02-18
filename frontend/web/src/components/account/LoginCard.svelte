@@ -9,7 +9,7 @@
 	};
 </script>
 
-<FormCard title="Login" actionTitle="Login" onsubmit={login} {subtext}>
+<FormCard title="Login" actionTitle="Login" onsubmit={login}>
 	<label>
 		<span class="label my-1">E-Mail</span>
 		<input
@@ -31,8 +31,8 @@
 			placeholder="Password"
 		/>
 	</label>
-</FormCard>
 
-{#snippet subtext()}
-	New to guggr? <a href="/register" class="link">Create an account!</a>
-{/snippet}
+	{#snippet subtext()}
+		New to guggr? <a href="/register" class="link">Create an account!</a>
+	{/snippet}
+</FormCard>
