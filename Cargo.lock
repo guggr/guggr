@@ -151,6 +151,9 @@ checksum = "5f0e0fee31ef5ed1ba1316088939cea399010ed7731dba877ed44aeb407a75ea"
 name = "api-service"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "database-client",
+ "thiserror 2.0.18",
  "tracing-subscriber",
 ]
 

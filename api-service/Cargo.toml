@@ -6,3 +6,6 @@ authors.workspace = true
 
 [dependencies]
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+database-client = {workspace = true}
