@@ -20,5 +20,5 @@ deadpool-lapin = { workspace = true }
 futures-lite = { workspace = true }
 lapin = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
-protocheck = { workspace = true }
+protify = { workspace = true }
 ipnet = { workspace = true }

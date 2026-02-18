@@ -180,3 +180,6 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 target
+
+
+gen/proto_types/src/file_descriptor_set.bin

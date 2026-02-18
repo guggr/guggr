@@ -6,7 +6,7 @@ use gen_proto_types::job_result::{
 
 use crate::{
     core::domain::errors::TypeMapperError, ipnet_from_bytes_host, naive_from_proto_ts,
-    protocheck_duration_to_i32_millis,
+    protify_duration_to_i32_millis,
 };
 /// Trait for converting protobuf [`JobResult`] sub-types to database types.
 pub trait FromProtobufTypeJobResult<F> {
@@ -32,13 +32,13 @@ impl FromProtobufTypeJobResult<&HttpJobResult> for db_models::JobResultHttp {
             ip_address: ipnet_from_bytes_host(&value.ip_address)
                 .map_err(TypeMapperError::IpAddress)?,
             status_code: value.status_code,
-            latency: protocheck_duration_to_i32_millis(
+            latency: protify_duration_to_i32_millis(
                 value
                     .latency
                     .ok_or_else(|| TypeMapperError::Latency("latency is missing".to_string()))?,
             )
             .map_err(|err| TypeMapperError::Latency(err.to_string()))?,
-            payload: value.payload.clone(),
+            payload: value.payload.clone().into(),
         })
     }
 }
@@ -53,9 +53,9 @@ impl FromProtobufTypeJobResult<&PingJobResult> for db_models::JobResultPing {
     fn from_protobuf_type(run_id: &str, value: &PingJobResult) -> Result<Self, TypeMapperError> {
         Ok(Self {
             id: run_id.to_string(),
-            ip_address: ipnet_from_bytes_host(value.ip_address.as_slice())
+            ip_address: ipnet_from_bytes_host(&value.ip_address)
                 .map_err(TypeMapperError::IpAddress)?,
-            latency: protocheck_duration_to_i32_millis(
+            latency: protify_duration_to_i32_millis(
                 value
                     .latency
                     .ok_or_else(|| TypeMapperError::Latency("latency is missing".to_string()))?,
@@ -115,7 +115,7 @@ mod tests {
     use database_client::models::{JobResultHttp, JobResultPing, JobRun};
     use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
     use ipnet::Ipv4Net;
-    use protocheck::types::Timestamp;
+    use protify::proto_types::Timestamp;
 
     use super::*;
     use crate::core::domain::type_mapper::{FromProtobufType, FromProtobufTypeJobResult};
@@ -123,11 +123,11 @@ mod tests {
     fn mock_ping_result(
         reachable: bool,
         ip: Vec<u8>,
-        latency: protocheck::types::Duration,
+        latency: protify::proto_types::Duration,
     ) -> PingJobResult {
         PingJobResult {
             reachable,
-            ip_address: ip,
+            ip_address: ip.into(),
             latency: Some(latency),
         }
     }
@@ -135,15 +135,15 @@ mod tests {
     fn mock_http_result(
         reachable: bool,
         ip: Vec<u8>,
-        latency: protocheck::types::Duration,
+        latency: protify::proto_types::Duration,
         status_code: i32,
     ) -> HttpJobResult {
         HttpJobResult {
             reachable,
-            ip_address: ip,
+            ip_address: ip.into(),
             status_code,
             latency: Some(latency),
-            payload: vec![],
+            payload: vec![].into(),
         }
     }
 
@@ -160,8 +160,11 @@ mod tests {
 
     #[test]
     fn invalid_ip() {
-        let ping_job =
-            mock_ping_result(false, vec![1, 1, 1], protocheck::types::Duration::new(5, 5));
+        let ping_job = mock_ping_result(
+            false,
+            vec![1, 1, 1],
+            protify::proto_types::Duration::new(5, 5),
+        );
 
         let err = JobResultPing::from_protobuf_type("abc", &ping_job).unwrap_err();
         assert_eq!(
@@ -175,7 +178,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(i64::MAX, 0),
+            protify::proto_types::Duration::new(i64::MAX, 0),
         );
 
         let err = JobResultPing::from_protobuf_type("abc", &ping_job).unwrap_err();
@@ -190,7 +193,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(0, 0),
+            protify::proto_types::Duration::new(0, 0),
         );
         let mut job = mock_result(
             "disabled".to_string(),
@@ -215,7 +218,7 @@ mod tests {
         let ping_job = mock_ping_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
         );
         let expected = JobResultPing {
             id: "abc".to_string(),
@@ -234,7 +237,7 @@ mod tests {
         let http_job = mock_http_result(
             false,
             vec![1, 1, 1, 1],
-            protocheck::types::Duration::new(5, 5),
+            protify::proto_types::Duration::new(5, 5),
             200,
         );
         let expected = JobResultHttp {

@@ -1,4 +1,4 @@
-extern crate protocheck;
+extern crate protify;
 
 #[allow(clippy::all, clippy::pedantic, clippy::nursery)]
 pub mod job {

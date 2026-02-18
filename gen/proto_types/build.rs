@@ -1,17 +1,12 @@
-use std::{fs, path::PathBuf};
+use std::{env, path::PathBuf};
 
-use protocheck_build::compile_protos_with_validators;
+use prost_build::Config;
+use protify_build::set_up_validators;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=../../proto/");
-    let mut config = prost_build::Config::default();
 
-    config.out_dir("src");
-
-    // Create output directory
-    fs::create_dir_all("src").expect("could not create `src` folder");
-
-    let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
+    let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
     let proto_dir = root.join("../../proto");
 
     // Proto files
@@ -23,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let proto_http_result_type = proto_dir.join("result").join("types").join("http.proto");
     let proto_ping_result_type = proto_dir.join("result").join("types").join("ping.proto");
 
-    let proto_files = &[
+    let proto_files: Vec<PathBuf> = vec![
         proto_job,
         proto_http_job_type,
         proto_ping_job_type,
@@ -32,14 +27,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         proto_ping_result_type,
     ];
 
-    compile_protos_with_validators(
-        &mut config,
-        &proto_files.clone(),
-        &[&proto_dir],
-        &["guggr.v1"],
-    )?;
+    let out_dir = "src";
+    let descriptor_path = "src/file_descriptor_set.bin";
 
-    config.compile_protos(proto_files, &[proto_dir])?;
+    let mut config = Config::new();
+    config
+        .file_descriptor_set_path(descriptor_path)
+        // Required if you use `bytes` fields anywhere
+        .bytes(["."])
+        .out_dir(out_dir);
+
+    set_up_validators(&mut config, &proto_files, &[&proto_dir], &["guggr.v1"])?;
+
+    config.compile_protos(&proto_files, &[proto_dir])?;
 
     Ok(())
 }

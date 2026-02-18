@@ -91,10 +91,10 @@ impl MonitorPort for HttpAdapter {
 
                 HttpJobResult {
                     reachable,
-                    ip_address: ip_bytes,
+                    ip_address: ip_bytes.into(),
                     status_code,
                     latency: Some(latency.to_proto()),
-                    payload: payload.to_vec(),
+                    payload,
                 }
             }
             None => HttpJobResult {
@@ -157,10 +157,10 @@ mod tests {
                 timestamp: res.timestamp,
                 http: Some(HttpJobResult {
                     reachable: true,
-                    ip_address: vec![127, 0, 0, 1],
+                    ip_address: vec![127, 0, 0, 1].into(),
                     status_code: 200,
                     latency: res.http.as_ref().unwrap().latency,
-                    payload: vec![],
+                    payload: vec![].into(),
                 }),
                 ..Default::default()
             }
@@ -193,9 +193,9 @@ mod tests {
                 timestamp: res.timestamp,
                 http: Some(HttpJobResult {
                     reachable: false,
-                    ip_address: vec![],
+                    ip_address: vec![].into(),
                     status_code: 0,
-                    payload: vec![],
+                    payload: vec![].into(),
                     ..Default::default()
                 }),
                 ..Default::default()

@@ -4,22 +4,22 @@ pub struct HttpJobResult {
     #[prost(bool, tag = "1")]
     pub reachable: bool,
     /// Not required if unreachable
-    #[prost(bytes = "vec", tag = "2")]
-    pub ip_address: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "bytes", tag = "2")]
+    pub ip_address: ::prost::bytes::Bytes,
     #[prost(int32, tag = "3")]
     pub status_code: i32,
     #[prost(message, optional, tag = "4")]
-    pub latency: ::core::option::Option<::protocheck::types::Duration>,
-    #[prost(bytes = "vec", tag = "5")]
-    pub payload: ::prost::alloc::vec::Vec<u8>,
+    pub latency: ::core::option::Option<::protify::proto_types::Duration>,
+    #[prost(bytes = "bytes", tag = "5")]
+    pub payload: ::prost::bytes::Bytes,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PingJobResult {
     #[prost(bool, tag = "1")]
     pub reachable: bool,
     /// Not required if unreachable
-    #[prost(bytes = "vec", tag = "2")]
-    pub ip_address: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "bytes", tag = "2")]
+    pub ip_address: ::prost::bytes::Bytes,
     #[prost(message, optional, tag = "3")]
-    pub latency: ::core::option::Option<::protocheck::types::Duration>,
+    pub latency: ::core::option::Option<::protify::proto_types::Duration>,
 }

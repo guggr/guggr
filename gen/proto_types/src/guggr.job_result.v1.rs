@@ -4,7 +4,7 @@ pub struct JobResult {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
-    pub timestamp: ::core::option::Option<::protocheck::types::Timestamp>,
+    pub timestamp: ::core::option::Option<::protify::proto_types::Timestamp>,
     #[prost(string, tag = "3")]
     pub batch_id: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]

@@ -9,7 +9,7 @@ use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::PingJobResult, v1::JobResult},
 };
-use protocheck::types::Timestamp;
+use protify::proto_types::Timestamp;
 use rand::random;
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
 use tracing::{debug, error, info};
@@ -79,8 +79,12 @@ impl MonitorPort for PingAdapter {
                     ping: Some(PingJobResult {
                         reachable: true,
                         ip_address: match packet {
-                            IcmpPacket::V4(packet) => packet.get_real_dest().octets().to_vec(),
-                            IcmpPacket::V6(packet) => packet.get_real_dest().octets().to_vec(),
+                            IcmpPacket::V4(packet) => {
+                                packet.get_real_dest().octets().to_vec().into()
+                            }
+                            IcmpPacket::V6(packet) => {
+                                packet.get_real_dest().octets().to_vec().into()
+                            }
                         },
                         latency: Some(latency.to_proto()),
                     }),
@@ -103,7 +107,7 @@ impl MonitorPort for PingAdapter {
                     timestamp: Some(get_timestamp()?),
                     ping: Some(PingJobResult {
                         reachable: false,
-                        ip_address: vec![],
+                        ip_address: vec![].into(),
                         latency: None,
                     }),
                     ..Default::default()
@@ -176,7 +180,7 @@ mod tests {
                 timestamp: res.timestamp,
                 ping: Some(PingJobResult {
                     reachable: true,
-                    ip_address: vec![1, 0, 0, 1],
+                    ip_address: vec![1, 0, 0, 1].into(),
                     latency: res.ping.as_ref().unwrap().latency
                 }),
                 ..Default::default()
@@ -214,7 +218,7 @@ mod tests {
             timestamp: res.timestamp,
             ping: Some(PingJobResult {
                 reachable: true,
-                ip_address: vec![1, 0, 0, 1],
+                ip_address: vec![1, 0, 0, 1].into(),
                 latency: res.ping.as_ref().unwrap().latency,
             }),
             ..Default::default()
@@ -227,7 +231,7 @@ mod tests {
             timestamp: res.timestamp,
             ping: Some(PingJobResult {
                 reachable: true,
-                ip_address: vec![1, 1, 1, 1],
+                ip_address: vec![1, 1, 1, 1].into(),
                 latency: res.ping.as_ref().unwrap().latency,
             }),
             ..Default::default()
