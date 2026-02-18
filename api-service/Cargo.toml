@@ -13,3 +13,4 @@ diesel = { workspace = true, features = ["postgres", "chrono"] }
 tracing  = { workspace = true }
 config = { workspace = true }
 anyhow = { workspace = true }
+actix-web = { workspace = true }
