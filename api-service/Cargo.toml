@@ -9,3 +9,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 async-trait = { workspace = true }
 thiserror = { workspace = true }
 database-client = {workspace = true}
+diesel = { workspace = true, features = ["postgres", "chrono"] }
+tracing  = { workspace = true }
+config = { workspace = true }
+anyhow = { workspace = true }
