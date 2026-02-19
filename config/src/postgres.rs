@@ -2,7 +2,7 @@ use std::{env, env::VarError};
 
 use crate::{ConfigError, basic::BasicConfig, connection_url::ConnectionUrl};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PostgresConfig {
     basic: BasicConfig,
     database: String,
@@ -30,6 +30,7 @@ impl PostgresConfig {
         self.database.clone()
     }
 
+    #[must_use]
     pub fn connection_url(&self) -> String {
         self.basic
             .connection_url_builder("postgres".to_owned(), self.database())

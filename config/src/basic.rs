@@ -1,5 +1,5 @@
-#[derive(Debug, PartialEq)]
-pub(crate) struct BasicConfig {
+#[derive(Debug, PartialEq, Eq)]
+pub struct BasicConfig {
     user: String,
     password: String,
     host: String,
@@ -7,7 +7,7 @@ pub(crate) struct BasicConfig {
 }
 
 impl BasicConfig {
-    pub(crate) fn new(user: String, password: String, host: String, port: String) -> Self {
+    pub const fn new(user: String, password: String, host: String, port: String) -> Self {
         Self {
             user,
             password,
@@ -17,7 +17,7 @@ impl BasicConfig {
     }
 }
 
-pub(crate) trait BasicConfigTrait {
+pub trait BasicConfigTrait {
     fn user(&self) -> String;
     fn password(&self) -> String;
     fn host(&self) -> String;

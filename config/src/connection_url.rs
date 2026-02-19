@@ -2,7 +2,7 @@ use urlencoding::encode;
 
 use crate::basic::BasicConfigTrait;
 
-pub(crate) trait ConnectionUrl {
+pub trait ConnectionUrl {
     fn connection_url_builder(&self, protocol: String, path: String) -> String;
 }
 

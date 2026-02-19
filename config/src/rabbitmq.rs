@@ -2,7 +2,7 @@ use std::{env, env::VarError};
 
 use crate::{ConfigError, basic::BasicConfig, connection_url::ConnectionUrl};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct RabbitMQConfig {
     basic: BasicConfig,
     vhost: String,
@@ -34,10 +34,12 @@ impl RabbitMQConfig {
         })
     }
 
+    #[must_use]
     pub fn queue_names(&self) -> Vec<String> {
         self.queue_names.clone()
     }
 
+    #[must_use]
     pub fn queue_name(&self, idx: usize) -> Option<String> {
         self.queue_names.get(idx).cloned()
     }
@@ -46,7 +48,7 @@ impl RabbitMQConfig {
         self.vhost.clone()
     }
 
-    fn protocol(&self, tls: bool) -> String {
+    fn protocol(tls: bool) -> String {
         if tls {
             "amqps".to_owned()
         } else {
@@ -54,9 +56,10 @@ impl RabbitMQConfig {
         }
     }
 
+    #[must_use]
     pub fn connection_url(&self, tls: bool) -> String {
         self.basic
-            .connection_url_builder(self.protocol(tls), self.vhost())
+            .connection_url_builder(Self::protocol(tls), self.vhost())
     }
 }
 
