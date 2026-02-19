@@ -14,6 +14,7 @@ use crate::schema::*;
 )]
 #[diesel(table_name = group)]
 pub struct Group {
+    #[serde(default)]
     pub id: String,
     pub name: String,
 }
@@ -23,6 +24,7 @@ pub struct Group {
 )]
 #[diesel(table_name = job)]
 pub struct Job {
+    #[serde(default)]
     pub id: String,
     pub name: String,
     pub job_type_id: String,
@@ -38,6 +40,7 @@ pub struct Job {
 )]
 #[diesel(table_name = job_details_http)]
 pub struct JobDetailsHttp {
+    #[serde(default)]
     pub id: String,
     pub url: String,
 }
@@ -47,6 +50,7 @@ pub struct JobDetailsHttp {
 )]
 #[diesel(table_name = job_details_ping)]
 pub struct JobDetailsPing {
+    #[serde(default)]
     pub id: String,
     pub host: String,
 }
@@ -56,6 +60,7 @@ pub struct JobDetailsPing {
 )]
 #[diesel(table_name = job_result_http)]
 pub struct JobResultHttp {
+    #[serde(default)]
     pub id: String,
     pub ip_address: IpNet,
     pub status_code: i32,
@@ -68,6 +73,7 @@ pub struct JobResultHttp {
 )]
 #[diesel(table_name = job_result_ping)]
 pub struct JobResultPing {
+    #[serde(default)]
     pub id: String,
     pub ip_address: IpNet,
     pub latency: i32,
@@ -78,6 +84,7 @@ pub struct JobResultPing {
 )]
 #[diesel(table_name = job_runs)]
 pub struct JobRun {
+    #[serde(default)]
     pub id: String,
     pub job_id: String,
     pub timestamp: NaiveDateTime,
@@ -91,6 +98,7 @@ pub struct JobRun {
 )]
 #[diesel(table_name = job_type)]
 pub struct JobType {
+    #[serde(default)]
     pub id: String,
     pub name: Option<String>,
 }
@@ -100,6 +108,7 @@ pub struct JobType {
 )]
 #[diesel(table_name = role)]
 pub struct Role {
+    #[serde(default)]
     pub id: String,
     pub name: String,
 }
@@ -109,6 +118,7 @@ pub struct Role {
 )]
 #[diesel(table_name = user)]
 pub struct User {
+    #[serde(default)]
     pub id: String,
     pub name: String,
     pub email: String,
