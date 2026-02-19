@@ -10,7 +10,10 @@
 
 {#snippet group()}
 	<li class="list-row @container gap-2 p-0">
-		<details class="collapse-arrow list-col-grow collapse" name="accordion-group-list">
+		<details
+			class="collapse-arrow list-col-grow open:border-base-content/10 collapse border-2 border-transparent"
+			name="accordion-group-list"
+		>
 			<summary class="collapse-title select-none">
 				<div class="flex gap-2">
 					<UsersIcon size="24" class="text-primary/70 m-2 shrink-0" />
