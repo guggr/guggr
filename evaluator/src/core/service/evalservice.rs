@@ -294,9 +294,7 @@ mod tests {
         assert!(service.evaluate_job_result(&job).await.is_ok());
         let guard = mock_for_assert.ping_result.lock().unwrap();
         let actual = guard.as_ref().unwrap();
-        assert_eq!(actual.id, expected.id);
-        assert_eq!(actual.ip_address, expected.ip_address);
-        assert_eq!(actual.latency, expected.latency);
+        assert_eq!(actual, &expected);
     }
 
     #[tokio::test]
@@ -331,10 +329,6 @@ mod tests {
         assert!(service.evaluate_job_result(&job).await.is_ok());
         let guard = mock_for_assert.http_result.lock().unwrap();
         let actual = guard.as_ref().unwrap();
-        assert_eq!(actual.id, expected.id);
-        assert_eq!(actual.ip_address, expected.ip_address);
-        assert_eq!(actual.latency, expected.latency);
-        assert_eq!(actual.status_code, expected.status_code);
-        assert_eq!(actual.payload, expected.payload);
+        assert_eq!(actual, &expected);
     }
 }
