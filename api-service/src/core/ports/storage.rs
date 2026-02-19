@@ -14,6 +14,5 @@ pub trait CrudOperations<T> {
 
 #[async_trait]
 pub trait StoragePort: Send + Sync {
-    type GroupCrud: CrudOperations<Group>;
-    fn group(&self) -> &Self::GroupCrud;
+    fn group(&self) -> &(dyn CrudOperations<Group> + Send + Sync);
 }

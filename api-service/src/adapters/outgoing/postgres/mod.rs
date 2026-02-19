@@ -1,11 +1,14 @@
 pub mod group;
 use async_trait::async_trait;
-use database_client::{DbError, create_connection_pool};
+use database_client::{DbError, create_connection_pool, models::Group};
 use thiserror::Error;
 
 use crate::{
     adapters::outgoing::postgres::group::PostgresGroupAdapter,
-    core::{domain::errors::StorageError, ports::storage::StoragePort},
+    core::{
+        domain::errors::StorageError,
+        ports::storage::{CrudOperations, StoragePort},
+    },
 };
 pub struct PostgresAdapter {
     pub group: PostgresGroupAdapter,
@@ -36,7 +39,7 @@ impl From<PostgresAdapterError> for StorageError {
             PostgresAdapterError::Connection(e) => Self::Unavailable(e.to_string()),
             PostgresAdapterError::Pool(e) => Self::Unavailable(e.to_string()),
 
-            other => Self::Unavailable(other.to_string()),
+            other => Self::Internal(other.to_string()),
         }
     }
 }
@@ -58,8 +61,7 @@ impl PostgresAdapter {
 
 #[async_trait]
 impl StoragePort for PostgresAdapter {
-    type GroupCrud = PostgresGroupAdapter;
-    fn group(&self) -> &Self::GroupCrud {
+    fn group(&self) -> &(dyn CrudOperations<Group> + Send + Sync) {
         &self.group
     }
 }

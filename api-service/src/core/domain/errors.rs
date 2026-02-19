@@ -5,4 +5,6 @@ use thiserror::Error;
 pub enum StorageError {
     #[error("Storage is currently unavailable: {0}")]
     Unavailable(String),
+    #[error("Internal error: {0}")]
+    Internal(String),
 }
