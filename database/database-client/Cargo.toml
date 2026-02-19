@@ -11,3 +11,4 @@ diesel_migrations = { workspace = true, features = ["postgres"] }
 ipnet = { workspace = true , features = ["serde"] }
 thiserror = { workspace = true }
 serde = { workspace = true }
+utoipa = { workspace = true , features = ["chrono"] }
