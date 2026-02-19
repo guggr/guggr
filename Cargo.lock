@@ -1210,6 +1210,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "ipnet",
+ "serde",
  "thiserror 2.0.18",
 ]
 
@@ -2256,6 +2257,9 @@ name = "ipnet"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "iri-string"
@@ -3025,9 +3029,9 @@ dependencies = [
 
 [[package]]
 name = "protify"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1cbf4b6493d5cce933bc2b32404aaa10adca32c7aae43ecc6a7e2594de171e0"
+checksum = "7cf300d253c57fc321cf1e0689fd64e20b661b9f8c9b9342f9549471a1f7fb0c"
 dependencies = [
  "askama",
  "bon",
@@ -3069,9 +3073,9 @@ dependencies = [
 
 [[package]]
 name = "protify-proc-macro"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a2146033faf99be55c4b9e74b9b35498b53441fdbe13bc40ba7ce4b868ba3ea"
+checksum = "f4235403de2f96e00a567f3c3605b7701252fa048e003bce6b2b9e3cd3398f18"
 dependencies = [
  "bool-enum",
  "bytes",
@@ -3682,6 +3686,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "chrono",
  "config",
  "database-client",
  "deadpool-lapin",

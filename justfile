@@ -28,12 +28,12 @@ check: fmt lint test
 # Format the source code
 [group('bundle')]
 [parallel]
-fmt: fmt-rust fmt-pnpm fmt-go
+fmt: fmt-rust fmt-pnpm
 
 # Lint the source code
 [group('bundle')]
 [parallel]
-lint: lint-rust lint-go
+lint: lint-rust
 
 # Test the source code
 [group('bundle')]
@@ -49,18 +49,6 @@ rust: fmt-rust lint-rust test-rust autoinherit machete
 [group('format')]
 fmt-pnpm:
 	pnpm prettier . -w --log-level warn
-
-# Run golangci-lint fmt
-[group('go')]
-[group('format')]
-fmt-go:
-	golangci-lint fmt .
-
-# Run golangci-lint
-[group('go')]
-[group('lint')]
-lint-go:
-	golangci-lint run .
 
 # Run rustfmt
 [group('rust')]

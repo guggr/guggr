@@ -33,20 +33,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: golangci-fmt
-        name: run golangci-lint fmt
-        types: [go]
-        language: system
-        entry: golangci-lint fmt -d
-        pass_filenames: false
-
-      - id: golangci-lint
-        name: run golangci-lint
-        types: [go]
-        language: system
-        entry: golangci-lint run api-service
-        pass_filenames: false
-
       - id: prettier-check
         name: run pnpm check
         language: system

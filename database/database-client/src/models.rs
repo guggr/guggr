@@ -3,48 +3,64 @@
 #![allow(unused)]
 #![allow(clippy::all)]
 
-use chrono::NaiveDateTime;
-use diesel::{data_types::PgInterval, prelude::*};
+use chrono::{Duration, NaiveDateTime};
+use diesel::prelude::*;
 use ipnet::IpNet;
+use serde::{Deserialize, Serialize};
 
 use crate::schema::*;
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = group)]
 pub struct Group {
+    #[serde(default)]
     pub id: String,
     pub name: String,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job)]
 pub struct Job {
+    #[serde(default)]
     pub id: String,
     pub name: String,
     pub job_type_id: String,
     pub group_id: String,
     pub notify_users: bool,
     pub custom_notification: Option<String>,
-    pub run_every: PgInterval,
+    pub run_every: Duration,
     pub last_scheduled: Option<NaiveDateTime>,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_details_http)]
 pub struct JobDetailsHttp {
+    #[serde(default)]
     pub id: String,
     pub url: String,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_details_ping)]
 pub struct JobDetailsPing {
+    #[serde(default)]
     pub id: String,
     pub host: String,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_result_http)]
 pub struct JobResultHttp {
+    #[serde(default)]
     pub id: String,
     pub ip_address: IpNet,
     pub status_code: i32,
@@ -52,17 +68,23 @@ pub struct JobResultHttp {
     pub payload: Vec<u8>,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_result_ping)]
 pub struct JobResultPing {
+    #[serde(default)]
     pub id: String,
     pub ip_address: IpNet,
     pub latency: i32,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_runs)]
 pub struct JobRun {
+    #[serde(default)]
     pub id: String,
     pub job_id: String,
     pub timestamp: NaiveDateTime,
@@ -71,30 +93,41 @@ pub struct JobRun {
     pub reachable: bool,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = job_type)]
 pub struct JobType {
+    #[serde(default)]
     pub id: String,
     pub name: Option<String>,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = role)]
 pub struct Role {
+    #[serde(default)]
     pub id: String,
     pub name: String,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(table_name = user)]
 pub struct User {
+    #[serde(default)]
     pub id: String,
     pub name: String,
     pub email: String,
     pub password: String,
 }
 
-#[derive(Queryable, Debug, Identifiable, Insertable)]
+#[derive(
+    Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 #[diesel(primary_key(user_id, group_id))]
 #[diesel(table_name = user_group_mapping)]
 pub struct UserGroupMapping {

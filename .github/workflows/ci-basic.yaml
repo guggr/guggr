@@ -58,10 +58,6 @@ jobs:
               - '!charts/**'
             frontend:
               - frontend/web/**
-            go:
-              - '**/*.go'
-              - '**/go.sum'
-              - '**/go.mod'
             helm: charts/**
 
   pnpm-fmt:
@@ -97,22 +93,6 @@ jobs:
       - name: Test build
         working-directory: frontend/web
         run: pnpm build
-
-  go-lint:
-    if: ${{ false }} # wait for go setup so this does not fail
-    name: 🐛 formatting & linting - go
-    # needs: changes
-    # if: ${{ needs.changes.outputs.go == 'true' }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-go@v6.2.0
-        with:
-          go-version-file: 'go.work'
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version-file: .tool-versions
 
   cargo-fmt:
     name: 🐛 formatting - cargo nightly
