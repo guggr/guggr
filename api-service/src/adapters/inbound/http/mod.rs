@@ -2,8 +2,9 @@ pub mod groups;
 
 use std::sync::Arc;
 
-use actix_web::{App, HttpResponse, Responder, web};
+use actix_web::{App, HttpResponse, Responder, get, web};
 use tracing::debug;
+use utoipa::ToSchema;
 
 use crate::core::{domain::errors::StorageError, ports::storage::StoragePort};
 
@@ -20,20 +21,23 @@ pub fn app(
 > {
     debug!("creating new app");
     App::new().app_data(api).service(
-        web::scope("/api/v1")
-            .route("/ping", web::get().to(health))
-            .service(
-                web::scope("/groups")
-                    .route("", web::post().to(groups::create))
-                    .route("", web::get().to(groups::list))
-                    .route("/{id}", web::get().to(groups::get))
-                    .route("/{id}", web::put().to(groups::update))
-                    .route("/{id}", web::delete().to(groups::delete)),
-            ),
+        web::scope("/api/v1").service(ping).service(
+            web::scope("/groups")
+                .service(groups::create)
+                .service(groups::list)
+                .service(groups::get)
+                .service(groups::update)
+                .service(groups::delete),
+        ),
     )
 }
-
-async fn health() -> impl Responder {
+#[utoipa::path(
+    responses(
+        (status = 200, description = "pong"),
+    ),
+)]
+#[get("/ping")]
+async fn ping() -> impl Responder {
     HttpResponse::Ok().body("pong")
 }
 
@@ -46,7 +50,7 @@ fn map_storage_error(err: StorageError) -> HttpResponse {
     }
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, ToSchema)]
 struct ErrorBody {
     code: &'static str,
     message: String,

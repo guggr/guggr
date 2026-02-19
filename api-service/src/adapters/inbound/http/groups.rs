@@ -1,11 +1,23 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{HttpResponse, Responder, delete, get, post, put, web};
 use database_client::models::Group;
 use nanoid::nanoid;
 
-use crate::{adapters::inbound::http::map_storage_error, core::ports::storage::StoragePort};
+use crate::{
+    adapters::inbound::http::{ErrorBody, map_storage_error},
+    core::ports::storage::StoragePort,
+};
 
+#[utoipa::path(
+    request_body = Group,
+    responses(
+        (status = 201, description = "Created group", body = Group),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "groups"
+)]
+#[post("")]
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: web::Json<Group>,
@@ -18,6 +30,14 @@ pub async fn create(
     }
 }
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "List groups", body = [Group]),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "groups"
+)]
+#[get("")]
 pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     match api.group().list(5).await {
         Ok(groups) => HttpResponse::Ok().json(groups),
@@ -25,6 +45,17 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     }
 }
 
+#[utoipa::path(
+    params(
+        ("id" = String, Path, description = "Group id")
+    ),
+    responses(
+        (status = 200, description = "Group (or null if not found)", body = Option<Group>),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "groups"
+)]
+#[get("/{id}")]
 pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) -> impl Responder {
     let id = path.into_inner();
     match api.group().get_by_id(&id).await {
@@ -33,6 +64,18 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     }
 }
 
+#[utoipa::path(
+    params(
+        ("id" = String, Path, description = "Group id")
+    ),
+    request_body = Group,
+    responses(
+        (status = 200, description = "Updated group", body = Group),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "groups"
+)]
+#[put("/{id}")]
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -44,7 +87,17 @@ pub async fn update(
         Err(e) => map_storage_error(e),
     }
 }
-
+#[utoipa::path(
+    params(
+        ("id" = String, Path, description = "Group id")
+    ),
+    responses(
+        (status = 204, description = "Deleted"),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "groups"
+)]
+#[delete("/{id}")]
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,

@@ -16,3 +16,5 @@ anyhow = { workspace = true }
 actix-web = { workspace = true }
 serde = {workspace = true}
 nanoid = {workspace = true}
+utoipa = { workspace = true , features = ["actix_extras"] }
+utoipa-actix-web = { workspace = true }
