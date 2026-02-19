@@ -20,7 +20,7 @@
 		"@tailwindcss/vite": "^4.2.0",
 		"astro": "^5.17.2",
 		"daisyui": "^5.5.18",
-		"svelte": "^5.51.3",
+		"svelte": "^5.53.0",
 		"svelte-check": "^4.4.0",
 		"tailwindcss": "^4.2.0",
 		"typescript": "^5.9.3"
