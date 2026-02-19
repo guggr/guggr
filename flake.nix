@@ -41,13 +41,9 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              go
-              gopls
-              golangci-lint
               just
               pnpm
               nodejs_24
-              buf
               trufflehog
               prek
               kubernetes-helm
