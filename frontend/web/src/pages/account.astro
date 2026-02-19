@@ -1,7 +1,7 @@
 ---
 import EditAccountForm from '@/components/account/EditAccountForm.svelte';
 import PageLayout from '@/layout/PageLayout.astro';
-import { UserIcon } from '@lucide/svelte';
+import { KeySquareIcon, UserIcon } from '@lucide/svelte';
 ---
 
 <PageLayout>
@@ -22,6 +22,28 @@ import { UserIcon } from '@lucide/svelte';
 
 				<EditAccountForm client:load />
 			</div>
+		</section>
+
+		<section>
+			<h2 class="text-lg font-bold">Security</h2>
+
+			<ul class="list">
+				<li class="list-row items-baseline">
+					<div class="self-center">
+						<KeySquareIcon class="text-primary/70" />
+					</div>
+
+					<div>Sign in with password</div>
+
+					<div class="list-col-grow">
+						<span class="badge badge-success badge-soft">Enabled</span>
+					</div>
+
+					<a href="/account/password/change" class="btn btn-soft btn-sm">
+						Change password
+					</a>
+				</li>
+			</ul>
 		</section>
 	</main>
 </PageLayout>
