@@ -134,16 +134,22 @@ pub fn generate_run_id() -> String {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[tokio::test]
     async fn test_resolve_domain_success() {
         let domain = String::from("one.one.one.one");
         let resolved = resolve_domain(domain).await;
-        assert!(
-            resolved == Some(IpAddr::from([1, 0, 0, 1]))
-                || resolved == Some(IpAddr::from([1, 1, 1, 1])),
-        );
+        match resolved.unwrap() {
+            IpAddr::V4(ipv4_addr) => assert!(
+                ipv4_addr == IpAddr::from([1, 0, 0, 1]) || ipv4_addr == IpAddr::from([1, 1, 1, 1])
+            ),
+            IpAddr::V6(ipv6_addr) => assert!(
+                ipv6_addr == "2606:4700:4700::1001".parse::<IpAddr>().unwrap()
+                    || ipv6_addr == "2606:4700:4700::1111".parse::<IpAddr>().unwrap()
+            ),
+        }
     }
 
     #[tokio::test]
