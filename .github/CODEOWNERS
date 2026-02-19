@@ -1,6 +1,5 @@
 *               @guggr-dev
 
-api-service/	@tametsi
 frontend/		@tametsi
 package.json	@tametsi
 pnpm-lock.yaml	@tametsi
@@ -16,6 +15,7 @@ Dockerfile.*            @melo-afk
 compose.yaml            @melo-afk
 Cargo.toml              @melo-afk
 Cargo.lock              @melo-afk
+api-service/            @melo-afk
 
 agent/		@philxws692
 flake.lock	@philxws692
