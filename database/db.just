@@ -37,13 +37,14 @@ models:
     diesel_ext --model \
         --import-types "diesel::prelude::*" \
         --import-types "crate::schema::*" \
+        --import-types "serde::{Deserialize, Serialize}" \
         --import-types "diesel::data_types::PgInterval" \
         --add-table-name \
         --schema-file {{ schema_file }} \
         --map "Interval PgInterval" \
         > {{ models_file }}
 
-    sed -i 's/Identifiable/Identifiable, Insertable/' {{ models_file }}
+    sed -i 's/Identifiable/Identifiable, Insertable, PartialEq, Eq, Clone,Serialize, Deserialize/' {{ models_file }}
     sed -i 's/use ipnetwork::IpNetwork;/use ipnet::IpNet;/' {{ models_file }}
     sed -i 's/IpNetwork/IpNet/' {{ models_file }}
     @just fmt-rust
