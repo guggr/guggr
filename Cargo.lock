@@ -361,6 +361,8 @@ dependencies = [
  "config",
  "database-client",
  "diesel",
+ "nanoid",
+ "serde",
  "thiserror 2.0.18",
  "tracing",
  "tracing-subscriber",

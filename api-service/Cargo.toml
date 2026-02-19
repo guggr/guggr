@@ -14,3 +14,5 @@ tracing  = { workspace = true }
 config = { workspace = true }
 anyhow = { workspace = true }
 actix-web = { workspace = true }
+serde = {workspace = true}
+nanoid = {workspace = true}
