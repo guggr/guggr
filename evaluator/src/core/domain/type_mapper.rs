@@ -227,9 +227,7 @@ mod tests {
         };
 
         let res = JobResultPing::from_protobuf_type("abc", &ping_job).unwrap();
-        assert_eq!(res.id, expected.id);
-        assert_eq!(res.ip_address, expected.ip_address);
-        assert_eq!(res.latency, expected.latency);
+        assert_eq!(res, expected);
     }
 
     #[test]
@@ -249,10 +247,6 @@ mod tests {
         };
 
         let res = JobResultHttp::from_protobuf_type("abc", &http_job).unwrap();
-        assert_eq!(res.id, expected.id);
-        assert_eq!(res.ip_address, expected.ip_address);
-        assert_eq!(res.latency, expected.latency);
-        assert_eq!(res.status_code, expected.status_code);
-        assert_eq!(res.payload, expected.payload);
+        assert_eq!(res, expected);
     }
 }
