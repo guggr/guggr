@@ -3,8 +3,8 @@
 #![allow(unused)]
 #![allow(clippy::all)]
 
-use chrono::NaiveDateTime;
-use diesel::{data_types::PgInterval, prelude::*};
+use chrono::{Duration, NaiveDateTime};
+use diesel::prelude::*;
 use ipnet::IpNet;
 use serde::{Deserialize, Serialize};
 
@@ -29,7 +29,7 @@ pub struct Job {
     pub group_id: String,
     pub notify_users: bool,
     pub custom_notification: Option<String>,
-    pub run_every: PgInterval,
+    pub run_every: Duration,
     pub last_scheduled: Option<NaiveDateTime>,
 }
 

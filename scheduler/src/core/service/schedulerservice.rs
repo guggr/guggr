@@ -84,8 +84,8 @@ mod tests {
     };
 
     use async_trait::async_trait;
+    use chrono::Duration;
     use database_client::models::Job;
-    use diesel::data_types::PgInterval;
 
     use super::*;
     use crate::{core::domain::type_mapper::DatabaseJob, telemetry::init_tracing};
@@ -99,11 +99,7 @@ mod tests {
                 name: "".to_owned(),
                 last_scheduled: None,
                 notify_users: false,
-                run_every: PgInterval {
-                    months: 0,
-                    days: 0,
-                    microseconds: 5000,
-                },
+                run_every: Duration::new(0, 5000000).unwrap(),
                 custom_notification: None,
             },
             None,

@@ -38,10 +38,10 @@ models:
         --import-types "diesel::prelude::*" \
         --import-types "crate::schema::*" \
         --import-types "serde::{Deserialize, Serialize}" \
-        --import-types "diesel::data_types::PgInterval" \
+        --import-types "chrono::Duration" \
         --add-table-name \
         --schema-file {{ schema_file }} \
-        --map "Interval PgInterval" \
+        --map "Interval Duration" \
         > {{ models_file }}
 
     sed -i 's/Identifiable/Identifiable, Insertable, PartialEq, Eq, Clone,Serialize, Deserialize/' {{ models_file }}
