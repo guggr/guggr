@@ -8,7 +8,7 @@ use diesel::{
 
 use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
-    core::{domain::errors::StorageError, ports::storage::Crud},
+    core::{domain::errors::StorageError, ports::storage::CrudOperations},
 };
 
 /// Sub-adapter of `PostgresAdapter`. Handles CRUD for the `group` table
@@ -23,7 +23,7 @@ impl PostgresGroupAdapter {
 }
 
 #[async_trait]
-impl Crud<Group> for PostgresGroupAdapter {
+impl CrudOperations<Group> for PostgresGroupAdapter {
     async fn create(&self, new_value: Group) -> Result<(), StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;

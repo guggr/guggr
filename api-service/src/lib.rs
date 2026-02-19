@@ -4,7 +4,7 @@ pub mod telemetry;
 
 use database_client::models::Group;
 
-use crate::{adapters::outgoing::postgres::PostgresAdapter, core::ports::storage::Crud};
+use crate::{adapters::outgoing::postgres::PostgresAdapter, core::ports::storage::CrudOperations};
 
 /// TODO delete this
 pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {

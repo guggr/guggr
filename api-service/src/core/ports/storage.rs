@@ -4,7 +4,7 @@ use database_client::models::Group;
 use crate::core::domain::errors::StorageError;
 
 #[async_trait]
-pub trait Crud<T> {
+pub trait CrudOperations<T> {
     async fn create(&self, new_value: T) -> Result<(), StorageError>;
     async fn update(&self, update_value: T) -> Result<(), StorageError>;
     async fn get_by_id(&self, id: &str) -> Result<Option<T>, StorageError>;
@@ -14,6 +14,6 @@ pub trait Crud<T> {
 
 #[async_trait]
 pub trait StoragePort: Send + Sync {
-    type GroupCrud: Crud<Group>;
+    type GroupCrud: CrudOperations<Group>;
     fn group(&self) -> &Self::GroupCrud;
 }
