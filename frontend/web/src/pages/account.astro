@@ -1,5 +1,6 @@
 ---
 import EditAccountForm from '@/components/account/EditAccountForm.svelte';
+import SettingsForm from '@/components/account/SettingsForm.svelte';
 import PageLayout from '@/layout/PageLayout.astro';
 import { KeySquareIcon, UserIcon } from '@lucide/svelte';
 ---
@@ -44,6 +45,13 @@ import { KeySquareIcon, UserIcon } from '@lucide/svelte';
 					</a>
 				</li>
 			</ul>
+		</section>
+
+		<section>
+			<h2 class="text-lg font-bold">Settings</h2>
+
+			{/* settings involves calls to localStorage, hence client-only */}
+			<SettingsForm client:only />
 		</section>
 	</main>
 </PageLayout>

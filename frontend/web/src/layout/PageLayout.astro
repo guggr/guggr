@@ -1,6 +1,7 @@
 ---
 import Footer from '@/components/shared/Footer.astro';
 import Navbar from '@/components/shared/Navbar.astro';
+import ThemeHandler from '@/components/ThemeHandler.svelte';
 import '@/style.css';
 
 const { title } = Astro.props;
@@ -29,4 +30,6 @@ interface Props {
 
 		<Footer />
 	</body>
+
+	<ThemeHandler client:only />
 </html>
