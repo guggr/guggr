@@ -149,10 +149,6 @@ mod tests {
                     || ipv6_addr == "2606:4700:4700::1111".parse::<IpAddr>().unwrap(),
             ),
         }
-        assert!(
-            resolved == Some(IpAddr::from([1, 0, 0, 1]))
-                || resolved == Some(IpAddr::from([1, 1, 1, 1])),
-        );
     }
 
     #[tokio::test]
