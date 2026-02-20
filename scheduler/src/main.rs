@@ -28,16 +28,16 @@ async fn main() -> Result<()> {
 
     debug!("initializing postgres fetcher and running pending migrations on the database");
     let fetcher = Arc::from(
-        PostgresFetcher::new(&db_config.postgres_connection_url())
+        PostgresFetcher::new(&db_config.connection_url())
             .context("while initializing postgres fetcher")?,
     );
 
     debug!("initializing publisher");
     let publisher = Arc::from(
         RabbitMQPublisher::new(
-            &rabbitmq_config.rabbitmq_connection_url(false),
+            &rabbitmq_config.connection_url(false),
             rabbitmq_config
-                .rabbitmq_queue_name(0)
+                .queue_name(0)
                 .context("while getting scheduler queue name")?,
         )
         .context("while initializing rabbitmq publisher")?,

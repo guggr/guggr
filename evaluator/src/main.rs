@@ -24,11 +24,11 @@ async fn main() -> Result<()> {
 
     debug!("creating rabbitmq pool");
     let rabbitmq_pool =
-        evaluator::create_rabbitmq_pool(&rabbitmq_config.rabbitmq_connection_url(false)).await?;
+        evaluator::create_rabbitmq_pool(&rabbitmq_config.connection_url(false)).await?;
 
     debug!("initializing postgres adapter and running pending migrations on the database");
     let postgres_adapter = Arc::from(
-        PostgresAdapter::new(&db_config.postgres_connection_url())
+        PostgresAdapter::new(&db_config.connection_url())
             .context("while initializing postgres fetcher")?,
     );
 
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let rabbitmq_driver = RabbitMQDriver::new(
         service,
         rabbitmq_pool.clone(),
-        rabbitmq_config.rabbitmq_queue_name(0).unwrap(),
+        rabbitmq_config.queue_name(0).unwrap(),
     );
     rabbitmq_driver.setup_schema().await?;
 

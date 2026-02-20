@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let agent_config = AgentConfig::from_env();
 
     let rabbitmq_pool =
-        agent::create_rabbitmq_pool(&rabbit_mq_config.rabbitmq_connection_url(false)).await?;
+        agent::create_rabbitmq_pool(&rabbit_mq_config.connection_url(false)).await?;
 
     // Outbound adapter
     let http_adapter = Arc::new(HttpAdapter::new(
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     ));
     let rabbitmq_publisher = Arc::new(RabbitMQPublisher::new(
         rabbitmq_pool.clone(),
-        rabbit_mq_config.rabbitmq_queue_name(1).unwrap(),
+        rabbit_mq_config.queue_name(1).unwrap(),
     ));
 
     rabbitmq_publisher.setup_queue().await?;
@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Inbound adapter
     let rabbitmq_driver = RabbitMQDriver::new(
         rabbitmq_pool.clone(),
-        rabbit_mq_config.rabbitmq_queue_name(0).unwrap(),
+        rabbit_mq_config.queue_name(0).unwrap(),
         job_service,
     );
     rabbitmq_driver.setup_queues().await?;
