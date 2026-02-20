@@ -1,0 +1,119 @@
+name: build and publish container images
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ${{ github.repository }}
+
+jobs:
+  build-buildcache:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Log in to GHCR
+        uses: docker/login-action@v3.7.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.12.0
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5.10.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache
+          tags: |
+            type=ref,event=tag
+            type=sha,format=long,prefix=sha-
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Build and push buildcache
+        id: push
+        uses: docker/build-push-action@v6.19.2
+        with:
+          context: .
+          file: Dockerfile.rust
+          target: buildcache
+          push: true
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache:latest
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache:latest,mode=max
+
+  build-and-push:
+    runs-on: ubuntu-24.04
+    needs: build-buildcache
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ['agent', 'scheduler', 'evaluator', 'frontend']
+        include:
+          - service: agent
+            dockerfile: Dockerfile.rust
+            image: agent
+          - service: scheduler
+            dockerfile: Dockerfile.rust
+            image: scheduler
+          - service: evaluator
+            dockerfile: Dockerfile.rust
+            image: evaluator
+          - service: frontend
+            dockerfile: Dockerfile.frontend
+            image: frontend
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Log in to GHCR
+        uses: docker/login-action@v3.7.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.12.0
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5.10.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/${{ matrix.image }}
+          tags: |
+            type=ref,event=tag
+            type=sha,format=long,prefix=sha-
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          flavor: |
+            latest=false
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v6.19.2
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          sbom: true
+          build-args: |
+            BIN=${{ matrix.service }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache:latest
