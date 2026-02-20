@@ -28,16 +28,9 @@ pub fn app(
         .service(
             utoipa_actix_web::scope("/api/v1")
                 .service(ping)
-                .service(
-                    utoipa_actix_web::scope("/groups")
-                        .service(groups::create)
-                        .service(groups::list)
-                        .service(groups::get)
-                        .service(groups::delete)
-                        .service(groups::update),
-                )
                 .service(openapi_json_redirect)
-                .service(swagger_ui_redirect),
+                .service(swagger_ui_redirect)
+                .configure(groups::configure),
         )
         .openapi_service(|api| {
             SwaggerUi::new("/api/swagger-ui/{_:.*}").url("/api/openapi.json", api)

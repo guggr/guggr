@@ -3,11 +3,23 @@ use std::sync::Arc;
 use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use database_client::models::Group;
 use nanoid::nanoid;
+use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
     adapters::inbound::http::{ErrorBody, map_storage_error},
     core::ports::storage::StoragePort,
 };
+
+pub fn configure(cfg: &mut ServiceConfig) {
+    let scope = utoipa_actix_web::scope("/groups")
+        .service(create)
+        .service(list)
+        .service(get)
+        .service(delete)
+        .service(update);
+
+    cfg.service(scope);
+}
 
 #[utoipa::path(
     request_body = Group,
