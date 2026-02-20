@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, delete, get, patch, post, put, web};
+use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use database_client::models::Group;
 use nanoid::nanoid;
 
@@ -76,7 +76,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     ),
     tag = "groups"
 )]
-#[put("/{id}")]
+#[patch("/{id}")]
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
