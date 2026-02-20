@@ -2718,9 +2718,9 @@ dependencies = [
 
 [[package]]
 name = "proto-types"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31acd1c07849509a328768d39cd8cb98d855075804b6fa9cd5cb3e325ef26e85"
+checksum = "b104d2c35d0e58a34b6a50bd6314e0a0a1c237be8ab77bd9b865ca59a8c58fa9"
 dependencies = [
  "base64",
  "bytes",
