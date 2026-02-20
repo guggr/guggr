@@ -12,7 +12,7 @@ use gen_proto_types::{
 use protify::proto_types::Timestamp;
 use rand::random;
 use surge_ping::{Client, Config, IcmpPacket, PingIdentifier, PingSequence};
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, trace};
 
 use crate::core::{
     ports::monitor::MonitorPort,
@@ -51,11 +51,20 @@ impl MonitorPort for PingAdapter {
             job.id, ping_details.host
         );
 
-        let client = Client::new(&Config::default())
-            .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
-
         // Check if domain provided or IP
         let host_ip = get_pinger_host(ping_details.host.clone()).await?;
+
+        let mut config_builder = Config::builder();
+
+        // Adjust config if IPv6 is provided
+        if host_ip.is_ipv6() {
+            trace!("received ipv6 address: {}", host_ip);
+            config_builder = config_builder.kind(surge_ping::ICMP::V6);
+        }
+
+        let config = config_builder.build();
+        let client = Client::new(&config)
+            .map_err(|e| JobServiceError::AgentIssue(AgentError::Ping(e.into()).into()))?;
 
         let mut pinger = client.pinger(host_ip, PingIdentifier(random())).await;
 
@@ -92,6 +101,7 @@ impl MonitorPort for PingAdapter {
                 }
             }
             Err(e) => {
+                debug!("error while pinging endpoint: {}", e);
                 if self.backup_endpoint.is_some() {
                     pinger.host = get_pinger_host(ping_details.host.clone()).await?;
                     if pinger.ping(PingSequence(0), &[0; 8]).await.is_err() {
@@ -144,6 +154,9 @@ async fn get_pinger_host(host: String) -> Result<IpAddr, JobServiceError> {
 
 #[cfg(test)]
 mod tests {
+    use std::net::Ipv6Addr;
+
+    use agent::init_tracing;
     use gen_proto_types::job::{types::v1::PingJobType, v1::JobType};
 
     use super::*;
@@ -181,6 +194,48 @@ mod tests {
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![1, 0, 0, 1].into(),
+                    latency: res.ping.as_ref().unwrap().latency
+                }),
+                ..Default::default()
+            }
+        )
+    }
+
+    /// Checks Ping Job with valid ipv6 address and listens for `reachable ==
+    /// true` with `ip_address == 2606:4700:4700::1001`
+    ///
+    /// Prefix is needed for nextest to exclude this test in the CI workflows,
+    /// since there occur problems with permissions when running in Github
+    /// Actions
+    #[tokio::test]
+    async fn no_ci_test_ping_success_ipv6() {
+        let job = Job {
+            id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+            job_type: JobType::Ping.into(),
+            ping: Some(PingJobType {
+                host: "::1".to_string(),
+            }),
+            ..Default::default()
+        };
+
+        init_tracing();
+
+        let run_id = "agent-test-xutjQ15iP2MsMEuVfhQng".to_string();
+
+        let ping_adapter = PingAdapter::new(None);
+        let res = ping_adapter.execute(&job, run_id.clone()).await.unwrap();
+        assert_eq!(
+            res,
+            JobResult {
+                id: "cjz-BKp5cg6lsjMjYNz3R".to_string(),
+                batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+                run_id,
+                // Needed since timestamps would be too accurate
+                timestamp: res.timestamp,
+                ping: Some(PingJobResult {
+                    reachable: true,
+                    ip_address: vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1].into(),
                     latency: res.ping.as_ref().unwrap().latency
                 }),
                 ..Default::default()
@@ -226,7 +281,7 @@ mod tests {
         let expected_result_alt_2 = JobResult {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
             batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
-            run_id,
+            run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
             ping: Some(PingJobResult {
@@ -236,7 +291,42 @@ mod tests {
             }),
             ..Default::default()
         };
-        assert!(res == expected_result_alt_1 || res == expected_result_alt_2)
+
+        let first_ipv6_addr = "2606:4700:4700::1001".parse::<Ipv6Addr>().unwrap();
+        let expected_result_alt_3 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+            run_id: run_id.clone(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: first_ipv6_addr.octets().to_vec().into(),
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+
+        let second_ipv6_addr = "2606:4700:4700::1111".parse::<Ipv6Addr>().unwrap();
+        let expected_result_alt_4 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+            run_id: run_id.clone(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: second_ipv6_addr.octets().to_vec().into(),
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+        assert!(
+            res == expected_result_alt_1
+                || res == expected_result_alt_2
+                || res == expected_result_alt_3
+                || res == expected_result_alt_4
+        )
     }
 
     /// Checks for `reachable == false` for not reachable IPs
