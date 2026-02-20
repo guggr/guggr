@@ -4,28 +4,46 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
 
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
 
   - package-ecosystem: 'helm'
     directory: '/charts'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
 
   - package-ecosystem: 'cargo'
     directory: '/'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
 
   - package-ecosystem: 'cargo'
     directory: '/.dummy'
     schedule:
       interval: 'weekly'
+      day: 'thursday'
+      time: '15:00'
+      timezone: 'Europe/Berlin'
