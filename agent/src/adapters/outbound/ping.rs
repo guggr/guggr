@@ -154,6 +154,8 @@ async fn get_pinger_host(host: String) -> Result<IpAddr, JobServiceError> {
 
 #[cfg(test)]
 mod tests {
+    use std::net::Ipv6Addr;
+
     use agent::init_tracing;
     use gen_proto_types::job::{types::v1::PingJobType, v1::JobType};
 
@@ -279,7 +281,7 @@ mod tests {
         let expected_result_alt_2 = JobResult {
             id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
             batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
-            run_id,
+            run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
             ping: Some(PingJobResult {
@@ -289,7 +291,42 @@ mod tests {
             }),
             ..Default::default()
         };
-        assert!(res == expected_result_alt_1 || res == expected_result_alt_2)
+
+        let first_ipv6_addr = "2606:4700:4700::1001".parse::<Ipv6Addr>().unwrap();
+        let expected_result_alt_3 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+            run_id: run_id.clone(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: first_ipv6_addr.octets().to_vec().into(),
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+
+        let second_ipv6_addr = "2606:4700:4700::1111".parse::<Ipv6Addr>().unwrap();
+        let expected_result_alt_4 = JobResult {
+            id: "lNhirp0h2nBY0Xb6BMT1B".to_string(),
+            batch_id: "slaXBvDDWLYFPkQ7wN0mb".to_string(),
+            run_id: run_id.clone(),
+            // Needed since timestamps would be too accurate
+            timestamp: res.timestamp,
+            ping: Some(PingJobResult {
+                reachable: true,
+                ip_address: second_ipv6_addr.octets().to_vec().into(),
+                latency: res.ping.as_ref().unwrap().latency,
+            }),
+            ..Default::default()
+        };
+        assert!(
+            res == expected_result_alt_1
+                || res == expected_result_alt_2
+                || res == expected_result_alt_3
+                || res == expected_result_alt_4
+        )
     }
 
     /// Checks for `reachable == false` for not reachable IPs
