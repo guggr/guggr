@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, delete, get, post, put, web};
+use actix_web::{HttpResponse, Responder, delete, get, patch, post, put, web};
 use database_client::models::Group;
 use nanoid::nanoid;
 
@@ -59,7 +59,8 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
 pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) -> impl Responder {
     let id = path.into_inner();
     match api.group().get_by_id(&id).await {
-        Ok(group) => HttpResponse::Ok().json(group),
+        Ok(Some(group)) => HttpResponse::Ok().json(group),
+        Ok(None) => HttpResponse::NotFound().json("not found"),
         Err(e) => map_storage_error(e),
     }
 }
