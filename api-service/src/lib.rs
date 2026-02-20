@@ -2,18 +2,9 @@ pub mod adapters;
 pub mod core;
 pub mod telemetry;
 
-use actix_web::App;
 use database_client::models::Group;
-use utoipa::openapi::OpenApi;
-use utoipa_actix_web::{AppExt, scope};
 
-use crate::{
-    adapters::{
-        inbound::http::{groups, ping},
-        outgoing::postgres::PostgresAdapter,
-    },
-    core::ports::storage::CrudOperations,
-};
+use crate::{adapters::outgoing::postgres::PostgresAdapter, core::ports::storage::CrudOperations};
 
 /// TODO delete this
 pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
@@ -46,21 +37,4 @@ pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
     dbg!(r);
 
     Ok(())
-}
-
-pub fn generate_open_api() -> OpenApi {
-    let (_, api) = App::new()
-        .into_utoipa_app()
-        .service(
-            scope::scope("/api/v1").service(ping).service(
-                scope::scope("/groups")
-                    .service(groups::create)
-                    .service(groups::list)
-                    .service(groups::get)
-                    .service(groups::update)
-                    .service(groups::delete),
-            ),
-        )
-        .split_for_parts();
-    api
 }
