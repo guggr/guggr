@@ -6,7 +6,6 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
 };
 use frunk::labelled::Transmogrifier;
-use tracing::info;
 
 use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
@@ -55,7 +54,6 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
     async fn get_by_id(&self, id: &str) -> Result<Option<DisplayGroup>, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        info!("aaaa");
         match group.find(id).first::<models::Group>(&mut conn) {
             Ok(row) => Ok(Some(row.transmogrify())),
             Err(diesel::result::Error::NotFound) => Ok(None),
