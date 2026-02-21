@@ -194,6 +194,6 @@ jobs:
           ref: ${{needs.fetch-depth.outputs.branch}}
           fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@v3.93.3
+        uses: trufflesecurity/trufflehog@v3.93.4
         with:
           extra_args: --results=verified,unknown

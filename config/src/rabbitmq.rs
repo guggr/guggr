@@ -1,18 +1,12 @@
 use std::{env, env::VarError};
 
-use urlencoding::encode;
+use crate::{ConfigError, basic::BasicConfig, connection_url::ConnectionUrl};
 
-use crate::ConfigError;
-
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct RabbitMQConfig {
-    rabbitmq_user: String,
-    rabbitmq_password: String,
-    rabbitmq_host: String,
-    rabbitmq_port: String,
-    rabbitmq_vhost: Option<String>,
-
-    rabbitmq_queue_names: Vec<String>,
+    basic: BasicConfig,
+    vhost: String,
+    queue_names: Vec<String>,
 }
 
 impl RabbitMQConfig {
@@ -22,8 +16,8 @@ impl RabbitMQConfig {
         let host = env::var("RABBITMQ_HOST")?;
         let port = env::var("RABBITMQ_PORT")?;
         let vhost = match env::var("RABBITMQ_VHOST") {
-            Ok(v) => Some(v),
-            Err(VarError::NotPresent) => None,
+            Ok(v) => v,
+            Err(VarError::NotPresent) => "/".to_owned(),
             Err(e) => return Err(e.into()),
         };
 
@@ -34,60 +28,38 @@ impl RabbitMQConfig {
         }
 
         Ok(Self {
-            rabbitmq_user: user,
-            rabbitmq_password: password,
-            rabbitmq_host: host,
-            rabbitmq_port: port,
-            rabbitmq_vhost: vhost,
-
-            rabbitmq_queue_names: queue_names,
+            basic: BasicConfig::new(user, password, host, port),
+            vhost,
+            queue_names,
         })
     }
 
-    pub fn rabbitmq_user(&self) -> String {
-        self.rabbitmq_user.clone()
+    #[must_use]
+    pub fn queue_names(&self) -> Vec<String> {
+        self.queue_names.clone()
     }
 
-    pub fn rabbitmq_password(&self) -> String {
-        self.rabbitmq_password.clone()
+    #[must_use]
+    pub fn queue_name(&self, idx: usize) -> Option<String> {
+        self.queue_names.get(idx).cloned()
     }
 
-    pub fn rabbitmq_host(&self) -> String {
-        self.rabbitmq_host.clone()
+    fn vhost(&self) -> String {
+        self.vhost.clone()
     }
 
-    pub fn rabbitmq_port(&self) -> String {
-        self.rabbitmq_port.clone()
+    fn protocol(tls: bool) -> String {
+        if tls {
+            "amqps".to_owned()
+        } else {
+            "amqp".to_owned()
+        }
     }
 
-    pub fn rabbitmq_vhost(&self) -> Option<String> {
-        self.rabbitmq_vhost.clone()
-    }
-
-    pub fn rabbitmq_connection_url(&self, tls: bool) -> String {
-        let protocol = if tls { "amqps" } else { "amqp" };
-        let encoded_vhost = match self.rabbitmq_vhost.as_deref() {
-            None | Some("/") => "%2f".to_string(), // Treat both as the default vhost
-            Some(v) => encode(v).to_string(),
-        };
-
-        format!(
-            "{}://{}:{}@{}:{}/{}",
-            protocol,
-            encode(&self.rabbitmq_user()),
-            encode(&self.rabbitmq_password()),
-            self.rabbitmq_host(),
-            self.rabbitmq_port(),
-            encoded_vhost
-        )
-    }
-
-    pub fn rabbitmq_queue_names(&self) -> Vec<String> {
-        self.rabbitmq_queue_names.clone()
-    }
-
-    pub fn rabbitmq_queue_name(&self, idx: usize) -> Option<String> {
-        self.rabbitmq_queue_names.get(idx).cloned()
+    #[must_use]
+    pub fn connection_url(&self, tls: bool) -> String {
+        self.basic
+            .connection_url_builder(Self::protocol(tls), self.vhost())
     }
 }
 
@@ -96,6 +68,7 @@ mod tests {
     use std::{env::VarError, error::Error};
 
     use super::*;
+    use crate::basic::BasicConfigTrait;
 
     #[test]
     fn missing_variables() {
@@ -152,39 +125,38 @@ mod tests {
             assert_eq!(
                 config,
                 RabbitMQConfig {
-                    rabbitmq_user: "user".to_owned(),
-                    rabbitmq_password: "password".to_owned(),
-                    rabbitmq_host: "host".to_owned(),
-                    rabbitmq_port: "port".to_owned(),
-                    rabbitmq_vhost: Some("/".to_owned()),
+                    basic: BasicConfig::new(
+                        "user".to_owned(),
+                        "password".to_owned(),
+                        "host".to_owned(),
+                        "port".to_owned(),
+                    ),
+                    vhost: "/".to_owned(),
 
-                    rabbitmq_queue_names: vec!["a".to_owned(), "b".to_owned()],
+                    queue_names: vec!["a".to_owned(), "b".to_owned()],
                 }
             );
 
-            assert_eq!(config.rabbitmq_user(), "user");
-            assert_eq!(config.rabbitmq_password(), "password");
-            assert_eq!(config.rabbitmq_host(), "host");
-            assert_eq!(config.rabbitmq_port(), "port");
-            assert_eq!(config.rabbitmq_vhost(), Some("/".to_owned()));
+            assert_eq!(config.basic.user(), "user");
+            assert_eq!(config.basic.password(), "password");
+            assert_eq!(config.basic.host(), "host");
+            assert_eq!(config.basic.port(), "port");
+            assert_eq!(config.vhost(), "/".to_owned());
             assert_eq!(
-                config.rabbitmq_connection_url(false),
-                "amqp://user:password@host:port/%2f"
+                config.connection_url(false),
+                "amqp://user:password@host:port/%2F"
             );
             assert_eq!(
-                config.rabbitmq_connection_url(true),
-                "amqps://user:password@host:port/%2f"
+                config.connection_url(true),
+                "amqps://user:password@host:port/%2F"
             );
 
-            assert_eq!(
-                config.rabbitmq_queue_names(),
-                vec!["a".to_owned(), "b".to_owned()]
-            );
-            assert_eq!(config.rabbitmq_queue_name(0), Some("a".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(1), Some("b".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(2), None);
-            assert_eq!(config.rabbitmq_queue_name(3), None);
-            assert_eq!(config.rabbitmq_queue_name(99), None);
+            assert_eq!(config.queue_names(), vec!["a".to_owned(), "b".to_owned()]);
+            assert_eq!(config.queue_name(0), Some("a".to_owned()));
+            assert_eq!(config.queue_name(1), Some("b".to_owned()));
+            assert_eq!(config.queue_name(2), None);
+            assert_eq!(config.queue_name(3), None);
+            assert_eq!(config.queue_name(99), None);
         })
     }
 
@@ -205,39 +177,38 @@ mod tests {
             assert_eq!(
                 config,
                 RabbitMQConfig {
-                    rabbitmq_user: "user".to_owned(),
-                    rabbitmq_password: "password".to_owned(),
-                    rabbitmq_host: "host".to_owned(),
-                    rabbitmq_port: "port".to_owned(),
-                    rabbitmq_vhost: None,
+                    basic: BasicConfig::new(
+                        "user".to_owned(),
+                        "password".to_owned(),
+                        "host".to_owned(),
+                        "port".to_owned(),
+                    ),
+                    vhost: "/".to_owned(),
 
-                    rabbitmq_queue_names: vec!["a".to_owned(), "b".to_owned()],
+                    queue_names: vec!["a".to_owned(), "b".to_owned()],
                 }
             );
 
-            assert_eq!(config.rabbitmq_user(), "user");
-            assert_eq!(config.rabbitmq_password(), "password");
-            assert_eq!(config.rabbitmq_host(), "host");
-            assert_eq!(config.rabbitmq_port(), "port");
-            assert_eq!(config.rabbitmq_vhost(), None);
+            assert_eq!(config.basic.user(), "user");
+            assert_eq!(config.basic.password(), "password");
+            assert_eq!(config.basic.host(), "host");
+            assert_eq!(config.basic.port(), "port");
+            assert_eq!(config.vhost(), "/");
             assert_eq!(
-                config.rabbitmq_connection_url(false),
-                "amqp://user:password@host:port/%2f"
+                config.connection_url(false),
+                "amqp://user:password@host:port/%2F"
             );
             assert_eq!(
-                config.rabbitmq_connection_url(true),
-                "amqps://user:password@host:port/%2f"
+                config.connection_url(true),
+                "amqps://user:password@host:port/%2F"
             );
 
-            assert_eq!(
-                config.rabbitmq_queue_names(),
-                vec!["a".to_owned(), "b".to_owned()]
-            );
-            assert_eq!(config.rabbitmq_queue_name(0), Some("a".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(1), Some("b".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(2), None);
-            assert_eq!(config.rabbitmq_queue_name(3), None);
-            assert_eq!(config.rabbitmq_queue_name(99), None);
+            assert_eq!(config.queue_names(), vec!["a".to_owned(), "b".to_owned()]);
+            assert_eq!(config.queue_name(0), Some("a".to_owned()));
+            assert_eq!(config.queue_name(1), Some("b".to_owned()));
+            assert_eq!(config.queue_name(2), None);
+            assert_eq!(config.queue_name(3), None);
+            assert_eq!(config.queue_name(99), None);
         })
     }
 
@@ -257,39 +228,38 @@ mod tests {
             assert_eq!(
                 config,
                 RabbitMQConfig {
-                    rabbitmq_user: "us:r".to_owned(),
-                    rabbitmq_password: "p@ssword".to_owned(),
-                    rabbitmq_host: "host".to_owned(),
-                    rabbitmq_port: "port".to_owned(),
-                    rabbitmq_vhost: Some("vh@st".to_owned()),
+                    basic: BasicConfig::new(
+                        "us:r".to_owned(),
+                        "p@ssword".to_owned(),
+                        "host".to_owned(),
+                        "port".to_owned()
+                    ),
+                    vhost: "vh@st".to_owned(),
 
-                    rabbitmq_queue_names: vec!["a".to_owned(), "b".to_owned()],
+                    queue_names: vec!["a".to_owned(), "b".to_owned()],
                 }
             );
 
-            assert_eq!(config.rabbitmq_user(), "us:r");
-            assert_eq!(config.rabbitmq_password(), "p@ssword");
-            assert_eq!(config.rabbitmq_host(), "host");
-            assert_eq!(config.rabbitmq_port(), "port");
-            assert_eq!(config.rabbitmq_vhost(), Some("vh@st".to_owned()));
+            assert_eq!(config.basic.user(), "us:r");
+            assert_eq!(config.basic.password(), "p@ssword");
+            assert_eq!(config.basic.host(), "host");
+            assert_eq!(config.basic.port(), "port");
+            assert_eq!(config.vhost(), "vh@st".to_owned());
             assert_eq!(
-                config.rabbitmq_connection_url(false),
+                config.connection_url(false),
                 "amqp://us%3Ar:p%40ssword@host:port/vh%40st"
             );
             assert_eq!(
-                config.rabbitmq_connection_url(true),
+                config.connection_url(true),
                 "amqps://us%3Ar:p%40ssword@host:port/vh%40st"
             );
 
-            assert_eq!(
-                config.rabbitmq_queue_names(),
-                vec!["a".to_owned(), "b".to_owned()]
-            );
-            assert_eq!(config.rabbitmq_queue_name(0), Some("a".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(1), Some("b".to_owned()));
-            assert_eq!(config.rabbitmq_queue_name(2), None);
-            assert_eq!(config.rabbitmq_queue_name(3), None);
-            assert_eq!(config.rabbitmq_queue_name(99), None);
+            assert_eq!(config.queue_names(), vec!["a".to_owned(), "b".to_owned()]);
+            assert_eq!(config.queue_name(0), Some("a".to_owned()));
+            assert_eq!(config.queue_name(1), Some("b".to_owned()));
+            assert_eq!(config.queue_name(2), None);
+            assert_eq!(config.queue_name(3), None);
+            assert_eq!(config.queue_name(99), None);
         })
     }
 }

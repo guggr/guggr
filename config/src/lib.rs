@@ -1,3 +1,6 @@
+mod basic;
+mod connection_url;
+
 mod agent;
 mod postgres;
 mod rabbitmq;
