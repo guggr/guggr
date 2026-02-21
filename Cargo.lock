@@ -361,6 +361,8 @@ dependencies = [
  "config",
  "database-client",
  "diesel",
+ "frunk",
+ "frunk_core",
  "nanoid",
  "serde",
  "thiserror 2.0.18",
