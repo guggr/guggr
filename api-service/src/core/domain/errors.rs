@@ -10,3 +10,14 @@ pub enum StorageError {
     #[error("No Record found")]
     NotFound,
 }
+
+/// Errors for everything Authentication related
+#[derive(Debug, Error, PartialEq)]
+pub enum AuthError {
+    #[error("No Record found")]
+    InvalidHashformat,
+    #[error("Error while handling JWT: {0}")]
+    JwtError(#[from] compact_jwt::error::JwtError),
+    #[error("JWT expired")]
+    JwtExpired,
+}

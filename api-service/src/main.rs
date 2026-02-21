@@ -10,6 +10,7 @@ use api_service::{
     core::ports::storage::StoragePort,
     telemetry::init_tracing,
 };
+use compact_jwt::JwsEs256Signer;
 use config::PostgresConfig;
 use tracing::debug;
 use tracing_actix_web::TracingLogger;
@@ -23,11 +24,14 @@ async fn main() -> Result<()> {
     debug!("initializing postgres adapter and running pending migrations on the database");
     let postgres: Arc<dyn StoragePort> = Arc::from(PostgresAdapter::new(&config.connection_url())?);
     let api = Data::new(postgres.clone());
+    let signer = Data::new(JwsEs256Signer::generate_es256()?);
+
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
             .into_utoipa_app()
             .app_data(api.clone())
+            .app_data(signer.clone())
             .service(
                 utoipa_actix_web::scope("/api/v1")
                     .configure(groups::configure)
