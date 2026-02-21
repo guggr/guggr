@@ -16,7 +16,7 @@
 			<div class="flex grow flex-col justify-between gap-2 sm:flex-row sm:items-center">
 				<div>
 					<div
-						class="card-title text-md text-base-content/70 sm:text-base-content sm:text-2xl"
+						class="card-title text-md text-base-content/90 sm:text-base-content sm:text-2xl"
 					>
 						<h2 class="truncate">Job name</h2>
 						<span class="badge badge-primary badge-soft badge-sm whitespace-nowrap">
