@@ -19,3 +19,4 @@ nanoid = {workspace = true}
 utoipa = { workspace = true , features = ["actix_extras"] }
 utoipa-actix-web = { workspace = true }
 utoipa-swagger-ui = { workspace = true , features = ["actix-web"] }
+tracing-actix-web = { workspace = true }

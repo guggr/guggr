@@ -11,6 +11,7 @@ use api_service::{
 };
 use config::PostgresConfig;
 use tracing::debug;
+use tracing_actix_web::TracingLogger;
 use utoipa_actix_web::{self, AppExt};
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -23,6 +24,7 @@ async fn main() -> Result<()> {
     let api = Data::new(postgres.clone());
     HttpServer::new(move || {
         App::new()
+            .wrap(TracingLogger::default())
             .into_utoipa_app()
             .app_data(Data::new(api.clone()))
             .service(
