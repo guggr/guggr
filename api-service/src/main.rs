@@ -1,13 +1,18 @@
 use std::sync::Arc;
 
-use actix_web::{HttpServer, web::Data};
+use actix_web::{App, HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
-    adapters::{inbound::http::app, outgoing::postgres::PostgresAdapter},
+    adapters::{
+        inbound::http::{self, groups},
+        outgoing::postgres::PostgresAdapter,
+    },
     telemetry::init_tracing,
 };
 use config::PostgresConfig;
 use tracing::debug;
+use utoipa_actix_web::{self, AppExt};
+use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -15,10 +20,24 @@ async fn main() -> Result<()> {
     let config = PostgresConfig::from_env()?;
     debug!("initializing postgres adapter and running pending migrations on the database");
     let postgres = Arc::from(PostgresAdapter::new(&config.postgres_connection_url())?);
-    HttpServer::new(move || app(Data::new(postgres.clone())))
-        .bind(("127.0.0.1", 8081))?
-        .run()
-        .await?;
+    let api = Data::new(postgres.clone());
+    HttpServer::new(move || {
+        App::new()
+            .into_utoipa_app()
+            .app_data(Data::new(api.clone()))
+            .service(
+                utoipa_actix_web::scope("/api/v1")
+                    .configure(http::configure)
+                    .configure(groups::configure),
+            )
+            .openapi_service(|api| {
+                SwaggerUi::new("/api/swagger-ui/{_:.*}").url("/api/openapi.json", api)
+            })
+            .into_app()
+    })
+    .bind(("127.0.0.1", 8081))?
+    .run()
+    .await?;
 
     Ok(())
 }

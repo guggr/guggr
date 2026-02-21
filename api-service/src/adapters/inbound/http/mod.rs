@@ -1,41 +1,18 @@
 pub mod groups;
 
-use std::sync::Arc;
-
-use actix_web::{App, HttpResponse, Responder, get, http::header, web};
-use tracing::debug;
+use actix_web::{HttpResponse, Responder, get, http::header};
 use utoipa::ToSchema;
-use utoipa_actix_web::{self, AppExt};
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_actix_web::{self, service_config::ServiceConfig};
 
-use crate::core::{domain::errors::StorageError, ports::storage::StoragePort};
+use crate::core::domain::errors::StorageError;
 
-pub fn app(
-    api: web::Data<Arc<dyn StoragePort>>,
-) -> App<
-    impl actix_web::dev::ServiceFactory<
-        actix_web::dev::ServiceRequest,
-        Config = (),
-        Response = actix_web::dev::ServiceResponse,
-        Error = actix_web::Error,
-        InitError = (),
-    >,
-> {
-    debug!("creating new app");
-    App::new()
-        .into_utoipa_app()
-        .app_data(api)
-        .service(
-            utoipa_actix_web::scope("/api/v1")
-                .service(ping)
-                .service(openapi_json_redirect)
-                .service(swagger_ui_redirect)
-                .configure(groups::configure),
-        )
-        .openapi_service(|api| {
-            SwaggerUi::new("/api/swagger-ui/{_:.*}").url("/api/openapi.json", api)
-        })
-        .into_app()
+pub fn configure(cfg: &mut ServiceConfig) {
+    let scope = utoipa_actix_web::scope("")
+        .service(ping)
+        .service(openapi_json_redirect)
+        .service(swagger_ui_redirect);
+
+    cfg.service(scope);
 }
 
 #[utoipa::path(
