@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     init_tracing();
     let config = PostgresConfig::from_env()?;
     debug!("initializing postgres adapter and running pending migrations on the database");
-    let postgres = Arc::from(PostgresAdapter::new(&config.postgres_connection_url())?);
+    let postgres = Arc::from(PostgresAdapter::new(&config.connection_url())?);
     let api = Data::new(postgres.clone());
     HttpServer::new(move || {
         App::new()
