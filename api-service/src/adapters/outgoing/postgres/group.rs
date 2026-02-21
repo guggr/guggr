@@ -29,26 +29,30 @@ impl PostgresGroupAdapter {
 
 #[async_trait]
 impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAdapter {
-    async fn create(&self, new_value: CreateGroup) -> Result<(), StorageError> {
+    async fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        diesel::insert_into(group)
+        let result: models::Group = diesel::insert_into(group)
             .values(models::Group::from(new_value))
-            .execute(&mut conn)
+            .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 
-        Ok(())
+        Ok(result.transmogrify())
     }
 
-    async fn update(&self, id: &str, update_value: UpdateGroup) -> Result<(), StorageError> {
+    async fn update(
+        &self,
+        id: &str,
+        update_value: UpdateGroup,
+    ) -> Result<DisplayGroup, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
-        diesel::update(group.find(id))
+        let result: models::Group = diesel::update(group.find(id))
             .set(&update_value)
-            .execute(&mut conn)
+            .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
-        Ok(())
+        Ok(result.transmogrify())
     }
 
     async fn get_by_id(&self, id: &str) -> Result<Option<DisplayGroup>, StorageError> {

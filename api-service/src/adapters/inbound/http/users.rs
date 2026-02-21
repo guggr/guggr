@@ -26,7 +26,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     request_body = CreateUser,
     operation_id = "create_user",
     responses(
-        (status = 204, description = "Created user"),
+        (status = 200, description = "Created user", body = DisplayUser),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     tag = "users"
@@ -37,7 +37,7 @@ pub async fn create(
     body: web::Json<CreateUser>,
 ) -> impl Responder {
     match api.user().create(body.into_inner()).await {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(r) => HttpResponse::Ok().json(r),
         Err(e) => map_storage_error(e),
     }
 }
@@ -87,7 +87,8 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     ),
     request_body = UpdateUser,
     responses(
-        (status = 204, description = "Patched user"),
+        (status = 200, description = "Patched user", body = DisplayUser),
+        (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     tag = "users"
@@ -103,7 +104,7 @@ pub async fn update(
         .update(&path.into_inner(), body.into_inner())
         .await
     {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(r) => HttpResponse::Ok().json(r),
         Err(e) => map_storage_error(e),
     }
 }

@@ -26,7 +26,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     request_body = CreateGroup,
     operation_id = "create_group",
     responses(
-        (status = 204, description = "Created group"),
+        (status = 200, description = "Created group", body = DisplayGroup),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     tag = "groups"
@@ -37,7 +37,7 @@ pub async fn create(
     body: web::Json<CreateGroup>,
 ) -> impl Responder {
     match api.group().create(body.into_inner()).await {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(r) => HttpResponse::NoContent().json(r),
         Err(e) => map_storage_error(e),
     }
 }
@@ -86,7 +86,8 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     operation_id = "update_group",
     request_body = UpdateGroup,
     responses(
-        (status = 204, description = "Patched group"),
+        (status = 200, description = "Patched group", body = DisplayGroup),
+        (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     tag = "groups"
@@ -102,7 +103,7 @@ pub async fn update(
         .update(&path.into_inner(), body.into_inner())
         .await
     {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(r) => HttpResponse::Ok().json(r),
         Err(e) => map_storage_error(e),
     }
 }

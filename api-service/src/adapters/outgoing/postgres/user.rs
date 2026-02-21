@@ -29,27 +29,31 @@ impl PostgresUserAdapter {
 
 #[async_trait]
 impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter {
-    async fn create(&self, new_value: CreateUser) -> Result<(), StorageError> {
+    async fn create(&self, new_value: CreateUser) -> Result<DisplayUser, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let u = models::User::try_from(new_value).map_err(StorageError::from)?;
-        diesel::insert_into(user)
+        let result: models::User = diesel::insert_into(user)
             .values(u)
-            .execute(&mut conn)
+            .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 
-        Ok(())
+        Ok(result.transmogrify())
     }
 
-    async fn update(&self, id: &str, update_value: UpdateUser) -> Result<(), StorageError> {
+    async fn update(
+        &self,
+        id: &str,
+        update_value: UpdateUser,
+    ) -> Result<DisplayUser, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
-        diesel::update(user.find(id))
+        let result: models::User = diesel::update(user.find(id))
             .set(&update_value)
-            .execute(&mut conn)
+            .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
-        Ok(())
+        Ok(result.transmogrify())
     }
 
     async fn get_by_id(&self, id: &str) -> Result<Option<DisplayUser>, StorageError> {

@@ -11,8 +11,8 @@ use crate::core::{
 /// `N` NewStruct, `U` UpdateStruct, `D` DisplayStruct
 #[async_trait]
 pub trait CrudOperations<N, U, D> {
-    async fn create(&self, new_value: N) -> Result<(), StorageError>;
-    async fn update(&self, id: &str, update_value: U) -> Result<(), StorageError>;
+    async fn create(&self, new_value: N) -> Result<D, StorageError>;
+    async fn update(&self, id: &str, update_value: U) -> Result<D, StorageError>;
     async fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
     async fn delete(&self, id: &str) -> Result<(), StorageError>;
     async fn list(&self, limit: i64) -> Result<Vec<D>, StorageError>;
