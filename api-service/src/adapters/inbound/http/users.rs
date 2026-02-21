@@ -24,6 +24,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
 
 #[utoipa::path(
     request_body = CreateUser,
+    operation_id = "create_user",
     responses(
         (status = 204, description = "Created user"),
         (status = 500, description = "Storage error", body = ErrorBody)
@@ -42,6 +43,7 @@ pub async fn create(
 }
 
 #[utoipa::path(
+    operation_id = "list_user",
     responses(
         (status = 200, description = "List users", body = [DisplayUser]),
         (status = 500, description = "Storage error", body = ErrorBody)
@@ -57,6 +59,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
 }
 
 #[utoipa::path(
+        operation_id = "get_user",
     params(
         ("id" = String, Path, description = "User id")
     ),
@@ -77,6 +80,8 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
 }
 
 #[utoipa::path(
+        operation_id = "update_user",
+
     params(
         ("id" = String, Path, description = "User id")
     ),
@@ -103,6 +108,8 @@ pub async fn update(
     }
 }
 #[utoipa::path(
+        operation_id = "delete_user",
+
     params(
         ("id" = String, Path, description = "User id")
     ),

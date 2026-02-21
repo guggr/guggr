@@ -24,6 +24,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
 
 #[utoipa::path(
     request_body = CreateGroup,
+    operation_id = "create_group",
     responses(
         (status = 204, description = "Created group"),
         (status = 500, description = "Storage error", body = ErrorBody)
@@ -42,6 +43,7 @@ pub async fn create(
 }
 
 #[utoipa::path(
+        operation_id = "list_group",
     responses(
         (status = 200, description = "List groups", body = [DisplayGroup]),
         (status = 500, description = "Storage error", body = ErrorBody)
@@ -60,6 +62,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     params(
         ("id" = String, Path, description = "Group id")
     ),
+    operation_id = "get_group",
     responses(
         (status = 200, description = "Group", body = DisplayGroup),
         (status = 404, description = "Group Not Found", body = ErrorBody),
@@ -80,6 +83,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     params(
         ("id" = String, Path, description = "Group id")
     ),
+    operation_id = "update_group",
     request_body = UpdateGroup,
     responses(
         (status = 204, description = "Patched group"),
@@ -106,6 +110,7 @@ pub async fn update(
     params(
         ("id" = String, Path, description = "Group id")
     ),
+    operation_id = "delete_group",
     responses(
         (status = 204, description = "Deleted"),
         (status = 500, description = "Storage error", body = ErrorBody)
