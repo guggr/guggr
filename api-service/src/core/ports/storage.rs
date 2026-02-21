@@ -1,18 +1,21 @@
 use async_trait::async_trait;
-use database_client::models::Group;
 
-use crate::core::domain::errors::StorageError;
+use crate::core::{
+    domain::errors::StorageError,
+    models::group::{CreateGroup, DisplayGroup, UpdateGroup},
+};
 
+/// `N` NewStruct, `U` UpdateStruct, `D` DisplayStruct
 #[async_trait]
-pub trait CrudOperations<T> {
-    async fn create(&self, new_value: T) -> Result<(), StorageError>;
-    async fn update(&self, update_value: T) -> Result<(), StorageError>;
-    async fn get_by_id(&self, id: &str) -> Result<Option<T>, StorageError>;
+pub trait CrudOperations<N, U, D> {
+    async fn create(&self, new_value: N) -> Result<(), StorageError>;
+    async fn update(&self, id: &str, update_value: U) -> Result<(), StorageError>;
+    async fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
     async fn delete(&self, id: &str) -> Result<(), StorageError>;
-    async fn list(&self, limit: i64) -> Result<Vec<T>, StorageError>;
+    async fn list(&self, limit: i64) -> Result<Vec<D>, StorageError>;
 }
 
 #[async_trait]
 pub trait StoragePort: Send + Sync {
-    fn group(&self) -> &(dyn CrudOperations<Group> + Send + Sync);
+    fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
 }
