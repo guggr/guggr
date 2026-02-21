@@ -7,6 +7,7 @@ use api_service::{
         inbound::http::{self, groups},
         outgoing::postgres::PostgresAdapter,
     },
+    core::ports::storage::StoragePort,
     telemetry::init_tracing,
 };
 use config::PostgresConfig;
@@ -20,17 +21,17 @@ async fn main() -> Result<()> {
     init_tracing();
     let config = PostgresConfig::from_env()?;
     debug!("initializing postgres adapter and running pending migrations on the database");
-    let postgres = Arc::from(PostgresAdapter::new(&config.connection_url())?);
+    let postgres: Arc<dyn StoragePort> = Arc::from(PostgresAdapter::new(&config.connection_url())?);
     let api = Data::new(postgres.clone());
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
             .into_utoipa_app()
-            .app_data(Data::new(api.clone()))
+            .app_data(api.clone())
             .service(
                 utoipa_actix_web::scope("/api/v1")
-                    .configure(http::configure)
-                    .configure(groups::configure),
+                    .configure(groups::configure)
+                    .configure(http::configure),
             )
             .openapi_service(|api| {
                 SwaggerUi::new("/api/swagger-ui/{_:.*}").url("/api/openapi.json", api)
