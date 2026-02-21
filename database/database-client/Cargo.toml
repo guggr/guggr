@@ -10,5 +10,8 @@ diesel = { workspace = true, features = ["chrono", "postgres", "r2d2", "ipnet-ad
 diesel_migrations = { workspace = true, features = ["postgres"] }
 ipnet = { workspace = true , features = ["serde"] }
 thiserror = { workspace = true }
-serde = { workspace = true }
-utoipa = { workspace = true , features = ["chrono"] }
+frunk = { workspace = true }
+frunk_core = { workspace = true }
+
+[package.metadata.cargo-machete]
+ignored = ["frunk_core"]
