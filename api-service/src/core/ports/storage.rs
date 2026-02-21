@@ -2,7 +2,10 @@ use async_trait::async_trait;
 
 use crate::core::{
     domain::errors::StorageError,
-    models::group::{CreateGroup, DisplayGroup, UpdateGroup},
+    models::{
+        group::{CreateGroup, DisplayGroup, UpdateGroup},
+        user::{CreateUser, DisplayUser, UpdateUser},
+    },
 };
 
 /// `N` NewStruct, `U` UpdateStruct, `D` DisplayStruct
@@ -18,4 +21,5 @@ pub trait CrudOperations<N, U, D> {
 #[async_trait]
 pub trait StoragePort: Send + Sync {
     fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
+    fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
 }

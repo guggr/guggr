@@ -1,18 +1,23 @@
 pub mod group;
+pub mod user;
 use async_trait::async_trait;
 use database_client::{DbError, create_connection_pool};
 use thiserror::Error;
 
 use crate::{
-    adapters::outgoing::postgres::group::PostgresGroupAdapter,
+    adapters::outgoing::postgres::{group::PostgresGroupAdapter, user::PostgresUserAdapter},
     core::{
         domain::errors::StorageError,
-        models::group::{CreateGroup, DisplayGroup, UpdateGroup},
+        models::{
+            group::{CreateGroup, DisplayGroup, UpdateGroup},
+            user::{CreateUser, DisplayUser, UpdateUser},
+        },
         ports::storage::{CrudOperations, StoragePort},
     },
 };
 pub struct PostgresAdapter {
     pub group: PostgresGroupAdapter,
+    pub user: PostgresUserAdapter,
 }
 
 /// Errors for [`PostgresAdapter`]
@@ -55,7 +60,8 @@ impl PostgresAdapter {
     pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
         let pool = create_connection_pool(database_url)?;
         Ok(Self {
-            group: PostgresGroupAdapter::new(pool),
+            group: PostgresGroupAdapter::new(pool.clone()),
+            user: PostgresUserAdapter::new(pool),
         })
     }
 }
@@ -64,5 +70,8 @@ impl PostgresAdapter {
 impl StoragePort for PostgresAdapter {
     fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync) {
         &self.group
+    }
+    fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
+        &self.user
     }
 }
