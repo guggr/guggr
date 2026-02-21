@@ -50,6 +50,13 @@ impl From<PostgresAdapterError> for StorageError {
     }
 }
 
+/// Allows for converting the argon2-specific errors to domain errors
+impl From<argon2::password_hash::Error> for StorageError {
+    fn from(value: argon2::password_hash::Error) -> Self {
+        Self::Internal(value.to_string())
+    }
+}
+
 impl PostgresAdapter {
     /// Creates a new `PostgresAdapter`
     ///

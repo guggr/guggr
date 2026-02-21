@@ -32,8 +32,9 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
     async fn create(&self, new_value: CreateUser) -> Result<(), StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let u = models::User::try_from(new_value).map_err(StorageError::from)?;
         diesel::insert_into(user)
-            .values(models::User::from(new_value))
+            .values(u)
             .execute(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 

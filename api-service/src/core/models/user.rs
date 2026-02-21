@@ -1,3 +1,7 @@
+use argon2::{
+    Argon2,
+    password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
+};
 use database_client::{models::User, schema::user};
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
@@ -28,14 +32,20 @@ pub struct UpdateUser {
     pub password: Option<String>,
 }
 
-impl From<CreateUser> for User {
-    fn from(value: CreateUser) -> Self {
-        Self {
+impl TryFrom<CreateUser> for User {
+    type Error = argon2::password_hash::Error;
+    fn try_from(value: CreateUser) -> Result<Self, Self::Error> {
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let pwhash = argon2
+            .hash_password(value.password.as_bytes(), &salt)?
+            .to_string();
+        Ok(Self {
             id: nanoid::nanoid!(),
             name: value.name,
             email: value.email,
-            password: value.password,
-        }
+            password: pwhash,
+        })
     }
 }
 

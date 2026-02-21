@@ -22,6 +22,7 @@ utoipa-swagger-ui = { workspace = true , features = ["actix-web"] }
 tracing-actix-web = { workspace = true }
 frunk = { workspace = true }
 frunk_core = { workspace = true }
+argon2 = { workspace = true }
 
 [package.metadata.cargo-machete]
 ignored = ["frunk_core"]
