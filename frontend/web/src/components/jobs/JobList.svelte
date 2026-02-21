@@ -57,14 +57,14 @@
 			</div>
 
 			<div class=" sm:hidden">
-				<a href="/jobs" class="btn btn-primary btn-soft pr-2">
+				<a href="/jobs/details" class="btn btn-primary btn-soft pr-2">
 					Details <ChevronRightIcon size="20" />
 				</a>
 			</div>
 		</div>
 
 		<a
-			href="/jobs"
+			href="/jobs/details"
 			class="btn btn-primary btn-soft hidden h-auto p-3 [writing-mode:sideways-lr] sm:inline-flex"
 		>
 			Details
