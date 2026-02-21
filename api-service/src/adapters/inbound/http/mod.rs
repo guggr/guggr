@@ -1,5 +1,5 @@
 pub mod groups;
-
+pub mod users;
 use actix_web::{HttpResponse, Responder, get, http::header};
 use utoipa::ToSchema;
 use utoipa_actix_web::{self, service_config::ServiceConfig};

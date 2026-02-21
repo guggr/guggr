@@ -4,7 +4,7 @@ use actix_web::{App, HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
     adapters::{
-        inbound::http::{self, groups},
+        inbound::http::{self, groups, users},
         outgoing::postgres::PostgresAdapter,
     },
     core::ports::storage::StoragePort,
@@ -31,6 +31,7 @@ async fn main() -> Result<()> {
             .service(
                 utoipa_actix_web::scope("/api/v1")
                     .configure(groups::configure)
+                    .configure(users::configure)
                     .configure(http::configure),
             )
             .openapi_service(|api| {
