@@ -57,6 +57,9 @@ fn map_storage_error(err: StorageError) -> HttpResponse {
             .json(err_body("unexpected", "Something went wrong".to_string())),
         StorageError::Unavailable(_) => HttpResponse::InternalServerError()
             .json(err_body("unexpected", "Something went wrong".to_string())),
+        StorageError::NotFound => {
+            HttpResponse::NotFound().json(err_body("not found", "No record found".to_string()))
+        }
     }
 }
 

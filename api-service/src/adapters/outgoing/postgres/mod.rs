@@ -32,7 +32,10 @@ pub enum PostgresAdapterError {
     Pool(#[from] diesel::r2d2::PoolError),
     /// Raised, when there was an error while accessing the database
     #[error("Failed to interact with the database: {0}")]
-    Result(#[from] diesel::result::Error),
+    Result(diesel::result::Error),
+    /// Raised, when no record was found
+    #[error("Record not Found")]
+    NotFound,
     /// Raised, when the supplied Job ID does not exist
     #[error("Unknown Job ID: {0}")]
     UnknownJobId(String),
@@ -44,7 +47,7 @@ impl From<PostgresAdapterError> for StorageError {
         match value {
             PostgresAdapterError::Connection(e) => Self::Unavailable(e.to_string()),
             PostgresAdapterError::Pool(e) => Self::Unavailable(e.to_string()),
-
+            PostgresAdapterError::NotFound => Self::NotFound,
             other => Self::Internal(other.to_string()),
         }
     }
@@ -54,6 +57,17 @@ impl From<PostgresAdapterError> for StorageError {
 impl From<argon2::password_hash::Error> for StorageError {
     fn from(value: argon2::password_hash::Error) -> Self {
         Self::Internal(value.to_string())
+    }
+}
+
+/// Allows for converting the diesel-specific errors to domain errors
+/// used instead of #[from] for more control
+impl From<diesel::result::Error> for PostgresAdapterError {
+    fn from(e: diesel::result::Error) -> Self {
+        match e {
+            diesel::result::Error::NotFound => PostgresAdapterError::NotFound,
+            other => PostgresAdapterError::Result(other),
+        }
     }
 }
 

@@ -7,4 +7,6 @@ pub enum StorageError {
     Unavailable(String),
     #[error("Internal error: {0}")]
     Internal(String),
+    #[error("No Record found")]
+    NotFound,
 }
