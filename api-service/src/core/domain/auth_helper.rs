@@ -113,3 +113,123 @@ pub fn verify_jwt(signer: &JwsEs256Signer, token: &str) -> Result<Jwt<()>, AuthE
 
     Ok(jwt_verified)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use super::*;
+    use crate::core::ports::storage::tests::MockStore;
+
+    #[actix_web::test]
+    async fn validate_token() -> anyhow::Result<()> {
+        let signer = JwsEs256Signer::generate_es256()?;
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+        let meta = AuthMetadata {
+            ip_address: "0.0.0.0".to_string(),
+            user_agent: "bogus".to_string(),
+        };
+        let ttl = 60;
+        let ttl_refresh = 600;
+        let user_id = "bob";
+        let token =
+            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        let v = verify_jwt(&signer, &token.access_token)?;
+        let a = signer.sign(&v)?;
+        assert_eq!(token.access_token, a.to_string());
+        assert!(
+            refresh_token(
+                &signer,
+                &storage,
+                AuthMetadata::default(),
+                &token.refresh_token,
+                ttl,
+                ttl_refresh,
+            )
+            .await
+            .is_ok()
+        );
+        Ok(())
+    }
+
+    #[actix_web::test]
+    async fn jwt_expired() -> anyhow::Result<()> {
+        let signer = JwsEs256Signer::generate_es256()?;
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+        let meta = AuthMetadata {
+            ip_address: "0.0.0.0".to_string(),
+            user_agent: "bogus".to_string(),
+        };
+        let ttl = 0;
+        let ttl_refresh = 600;
+        let user_id = "bob";
+        let token =
+            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        actix_web::rt::time::sleep(Duration::from_secs(1)).await;
+        assert_eq!(
+            verify_jwt(&signer, &token.access_token).unwrap_err(),
+            AuthError::JwtExpired
+        );
+        Ok(())
+    }
+
+    #[actix_web::test]
+    async fn jwt_refresh_expired() -> anyhow::Result<()> {
+        let signer = JwsEs256Signer::generate_es256()?;
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+        let meta = AuthMetadata {
+            ip_address: "0.0.0.0".to_string(),
+            user_agent: "bogus".to_string(),
+        };
+        let ttl = 0;
+        let ttl_refresh = 0;
+        let user_id = "bob";
+        let token =
+            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        actix_web::rt::time::sleep(Duration::from_secs(1)).await;
+        assert_eq!(
+            refresh_token(
+                &signer,
+                &storage,
+                AuthMetadata::default(),
+                &token.refresh_token,
+                ttl,
+                ttl_refresh,
+            )
+            .await
+            .unwrap_err(),
+            AuthError::JwtExpired
+        );
+        Ok(())
+    }
+
+    #[actix_web::test]
+    async fn jti_missing_from_refresh() -> anyhow::Result<()> {
+        let signer = JwsEs256Signer::generate_es256()?;
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+        let meta = AuthMetadata {
+            ip_address: "0.0.0.0".to_string(),
+            user_agent: "bogus".to_string(),
+        };
+        let ttl = 0;
+        let ttl_refresh = 0;
+        let user_id = "bob";
+        let token =
+            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        assert_eq!(
+            refresh_token(
+                &signer,
+                &storage,
+                AuthMetadata::default(),
+                // we just use the access token here, as that does not have the jti claim set
+                &token.access_token,
+                ttl,
+                ttl_refresh,
+            )
+            .await
+            .unwrap_err(),
+            AuthError::JtiMissing
+        );
+        Ok(())
+    }
+}
