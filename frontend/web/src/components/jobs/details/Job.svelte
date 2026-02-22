@@ -1,0 +1,71 @@
+<script lang="ts">
+	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
+	import { ActivityIcon } from '@lucide/svelte';
+</script>
+
+<svelte:head>
+	<title>Job Name Details | guggr</title>
+</svelte:head>
+
+<div class="breadcrumbs pb-4 text-sm">
+	<menu>
+		<li><a href="/">Home</a></li>
+		<li><a href="/jobs">Jobs</a></li>
+		<li><a href="/jobs/details">Job Name</a></li>
+	</menu>
+</div>
+
+<div class="card card-side bg-base-100 shadow-md">
+	<figure class="text-primary/60 hidden p-6 md:block">
+		<ActivityIcon size="48" />
+	</figure>
+
+	<div class="card-body flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+		<div>
+			<div class="card-title text-md text-base-content/90 sm:text-base-content sm:text-2xl">
+				<h2 class="truncate">
+					<span class="sr-only">Job name:</span>
+					Job name
+				</h2>
+				<span class="badge badge-primary badge-soft badge-sm whitespace-nowrap">
+					HTTP Job
+				</span>
+			</div>
+
+			<div class="text-base-content/80">
+				<span class="sr-only">Group: </span>
+				<a href="/groups" class="link link-hover">My cool group</a>
+			</div>
+		</div>
+
+		<div class="stats hidden sm:inline-grid">
+			{@render statusStat()}
+		</div>
+	</div>
+</div>
+
+<div class="stats rounded-box bg-base-100 mt-4 w-full py-4 shadow-md sm:hidden">
+	{@render statusStat()}
+</div>
+
+{#snippet statusStat()}
+	<div class="stat py-0">
+		<div class="stat-title">Current Status</div>
+		<div class="stat-value text-success flex items-center gap-2 text-3xl">
+			<div class="inline-grid *:[grid-area:1/1]">
+				<div
+					class="status status-success status-xl animate-ping motion-reduce:hidden"
+				></div>
+				<div class="status status-success status-xl"></div>
+			</div>
+			Online
+		</div>
+		<div class="stat-desc">Last checked 2 minutes ago</div>
+	</div>
+{/snippet}
+
+<div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
+	<h2 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h2>
+
+	<JobRuns />
+</div>
