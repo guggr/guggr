@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use crate::core::{
     domain::errors::StorageError,
     models::{
-        auth::UserAuth,
+        auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth},
         group::{CreateGroup, DisplayGroup, UpdateGroup},
         user::{CreateUser, DisplayUser, UpdateUser},
     },
@@ -22,6 +22,9 @@ pub trait CrudOperations<N, U, D> {
 #[async_trait]
 pub trait AuthOperations {
     async fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError>;
+    async fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
+    async fn get_refresh_token(&self, jit: &str) -> Result<DisplayRefreshToken, StorageError>;
+    async fn delete_refresh_toke(&self, jti: &str) -> Result<(), StorageError>;
 }
 
 #[async_trait]

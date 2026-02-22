@@ -9,6 +9,8 @@ pub enum StorageError {
     Internal(String),
     #[error("No Record found")]
     NotFound,
+    #[error("Timestamp conversion error")]
+    TimestampConversion,
 }
 
 /// Errors for everything Authentication related
