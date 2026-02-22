@@ -5,7 +5,7 @@ use compact_jwt::JwsEs256Signer;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
-    adapters::inbound::http::{ErrorBody, map_storage_error},
+    adapters::inbound::http::ErrorBody,
     core::{
         domain::auth_helper::{create_jwt, verify_password},
         models::auth::{LoginRequest, TokenResponse},
@@ -40,7 +40,9 @@ pub async fn login(
     let req = body.into_inner();
     let user = match api.auth().get_user_by_email(&req.email).await {
         Ok(user) => user,
-        Err(e) => return map_storage_error(&e),
+        Err(_) => {
+            return HttpResponse::Unauthorized().finish();
+        }
     };
     let ok = verify_password(&req.password, &user.password).unwrap_or(false);
     if !ok {
