@@ -7,9 +7,9 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::{ErrorBody, map_auth_error},
     core::{
-        domain::auth_helper::{create_token, refresh_token, verify_password},
+        domain::auth_helper::{create_token, invalidate_token, refresh_token, verify_password},
         models::auth::{
-            AuthMetadata, LoginRequest, TokenRefreshRequest, TokenResponse,
+            AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
         },
         ports::storage::StoragePort,
     },
@@ -21,7 +21,8 @@ const TTL_REFRESH: i64 = 60 * 60 * 4;
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/auth")
         .service(login)
-        .service(token_refresh);
+        .service(token_refresh)
+        .service(logout);
 
     cfg.service(scope);
 }
@@ -116,5 +117,32 @@ pub async fn token_refresh(
     .map_or_else(
         |err| map_auth_error(&err),
         |token_response| HttpResponse::Ok().json(token_response),
+    )
+}
+
+#[utoipa::path(
+    request_body = TokenRefreshRequest,
+    operation_id = "auth_logout",
+    responses(
+        (status = 204, description = "Successful logout"),
+        (status = 500, description = "Storage error", body = ErrorBody)
+    ),
+    tag = "auth"
+)]
+#[post("/logout")]
+pub async fn logout(
+    api: web::Data<Arc<dyn StoragePort>>,
+    signer: web::Data<JwsEs256Signer>,
+    body: web::Json<LogoutRequest>,
+) -> impl Responder {
+    invalidate_token(
+        signer.get_ref(),
+        api.get_ref(),
+        &body.into_inner().refresh_token,
+    )
+    .await
+    .map_or_else(
+        |err| map_auth_error(&err),
+        |()| HttpResponse::NoContent().finish(),
     )
 }
