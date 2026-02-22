@@ -94,7 +94,6 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     responses(
         (status = 200, description = "Patched user", body = DisplayUser),
         (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     security(("bearerAuth" = [])),
