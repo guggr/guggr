@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
+use garde_actix_web::web::Json;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
@@ -28,6 +29,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_group",
     responses(
         (status = 200, description = "Created group", body = DisplayGroup),
+        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     security(("bearerAuth" = [])),
@@ -36,7 +38,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
 #[post("")]
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
-    body: web::Json<CreateGroup>,
+    body: Json<CreateGroup>,
 ) -> impl Responder {
     match api.group().create(body.into_inner()).await {
         Ok(r) => HttpResponse::NoContent().json(r),
@@ -91,6 +93,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     request_body = UpdateGroup,
     responses(
         (status = 200, description = "Patched group", body = DisplayGroup),
+        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
         (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
@@ -101,7 +104,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
-    body: web::Json<UpdateGroup>,
+    body: Json<UpdateGroup>,
 ) -> impl Responder {
     match api
         .group()

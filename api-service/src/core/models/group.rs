@@ -1,11 +1,15 @@
 use database_client::{models::Group, schema::group};
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
+use garde::Validate;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Validate,
+)]
 pub struct CreateGroup {
+    #[garde(ascii, length(min = 1))]
     pub name: String,
 }
 
@@ -16,10 +20,20 @@ pub struct DisplayGroup {
 }
 
 #[derive(
-    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, AsChangeset, LabelledGeneric,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Serialize,
+    Deserialize,
+    ToSchema,
+    AsChangeset,
+    LabelledGeneric,
+    Validate,
 )]
 #[diesel(table_name = group)]
 pub struct UpdateGroup {
+    #[garde(ascii, length(min = 1))]
     pub name: Option<String>,
 }
 

@@ -26,6 +26,8 @@ argon2 = { workspace = true }
 compact_jwt = { workspace = true }
 chrono = { workspace = true }
 futures-util = { workspace = true }
+garde-actix-web = { workspace = true }
+garde = { workspace = true , features = ["email"] }
 
 [package.metadata.cargo-machete]
 ignored = ["frunk_core"]

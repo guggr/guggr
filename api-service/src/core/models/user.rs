@@ -5,13 +5,19 @@ use argon2::{
 use database_client::{models::User, schema::user};
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
+use garde::Validate;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Validate,
+)]
 pub struct CreateUser {
+    #[garde(ascii, length(min = 1))]
     pub name: String,
+    #[garde(email)]
     pub email: String,
+    #[garde(ascii, length(min = 8))]
     pub password: String,
 }
 
@@ -23,12 +29,24 @@ pub struct DisplayUser {
 }
 
 #[derive(
-    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, AsChangeset, LabelledGeneric,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Serialize,
+    Deserialize,
+    ToSchema,
+    AsChangeset,
+    LabelledGeneric,
+    Validate,
 )]
 #[diesel(table_name = user)]
 pub struct UpdateUser {
+    #[garde(ascii, length(min = 1))]
     pub name: Option<String>,
+    #[garde(email)]
     pub email: Option<String>,
+    #[garde(ascii, length(min = 8))]
     pub password: Option<String>,
 }
 
