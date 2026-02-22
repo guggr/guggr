@@ -402,7 +402,6 @@ dependencies = [
  "futures-util",
  "garde",
  "garde-actix-web",
- "ipnet",
  "nanoid",
  "serde",
  "thiserror 2.0.18",

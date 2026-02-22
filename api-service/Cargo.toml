@@ -28,6 +28,6 @@ chrono = { workspace = true }
 futures-util = { workspace = true }
 garde-actix-web = { workspace = true }
 garde = { workspace = true , features = ["email"] }
-ipnet = { workspace = true }
+
 [package.metadata.cargo-machete]
 ignored = ["frunk_core"]
