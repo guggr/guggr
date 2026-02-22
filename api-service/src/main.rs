@@ -11,7 +11,7 @@ use api_service::{
     telemetry::init_tracing,
 };
 use compact_jwt::JwsEs256Signer;
-use config::PostgresConfig;
+use config::{ApiServiceConfig, PostgresConfig};
 use tracing::debug;
 use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;
@@ -21,11 +21,14 @@ use utoipa_swagger_ui::SwaggerUi;
 #[actix_web::main]
 async fn main() -> Result<()> {
     init_tracing();
-    let config = PostgresConfig::from_env()?;
+    let postgres_config = PostgresConfig::from_env()?;
+    let config = ApiServiceConfig::from_env()?;
     debug!("initializing postgres adapter and running pending migrations on the database");
-    let postgres: Arc<dyn StoragePort> = Arc::from(PostgresAdapter::new(&config.connection_url())?);
+    let postgres: Arc<dyn StoragePort> =
+        Arc::from(PostgresAdapter::new(&postgres_config.connection_url())?);
     let api = Data::new(postgres.clone());
     let signer = Data::new(JwsEs256Signer::generate_es256()?);
+    let dconfig = Data::new(config.clone());
 
     HttpServer::new(move || {
         App::new()
@@ -34,6 +37,7 @@ async fn main() -> Result<()> {
             .openapi(ApiDoc::openapi())
             .app_data(api.clone())
             .app_data(signer.clone())
+            .app_data(dconfig.clone())
             .service(
                 utoipa_actix_web::scope("/api/v1")
                     .configure(groups::configure)
@@ -46,7 +50,7 @@ async fn main() -> Result<()> {
             })
             .into_app()
     })
-    .bind(("127.0.0.1", 8081))?
+    .bind(config.bind_address())?
     .run()
     .await?;
 

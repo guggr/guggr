@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
 use compact_jwt::JwsEs256Signer;
+use config::ApiServiceConfig;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
@@ -14,9 +15,6 @@ use crate::{
         ports::storage::StoragePort,
     },
 };
-// TODO move to configuration
-const TTL: i64 = 15 * 60;
-const TTL_REFRESH: i64 = 60 * 60 * 4;
 
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/auth")
@@ -58,6 +56,7 @@ pub fn get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
 pub async fn login(
     api: web::Data<Arc<dyn StoragePort>>,
     signer: web::Data<JwsEs256Signer>,
+    config: web::Data<ApiServiceConfig>,
     req: HttpRequest,
     body: web::Json<LoginRequest>,
 ) -> impl Responder {
@@ -77,8 +76,8 @@ pub async fn login(
         api.get_ref(),
         meta,
         &user.id,
-        TTL,
-        TTL_REFRESH,
+        config.auth_ttl(),
+        config.auth_refresh_ttl(),
     )
     .await
     .map_or_else(
@@ -101,6 +100,7 @@ pub async fn login(
 pub async fn token_refresh(
     api: web::Data<Arc<dyn StoragePort>>,
     signer: web::Data<JwsEs256Signer>,
+    config: web::Data<ApiServiceConfig>,
     req: HttpRequest,
     body: web::Json<TokenRefreshRequest>,
 ) -> impl Responder {
@@ -110,8 +110,8 @@ pub async fn token_refresh(
         api.get_ref(),
         meta,
         &body.into_inner().refresh_token,
-        TTL,
-        TTL_REFRESH,
+        config.auth_ttl(),
+        config.auth_refresh_ttl(),
     )
     .await
     .map_or_else(
