@@ -28,7 +28,7 @@ pub struct TokenResponse {
     pub refresh_token: String,
 }
 
-#[derive(Debug, Serialize, PartialEq, Eq, LabelledGeneric)]
+#[derive(Debug, Serialize, PartialEq, Eq, LabelledGeneric, Default, Clone)]
 pub struct AuthMetadata {
     pub ip_address: String,
     pub user_agent: String,
@@ -36,7 +36,7 @@ pub struct AuthMetadata {
 
 // DB DTO models below
 
-#[derive(Debug, LabelledGeneric)]
+#[derive(Debug, LabelledGeneric, Default)]
 pub struct UserAuth {
     pub id: String,
     pub email: String,
@@ -44,7 +44,7 @@ pub struct UserAuth {
     // TODO roles
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct CreateRefreshToken {
     pub jti: String,
     pub user_id: String,
@@ -53,7 +53,7 @@ pub struct CreateRefreshToken {
     pub expires_on: i64,
 }
 
-#[derive(Debug, LabelledGeneric)]
+#[derive(Debug, LabelledGeneric, Default)]
 pub struct DisplayRefreshToken {
     pub user_id: String,
     pub ip_address: String,

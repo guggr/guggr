@@ -6,7 +6,16 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Validate,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Serialize,
+    Deserialize,
+    ToSchema,
+    LabelledGeneric,
+    Validate,
+    Default,
 )]
 pub struct CreateGroup {
     #[garde(ascii, length(min = 1))]
@@ -14,7 +23,9 @@ pub struct CreateGroup {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
+)]
 pub struct DisplayGroup {
     pub id: String,
     pub name: String,
@@ -31,6 +42,7 @@ pub struct DisplayGroup {
     AsChangeset,
     LabelledGeneric,
     Validate,
+    Default,
 )]
 #[diesel(table_name = group)]
 pub struct UpdateGroup {

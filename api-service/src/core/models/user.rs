@@ -10,7 +10,16 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Validate,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Serialize,
+    Deserialize,
+    ToSchema,
+    LabelledGeneric,
+    Validate,
+    Default,
 )]
 pub struct CreateUser {
     #[garde(ascii, length(min = 1))]
@@ -24,7 +33,9 @@ pub struct CreateUser {
     pub password: String,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
+)]
 pub struct DisplayUser {
     pub id: String,
     pub name: String,
@@ -42,6 +53,7 @@ pub struct DisplayUser {
     AsChangeset,
     LabelledGeneric,
     Validate,
+    Default,
 )]
 #[diesel(table_name = user)]
 pub struct UpdateUser {
