@@ -80,6 +80,17 @@ pub struct JobType {
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, LabelledGeneric)]
+#[diesel(primary_key(jti))]
+#[diesel(table_name = refresh_token)]
+pub struct RefreshToken {
+    pub jti: String,
+    pub user_id: String,
+    pub ip_address: String,
+    pub user_agent: String,
+    pub expires_on: NaiveDateTime,
+}
+
+#[derive(Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, LabelledGeneric)]
 #[diesel(table_name = role)]
 pub struct Role {
     pub id: String,

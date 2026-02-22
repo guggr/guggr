@@ -71,6 +71,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    refresh_token (jti) {
+        jti -> Text,
+        user_id -> Text,
+        ip_address -> Text,
+        user_agent -> Text,
+        expires_on -> Timestamp,
+    }
+}
+
+diesel::table! {
     role (id) {
         id -> Text,
         name -> Text,
@@ -101,6 +111,7 @@ diesel::joinable!(job_details_ping -> job (id));
 diesel::joinable!(job_result_http -> job_runs (id));
 diesel::joinable!(job_result_ping -> job_runs (id));
 diesel::joinable!(job_runs -> job (job_id));
+diesel::joinable!(refresh_token -> user (user_id));
 diesel::joinable!(user_group_mapping -> group (group_id));
 diesel::joinable!(user_group_mapping -> role (role_id));
 diesel::joinable!(user_group_mapping -> user (user_id));
@@ -114,6 +125,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     job_result_ping,
     job_runs,
     job_type,
+    refresh_token,
     role,
     user,
     user_group_mapping,
