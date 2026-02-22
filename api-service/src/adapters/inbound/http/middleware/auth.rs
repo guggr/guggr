@@ -62,7 +62,7 @@ where
         } else {
             error!("JWT signer is not configured");
             return Box::pin(future::err::<ServiceResponse<B>, _>(
-                error::ErrorInternalServerError("JWT signer not configured"),
+                error::ErrorInternalServerError(""),
             ));
         };
 
