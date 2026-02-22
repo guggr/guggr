@@ -70,7 +70,6 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     ),
     responses(
         (status = 200, description = "User", body = DisplayUser),
-        (status = 404, description = "User Not Found", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
     security(("bearerAuth" = [])),
