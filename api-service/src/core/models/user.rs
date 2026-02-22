@@ -14,10 +14,13 @@ use utoipa::ToSchema;
 )]
 pub struct CreateUser {
     #[garde(ascii, length(min = 1))]
+    #[schema(min_length = 1)]
     pub name: String,
     #[garde(email)]
+    #[schema(format = "email")]
     pub email: String,
     #[garde(ascii, length(min = 8))]
+    #[schema(min_length = 8, format = "password")]
     pub password: String,
 }
 
@@ -43,10 +46,13 @@ pub struct DisplayUser {
 #[diesel(table_name = user)]
 pub struct UpdateUser {
     #[garde(ascii, length(min = 1))]
+    #[schema(min_length = 1)]
     pub name: Option<String>,
     #[garde(email)]
+    #[schema(format = "email")]
     pub email: Option<String>,
     #[garde(ascii, length(min = 8))]
+    #[schema(min_length = 8, format = "password")]
     pub password: Option<String>,
 }
 

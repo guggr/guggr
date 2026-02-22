@@ -10,6 +10,7 @@ use utoipa::ToSchema;
 )]
 pub struct CreateGroup {
     #[garde(ascii, length(min = 1))]
+    #[schema(min_length = 1)]
     pub name: String,
 }
 
@@ -34,6 +35,7 @@ pub struct DisplayGroup {
 #[diesel(table_name = group)]
 pub struct UpdateGroup {
     #[garde(ascii, length(min = 1))]
+    #[schema(min_length = 1)]
     pub name: Option<String>,
 }
 
