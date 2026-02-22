@@ -22,4 +22,10 @@ pub enum AuthError {
     JwtError(#[from] compact_jwt::error::JwtError),
     #[error("JWT expired")]
     JwtExpired,
+    #[error("JTI claim not present")]
+    JtiMissing,
+    #[error("Storage: {0}")]
+    Storage(#[from] StorageError),
+    #[error("Auth Metadata has changed")]
+    ChangedAuthMetadata,
 }

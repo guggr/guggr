@@ -6,7 +6,7 @@ use actix_web::{HttpResponse, Responder, get, http::header};
 use utoipa::ToSchema;
 use utoipa_actix_web::{self, service_config::ServiceConfig};
 
-use crate::core::domain::errors::StorageError;
+use crate::core::domain::errors::{AuthError, StorageError};
 
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("")
@@ -62,6 +62,13 @@ fn map_storage_error(err: &StorageError) -> HttpResponse {
         StorageError::NotFound => {
             HttpResponse::NotFound().json(err_body("not found", "No record found".to_string()))
         }
+    }
+}
+
+fn map_auth_error(err: &AuthError) -> HttpResponse {
+    match err {
+        AuthError::ChangedAuthMetadata => HttpResponse::Unauthorized().finish(),
+        _ => HttpResponse::InternalServerError().finish(),
     }
 }
 
