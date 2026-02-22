@@ -1,7 +1,7 @@
 use std::future::{Ready, ready};
 
 use actix_web::{
-    Error,
+    Error, HttpResponse,
     dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
     error,
     http::header,
@@ -12,6 +12,14 @@ use futures_util::future::{self, LocalBoxFuture};
 use tracing::error;
 
 use crate::core::domain::auth_helper::verify_jwt;
+
+fn unauthorized_with_bearer() -> actix_web::Error {
+    let resp = HttpResponse::Unauthorized()
+        .insert_header((header::WWW_AUTHENTICATE, "Bearer"))
+        .finish();
+
+    error::InternalError::from_response("", resp).into()
+}
 
 pub struct Auth;
 
@@ -65,17 +73,11 @@ where
             .and_then(|s| s.strip_prefix("Bearer "))
         {
             Some(t) if !t.is_empty() => t,
-            _ => {
-                return Box::pin(future::err::<ServiceResponse<B>, _>(
-                    error::ErrorUnauthorized(""),
-                ));
-            }
+            _ => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
 
         if verify_jwt(signer, token).is_err() {
-            return Box::pin(future::err::<ServiceResponse<B>, _>(
-                error::ErrorUnauthorized(""),
-            ));
+            return Box::pin(futures_util::future::err(unauthorized_with_bearer()));
         }
         let fut = self.service.call(req);
         Box::pin(fut)
