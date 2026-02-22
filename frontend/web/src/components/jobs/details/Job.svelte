@@ -1,18 +1,24 @@
 <script lang="ts">
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
-	import { ActivityIcon } from '@lucide/svelte';
+	import { ActivityIcon, PenIcon } from '@lucide/svelte';
 </script>
 
 <svelte:head>
 	<title>Job Name Details | guggr</title>
 </svelte:head>
 
-<div class="breadcrumbs pb-4 text-sm">
-	<menu>
-		<li><a href="/">Home</a></li>
-		<li><a href="/jobs">Jobs</a></li>
-		<li><a href="/jobs/details">Job Name</a></li>
-	</menu>
+<div class="mb-4 flex items-baseline justify-between gap-2">
+	<div class="breadcrumbs text-sm">
+		<menu>
+			<li><a href="/">Home</a></li>
+			<li><a href="/jobs">Jobs</a></li>
+			<li><a href="/jobs/details">Job Name</a></li>
+		</menu>
+	</div>
+
+	<a href="/jobs/edit" class="btn btn-soft btn-sm">
+		<PenIcon size="16" /> Edit job
+	</a>
 </div>
 
 <div class="card card-side bg-base-100 shadow-md">

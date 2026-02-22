@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { preventDefault } from '@/lib/event';
 
+	let { edit = false }: { edit?: boolean } = $props();
+
 	let name = $state(''),
 		type = $state(''),
 		interval = $state(300),
@@ -102,7 +104,9 @@
 	</fieldset>
 
 	<div class="flex flex-row-reverse gap-2">
-		<button type="submit" class="btn btn-soft btn-primary">Create job</button>
+		<button type="submit" class="btn btn-soft btn-primary">
+			{edit ? 'Save job' : 'Create job'}
+		</button>
 		<a href="/jobs" class="btn btn-ghost">Back to jobs</a>
 	</div>
 </form>
