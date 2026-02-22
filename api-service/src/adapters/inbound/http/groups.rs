@@ -4,7 +4,7 @@ use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
-    adapters::inbound::http::{ErrorBody, map_storage_error},
+    adapters::inbound::http::{ErrorBody, map_storage_error, middleware::auth::Auth},
     core::{
         models::group::{CreateGroup, DisplayGroup, UpdateGroup},
         ports::storage::StoragePort,
@@ -13,6 +13,7 @@ use crate::{
 
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/groups")
+        .wrap(Auth)
         .service(create)
         .service(list)
         .service(get)
@@ -29,6 +30,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
         (status = 200, description = "Created group", body = DisplayGroup),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "groups"
 )]
 #[post("")]
@@ -48,6 +50,7 @@ pub async fn create(
         (status = 200, description = "List groups", body = [DisplayGroup]),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "groups"
 )]
 #[get("")]
@@ -68,6 +71,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
         (status = 404, description = "Group Not Found", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "groups"
 )]
 #[get("/{id}")]
@@ -90,6 +94,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
         (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "groups"
 )]
 #[patch("/{id}")]
@@ -116,6 +121,7 @@ pub async fn update(
         (status = 204, description = "Deleted"),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "groups"
 )]
 #[delete("/{id}")]

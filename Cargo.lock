@@ -399,6 +399,7 @@ dependencies = [
  "diesel",
  "frunk",
  "frunk_core",
+ "futures-util",
  "nanoid",
  "serde",
  "thiserror 2.0.18",

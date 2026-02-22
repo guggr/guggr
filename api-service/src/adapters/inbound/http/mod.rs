@@ -1,4 +1,6 @@
+pub mod auth;
 pub mod groups;
+pub mod middleware;
 pub mod users;
 use actix_web::{HttpResponse, Responder, get, http::header};
 use utoipa::ToSchema;

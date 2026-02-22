@@ -17,7 +17,7 @@ use compact_jwt::{
     JwsEs256Signer, JwsSigner, JwsSignerToVerifier, JwsVerifier, Jwt, JwtUnverified,
 };
 
-pub fn create_jwt(signer: JwsEs256Signer, user_id: &str, ttl_s: i64) -> Result<String, AuthError> {
+pub fn create_jwt(signer: &JwsEs256Signer, user_id: &str, ttl_s: i64) -> Result<String, AuthError> {
     let now = Utc::now().timestamp();
     let jwt: Jwt<()> = Jwt::<()> {
         sub: Some(user_id.to_string()),
@@ -30,7 +30,7 @@ pub fn create_jwt(signer: JwsEs256Signer, user_id: &str, ttl_s: i64) -> Result<S
     Ok(signed.to_string())
 }
 
-pub fn verify_jwt(signer: JwsEs256Signer, token: &str) -> Result<Jwt<()>, AuthError> {
+pub fn verify_jwt(signer: &JwsEs256Signer, token: &str) -> Result<Jwt<()>, AuthError> {
     let now = Utc::now().timestamp();
     let unverified = JwtUnverified::from_str(token)?;
     let verifier = signer.get_verifier()?;

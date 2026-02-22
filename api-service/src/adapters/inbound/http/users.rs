@@ -4,7 +4,7 @@ use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
-    adapters::inbound::http::{ErrorBody, map_storage_error},
+    adapters::inbound::http::{ErrorBody, map_storage_error, middleware::auth::Auth},
     core::{
         models::user::{CreateUser, DisplayUser, UpdateUser},
         ports::storage::StoragePort,
@@ -13,6 +13,7 @@ use crate::{
 
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/users")
+        .wrap(Auth)
         .service(create)
         .service(list)
         .service(get)
@@ -29,6 +30,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
         (status = 200, description = "Created user", body = DisplayUser),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[post("")]
@@ -48,6 +50,7 @@ pub async fn create(
         (status = 200, description = "List users", body = [DisplayUser]),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[get("")]
@@ -68,6 +71,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
         (status = 404, description = "User Not Found", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[get("/{id}")]
@@ -91,6 +95,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
         (status = 404, description = "Empty Body", body = ErrorBody),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[patch("/{id}")]
@@ -118,6 +123,7 @@ pub async fn update(
         (status = 204, description = "Deleted"),
         (status = 500, description = "Storage error", body = ErrorBody)
     ),
+    security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[delete("/{id}")]
