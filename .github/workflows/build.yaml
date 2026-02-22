@@ -101,8 +101,6 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.revision=${{ github.sha }}
-          flavor: |
-            latest=false
 
       - name: Build and push
         id: push
