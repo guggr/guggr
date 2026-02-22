@@ -49,10 +49,10 @@ pub async fn login(
         return HttpResponse::Unauthorized().finish();
     }
 
-    let Ok(jwt) = create_jwt(signer.get_ref(), &user.id, TTL) else {
-        return HttpResponse::InternalServerError().finish();
-    };
-    HttpResponse::Ok().json(TokenResponse { access_token: jwt })
+    create_jwt(signer.get_ref(), &user.id, TTL).map_or_else(
+        |_| HttpResponse::InternalServerError().finish(),
+        |jwt| HttpResponse::Ok().json(TokenResponse { access_token: jwt }),
+    )
 }
 
 // TODO logout
