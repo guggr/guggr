@@ -4,16 +4,17 @@ use actix_web::{App, HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
     adapters::{
-        inbound::http::{self, groups, users},
+        inbound::http::{self, auth, groups, users},
         outgoing::postgres::PostgresAdapter,
     },
-    core::ports::storage::StoragePort,
+    core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
     telemetry::init_tracing,
 };
 use compact_jwt::JwsEs256Signer;
 use config::PostgresConfig;
 use tracing::debug;
 use tracing_actix_web::TracingLogger;
+use utoipa::OpenApi;
 use utoipa_actix_web::{self, AppExt};
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -30,12 +31,14 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(TracingLogger::default())
             .into_utoipa_app()
+            .openapi(ApiDoc::openapi())
             .app_data(api.clone())
             .app_data(signer.clone())
             .service(
                 utoipa_actix_web::scope("/api/v1")
                     .configure(groups::configure)
                     .configure(users::configure)
+                    .configure(auth::configure)
                     .configure(http::configure),
             )
             .openapi_service(|api| {
