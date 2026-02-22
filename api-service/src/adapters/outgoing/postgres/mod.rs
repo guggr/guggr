@@ -69,8 +69,8 @@ impl From<argon2::password_hash::Error> for StorageError {
 impl From<diesel::result::Error> for PostgresAdapterError {
     fn from(e: diesel::result::Error) -> Self {
         match e {
-            diesel::result::Error::NotFound => PostgresAdapterError::NotFound,
-            other => PostgresAdapterError::Result(other),
+            diesel::result::Error::NotFound => Self::NotFound,
+            other => Self::Result(other),
         }
     }
 }

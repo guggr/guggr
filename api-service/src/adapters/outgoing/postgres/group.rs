@@ -22,7 +22,8 @@ pub struct PostgresGroupAdapter {
 }
 
 impl PostgresGroupAdapter {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+    #[must_use]
+    pub const fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }
@@ -82,6 +83,9 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
             .load(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 
-        Ok(groups.into_iter().map(|u| u.transmogrify()).collect())
+        Ok(groups
+            .into_iter()
+            .map(frunk::labelled::Transmogrifier::transmogrify)
+            .collect())
     }
 }

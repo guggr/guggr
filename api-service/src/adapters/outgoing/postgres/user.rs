@@ -22,7 +22,8 @@ pub struct PostgresUserAdapter {
 }
 
 impl PostgresUserAdapter {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+    #[must_use]
+    pub const fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }
@@ -78,11 +79,14 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
     async fn list(&self, limit: i64) -> Result<Vec<DisplayUser>, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        let groups: Vec<models::User> = user
+        let users: Vec<models::User> = user
             .limit(limit)
             .load(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 
-        Ok(groups.into_iter().map(|u| u.transmogrify()).collect())
+        Ok(users
+            .into_iter()
+            .map(frunk::labelled::Transmogrifier::transmogrify)
+            .collect())
     }
 }

@@ -42,7 +42,7 @@ pub async fn create(
 ) -> impl Responder {
     match api.user().create(body.into_inner()).await {
         Ok(r) => HttpResponse::Ok().json(r),
-        Err(e) => map_storage_error(e),
+        Err(e) => map_storage_error(&e),
     }
 }
 
@@ -59,7 +59,7 @@ pub async fn create(
 pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     match api.user().list(5).await {
         Ok(users) => HttpResponse::Ok().json(users),
-        Err(e) => map_storage_error(e),
+        Err(e) => map_storage_error(&e),
     }
 }
 
@@ -81,7 +81,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     match api.user().get_by_id(&path.into_inner()).await {
         Ok(Some(user)) => HttpResponse::Ok().json(user),
         Ok(None) => HttpResponse::NotFound().json("not found"),
-        Err(e) => map_storage_error(e),
+        Err(e) => map_storage_error(&e),
     }
 }
 
@@ -113,7 +113,7 @@ pub async fn update(
         .await
     {
         Ok(r) => HttpResponse::Ok().json(r),
-        Err(e) => map_storage_error(e),
+        Err(e) => map_storage_error(&e),
     }
 }
 #[utoipa::path(
@@ -137,6 +137,6 @@ pub async fn delete(
     let id = path.into_inner();
     match api.user().delete(&id).await {
         Ok(()) => HttpResponse::NoContent().finish(),
-        Err(e) => map_storage_error(e),
+        Err(e) => map_storage_error(&e),
     }
 }

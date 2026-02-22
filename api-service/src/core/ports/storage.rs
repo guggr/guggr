@@ -9,7 +9,7 @@ use crate::core::{
     },
 };
 
-/// `N` NewStruct, `U` UpdateStruct, `D` DisplayStruct
+/// `N`: `NewStruct`, `U`: `UpdateStruct`, `D`: `DisplayStruct`
 #[async_trait]
 pub trait CrudOperations<N, U, D> {
     async fn create(&self, new_value: N) -> Result<D, StorageError>;

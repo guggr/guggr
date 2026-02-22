@@ -18,7 +18,8 @@ pub struct PostgresAuthAdapter {
 }
 
 impl PostgresAuthAdapter {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+    #[must_use]
+    pub const fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }

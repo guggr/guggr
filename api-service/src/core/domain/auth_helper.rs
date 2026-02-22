@@ -26,21 +26,21 @@ pub fn create_jwt(signer: &JwsEs256Signer, user_id: &str, ttl_s: i64) -> Result<
         ..Default::default()
     };
 
-    let signed = signer.sign(&jwt)?;
-    Ok(signed.to_string())
+    let jwt_signed = signer.sign(&jwt)?;
+    Ok(jwt_signed.to_string())
 }
 
 pub fn verify_jwt(signer: &JwsEs256Signer, token: &str) -> Result<Jwt<()>, AuthError> {
     let now = Utc::now().timestamp();
-    let unverified = JwtUnverified::from_str(token)?;
+    let jwt_unverified = JwtUnverified::from_str(token)?;
     let verifier = signer.get_verifier()?;
-    let verified = verifier.verify(&unverified)?;
+    let jwt_verified = verifier.verify(&jwt_unverified)?;
 
-    if let Some(expiry) = verified.exp
+    if let Some(expiry) = jwt_verified.exp
         && expiry < now
     {
         return Err(AuthError::JwtExpired);
     }
 
-    Ok(verified)
+    Ok(jwt_verified)
 }

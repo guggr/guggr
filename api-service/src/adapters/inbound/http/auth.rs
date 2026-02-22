@@ -40,16 +40,15 @@ pub async fn login(
     let req = body.into_inner();
     let user = match api.auth().get_user_by_email(&req.email).await {
         Ok(user) => user,
-        Err(err) => return map_storage_error(err),
+        Err(e) => return map_storage_error(&e),
     };
     let ok = verify_password(&req.password, &user.password).unwrap_or(false);
     if !ok {
         return HttpResponse::Unauthorized().finish();
     }
 
-    let jwt = match create_jwt(signer.get_ref(), &user.id, TTL) {
-        Ok(jwt) => jwt,
-        Err(_) => return HttpResponse::InternalServerError().finish(),
+    let Ok(jwt) = create_jwt(signer.get_ref(), &user.id, TTL) else {
+        return HttpResponse::InternalServerError().finish();
     };
     HttpResponse::Ok().json(TokenResponse { access_token: jwt })
 }

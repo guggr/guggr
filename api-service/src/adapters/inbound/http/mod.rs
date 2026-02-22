@@ -53,12 +53,12 @@ async fn swagger_ui_redirect() -> impl Responder {
         .finish()
 }
 
-fn map_storage_error(err: StorageError) -> HttpResponse {
+fn map_storage_error(err: &StorageError) -> HttpResponse {
     match err {
-        StorageError::Internal(_) => HttpResponse::InternalServerError()
-            .json(err_body("unexpected", "Something went wrong".to_string())),
-        StorageError::Unavailable(_) => HttpResponse::InternalServerError()
-            .json(err_body("unexpected", "Something went wrong".to_string())),
+        StorageError::Internal(_) | StorageError::Unavailable(_) => {
+            HttpResponse::InternalServerError()
+                .json(err_body("unexpected", "Something went wrong".to_string()))
+        }
         StorageError::NotFound => {
             HttpResponse::NotFound().json(err_body("not found", "No record found".to_string()))
         }
@@ -71,6 +71,6 @@ struct ErrorBody {
     message: String,
 }
 
-fn err_body(code: &'static str, message: String) -> ErrorBody {
+const fn err_body(code: &'static str, message: String) -> ErrorBody {
     ErrorBody { code, message }
 }

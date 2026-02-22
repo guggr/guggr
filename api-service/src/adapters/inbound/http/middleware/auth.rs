@@ -49,14 +49,13 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let signer = match req.app_data::<web::Data<JwsEs256Signer>>() {
-            Some(s) => s.get_ref(),
-            None => {
-                error!("JWT signer is not configured");
-                return Box::pin(future::err::<ServiceResponse<B>, _>(
-                    error::ErrorInternalServerError("JWT signer not configured"),
-                ));
-            }
+        let signer = if let Some(s) = req.app_data::<web::Data<JwsEs256Signer>>() {
+            s.get_ref()
+        } else {
+            error!("JWT signer is not configured");
+            return Box::pin(future::err::<ServiceResponse<B>, _>(
+                error::ErrorInternalServerError("JWT signer not configured"),
+            ));
         };
 
         let token = match req
