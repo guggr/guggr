@@ -59,7 +59,7 @@ impl AuthOperations for PostgresAuthAdapter {
             .map_err(PostgresAdapterError::from)?;
         Ok(DisplayRefreshToken::from(r))
     }
-    async fn delete_refresh_toke(&self, jti: &str) -> Result<(), StorageError> {
+    async fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(refresh_token.filter(dsl::jti.eq(jti)))

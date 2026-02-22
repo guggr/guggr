@@ -23,8 +23,8 @@ pub trait CrudOperations<N, U, D> {
 pub trait AuthOperations {
     async fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError>;
     async fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
-    async fn get_refresh_token(&self, jit: &str) -> Result<DisplayRefreshToken, StorageError>;
-    async fn delete_refresh_toke(&self, jti: &str) -> Result<(), StorageError>;
+    async fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError>;
+    async fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError>;
 }
 
 #[async_trait]

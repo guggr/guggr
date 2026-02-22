@@ -94,7 +94,7 @@ pub async fn invalidate_token(
 ) -> Result<(), AuthError> {
     let jwt = verify_jwt(signer, token)?;
     if let Some(jti) = jwt.jti {
-        storage.auth().delete_refresh_toke(&jti).await?;
+        storage.auth().delete_refresh_token(&jti).await?;
     }
     Ok(())
 }
