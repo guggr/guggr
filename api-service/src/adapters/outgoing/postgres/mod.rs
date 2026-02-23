@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod group;
+pub mod job;
 pub mod role;
 pub mod user;
 use async_trait::async_trait;
@@ -8,8 +9,8 @@ use thiserror::Error;
 
 use crate::{
     adapters::outgoing::postgres::{
-        auth::PostgresAuthAdapter, group::PostgresGroupAdapter, role::PostgresRoleAdapter,
-        user::PostgresUserAdapter,
+        auth::PostgresAuthAdapter, group::PostgresGroupAdapter, job::PostgresJobAdapter,
+        role::PostgresRoleAdapter, user::PostgresUserAdapter,
     },
     core::{
         domain::errors::StorageError,
@@ -18,7 +19,7 @@ use crate::{
             role::{CreateRole, DisplayRole, UpdateRole},
             user::{CreateUser, DisplayUser, UpdateUser},
         },
-        ports::storage::{AuthOperations, CrudOperations, StoragePort},
+        ports::storage::{AuthOperations, CrudOperations, JobCrudOperations, StoragePort},
     },
 };
 pub struct PostgresAdapter {
@@ -26,6 +27,7 @@ pub struct PostgresAdapter {
     pub user: PostgresUserAdapter,
     pub role: PostgresRoleAdapter,
     pub auth: PostgresAuthAdapter,
+    pub job: PostgresJobAdapter,
 }
 
 /// Errors for [`PostgresAdapter`]
@@ -92,7 +94,8 @@ impl PostgresAdapter {
             group: PostgresGroupAdapter::new(pool.clone()),
             user: PostgresUserAdapter::new(pool.clone()),
             role: PostgresRoleAdapter::new(pool.clone()),
-            auth: PostgresAuthAdapter::new(pool),
+            auth: PostgresAuthAdapter::new(pool.clone()),
+            job: PostgresJobAdapter::new(pool),
         })
     }
 }
@@ -110,5 +113,8 @@ impl StoragePort for PostgresAdapter {
     }
     fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
         &self.auth
+    }
+    fn job(&self) -> &(dyn JobCrudOperations + Send + Sync) {
+        &self.job
     }
 }

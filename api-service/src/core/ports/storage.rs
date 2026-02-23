@@ -3,6 +3,7 @@ use crate::core::{
     models::{
         auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth},
         group::{CreateGroup, DisplayGroup, UpdateGroup},
+        job::{CreateJob, DisplayJob, UpdateJob, run::DisplayJobRun},
         role::{CreateRole, DisplayRole, UpdateRole},
         user::{CreateUser, DisplayUser, UpdateUser},
     },
@@ -17,6 +18,27 @@ pub trait CrudOperations<N, U, D> {
     fn list(&self, limit: i64) -> Result<Vec<D>, StorageError>;
 }
 
+pub trait JobCrudOperations {
+    fn create(&self, new_value: CreateJob) -> Result<DisplayJob, StorageError>;
+    fn update(&self, id: &str, update_value: UpdateJob) -> Result<DisplayJob, StorageError>;
+    fn get_by_id(&self, id: &str) -> Result<Option<DisplayJob>, StorageError>;
+    fn delete(&self, id: &str) -> Result<(), StorageError>;
+    fn list(&self, limit: i64) -> Result<Vec<DisplayJob>, StorageError>;
+
+    fn run(&self) -> &(dyn JobRunCrudOperations + Send + Sync);
+}
+
+pub trait JobRunCrudOperations {
+    fn get_by_job_id(&self, job_id: &str) -> Result<Option<DisplayJobRun>, StorageError>;
+    fn list_by_job_id(&self, job_id: &str, limit: i64) -> Result<Vec<DisplayJobRun>, StorageError>;
+}
+
+pub trait JobDetailOperations<C, U, D> {
+    fn create(&self, new_value: C) -> Result<D, StorageError>;
+    fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
+    fn update(&self, id: &str, update_value: U) -> Result<D, StorageError>;
+}
+
 pub trait AuthOperations {
     fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError>;
     fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
@@ -29,6 +51,7 @@ pub trait StoragePort: Send + Sync {
     fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
     fn role(&self) -> &(dyn CrudOperations<CreateRole, UpdateRole, DisplayRole> + Send + Sync);
     fn auth(&self) -> &(dyn AuthOperations + Send + Sync);
+    fn job(&self) -> &(dyn JobCrudOperations + Send + Sync);
 }
 
 #[cfg(test)]
@@ -41,15 +64,34 @@ pub mod tests {
         pub user: MockStoreUser,
         pub role: MockStoreRole,
         pub auth: MockStoreAuth,
+        pub job: MockStoreJob,
     }
     pub struct MockStoreGroup;
     pub struct MockStoreUser;
     pub struct MockStoreRole;
     pub struct MockStoreAuth;
+    pub struct MockStoreJob {
+        pub run: MockStoreJobRun,
+    }
+    pub struct MockStoreJobRun;
 
     impl Default for MockStore {
         fn default() -> Self {
             Self::new()
+        }
+    }
+
+    impl Default for MockStoreJob {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
+    impl MockStoreJob {
+        pub fn new() -> Self {
+            Self {
+                run: MockStoreJobRun,
+            }
         }
     }
 
@@ -60,6 +102,7 @@ pub mod tests {
                 user: MockStoreUser,
                 role: MockStoreRole,
                 auth: MockStoreAuth,
+                job: MockStoreJob::new(),
             }
         }
     }
@@ -78,6 +121,9 @@ pub mod tests {
         }
         fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
             &self.auth
+        }
+        fn job(&self) -> &(dyn JobCrudOperations + Send + Sync) {
+            &self.job
         }
     }
 
@@ -191,6 +237,38 @@ pub mod tests {
         }
         fn delete_refresh_token(&self, _jti: &str) -> Result<(), StorageError> {
             Ok(())
+        }
+    }
+    impl JobCrudOperations for MockStoreJob {
+        fn create(&self, _new_value: CreateJob) -> Result<DisplayJob, StorageError> {
+            todo!()
+        }
+        fn delete(&self, _id: &str) -> Result<(), StorageError> {
+            todo!()
+        }
+        fn get_by_id(&self, _id: &str) -> Result<Option<DisplayJob>, StorageError> {
+            todo!()
+        }
+        fn list(&self, _limit: i64) -> Result<Vec<DisplayJob>, StorageError> {
+            todo!()
+        }
+        fn run(&self) -> &(dyn JobRunCrudOperations + Send + Sync) {
+            &self.run
+        }
+        fn update(&self, _id: &str, _update_value: UpdateJob) -> Result<DisplayJob, StorageError> {
+            todo!()
+        }
+    }
+    impl JobRunCrudOperations for MockStoreJobRun {
+        fn get_by_job_id(&self, _job_id: &str) -> Result<Option<DisplayJobRun>, StorageError> {
+            todo!()
+        }
+        fn list_by_job_id(
+            &self,
+            _job_id: &str,
+            _limit: i64,
+        ) -> Result<Vec<DisplayJobRun>, StorageError> {
+            todo!()
         }
     }
 }
