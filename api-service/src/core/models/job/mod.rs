@@ -23,7 +23,6 @@ pub struct CreateJob {
     pub custom_notification: Option<String>,
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
     pub run_every: Duration,
-    pub last_scheduled: Option<NaiveDateTime>,
     pub details: CreateJobDetails,
 }
 
@@ -94,7 +93,7 @@ impl From<CreateJob> for Job {
             notify_users: value.notify_users,
             custom_notification: value.custom_notification,
             run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            last_scheduled: None,
         }
     }
 }
