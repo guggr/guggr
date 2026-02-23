@@ -77,6 +77,7 @@
               rust-bin.stable.latest.default
               rustfmt-nightly
               protobuf_33
+              podman
             ];
             LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
           };
