@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgs-diesel-cli-ext-fix.url = "github:NixOS/nixpkgs/refs/pull/487982/head";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
   outputs =
@@ -11,6 +12,7 @@
       self,
       nixpkgs,
       nixpkgs-diesel-cli-ext-fix,
+      rust-overlay,
     }:
     let
       supportedSystems = [
@@ -28,6 +30,7 @@
             (final: prev: {
               diesel-cli-ext = (import nixpkgs-diesel-cli-ext-fix { inherit system; }).diesel-cli-ext;
             })
+            (import rust-overlay)
           ];
         }
       );
@@ -53,6 +56,7 @@
               diesel-cli
               diesel-cli-ext
               libpq
+              rust-bin.stable.latest.default
             ];
             LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
           };
