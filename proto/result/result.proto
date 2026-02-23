@@ -3,6 +3,7 @@ package guggr.job_result.v1;
 
 import "result/types/http.proto";
 import "result/types/ping.proto";
+import "job_types/job_types.proto";
 
 import "google/protobuf/timestamp.proto";
 
@@ -13,6 +14,8 @@ message JobResult {
     google.protobuf.Timestamp timestamp = 2 [(buf.validate.field).required = true];
     string batch_id = 3 [(buf.validate.field).required = true];
     string run_id = 4 [(buf.validate.field).required = true];
+
+    guggr.job_types.v1.JobType job_type = 5;
 
     option (buf.validate.message).oneof = { fields: ["http", "ping"], required: true };
 

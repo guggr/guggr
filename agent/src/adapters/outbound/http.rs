@@ -118,7 +118,7 @@ impl MonitorPort for HttpAdapter {
 
 #[cfg(test)]
 mod tests {
-    use gen_proto_types::job::{types::v1::HttpJobType, v1::JobType};
+    use gen_proto_types::{job::types::v1::HttpJobType, job_types::v1::JobType};
     use httpmock::{Method::HEAD, MockServer};
 
     use super::*;

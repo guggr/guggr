@@ -157,7 +157,7 @@ mod tests {
     use std::net::Ipv6Addr;
 
     use agent::init_tracing;
-    use gen_proto_types::job::{types::v1::PingJobType, v1::JobType};
+    use gen_proto_types::{job::types::v1::PingJobType, job_types::v1::JobType};
 
     use super::*;
 

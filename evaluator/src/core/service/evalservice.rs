@@ -171,6 +171,7 @@ mod tests {
             timestamp: Some(timestamp),
             batch_id: "abcd".to_string(),
             run_id: "abcd".to_string(),
+            job_type: 0,
             http: None,
             ping: None,
         }

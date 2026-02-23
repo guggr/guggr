@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use gen_proto_types::job::v1::{Job, JobType};
+use gen_proto_types::{job::v1::Job, job_types::v1::JobType};
 use nanoid::nanoid;
 use tracing::{debug, error};
 
