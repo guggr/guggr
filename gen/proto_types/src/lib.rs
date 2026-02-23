@@ -24,3 +24,10 @@ pub mod job_result {
         }
     }
 }
+
+#[allow(clippy::all, clippy::pedantic, clippy::nursery)]
+pub mod job_types {
+    pub mod v1 {
+        include!("guggr.job_types.v1.rs");
+    }
+}

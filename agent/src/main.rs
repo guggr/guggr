@@ -1,7 +1,7 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
 use config::{AgentConfig, RabbitMQConfig};
-use gen_proto_types::job::v1::JobType;
+use gen_proto_types::job_types::v1::JobType;
 use tokio::{select, signal::unix::SignalKind};
 use tracing::{error, info};
 
