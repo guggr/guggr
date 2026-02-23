@@ -118,6 +118,11 @@ pub fn verify_jwt(signer: &JwsEs256Signer, token: &str) -> Result<Jwt<()>, AuthE
 mod tests {
     use std::time::Duration;
 
+    use argon2::{
+        PasswordHasher,
+        password_hash::{SaltString, rand_core::OsRng},
+    };
+
     use super::*;
     use crate::core::ports::storage::tests::MockStore;
 
@@ -149,6 +154,11 @@ mod tests {
             .await
             .is_ok()
         );
+        assert!(
+            invalidate_token(&signer, &storage, &token.refresh_token)
+                .await
+                .is_ok()
+        );
         Ok(())
     }
 
@@ -161,7 +171,7 @@ mod tests {
             user_agent: "bogus".to_string(),
         };
         let ttl = 0;
-        let ttl_refresh = 600;
+        let ttl_refresh = 0;
         let user_id = "bob";
         let token =
             create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
@@ -170,23 +180,6 @@ mod tests {
             verify_jwt(&signer, &token.access_token).unwrap_err(),
             AuthError::JwtExpired
         );
-        Ok(())
-    }
-
-    #[actix_web::test]
-    async fn jwt_refresh_expired() -> anyhow::Result<()> {
-        let signer = JwsEs256Signer::generate_es256()?;
-        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
-        let meta = AuthMetadata {
-            ip_address: "0.0.0.0".to_string(),
-            user_agent: "bogus".to_string(),
-        };
-        let ttl = 0;
-        let ttl_refresh = 0;
-        let user_id = "bob";
-        let token =
-            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
-        actix_web::rt::time::sleep(Duration::from_secs(1)).await;
         assert_eq!(
             refresh_token(
                 &signer,
@@ -230,6 +223,20 @@ mod tests {
             .unwrap_err(),
             AuthError::JtiMissing
         );
+        Ok(())
+    }
+
+    #[test]
+    fn validate_passwords() -> anyhow::Result<()> {
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let s = "secret".to_string();
+        let h = argon2
+            .hash_password(s.as_bytes(), &salt)
+            .unwrap()
+            .to_string();
+        assert!(verify_password(&s, &h)?);
+        assert!(!verify_password("othersecret", &h)?);
         Ok(())
     }
 }
