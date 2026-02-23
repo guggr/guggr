@@ -196,8 +196,8 @@ mod tests {
             ip_address: "0.0.0.0".to_string(),
             user_agent: "bogus".to_string(),
         };
-        let ttl = 0;
-        let ttl_refresh = 0;
+        let ttl = 60;
+        let ttl_refresh = 600;
         let user_id = "bob";
         let token = create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh)?;
         assert_eq!(
