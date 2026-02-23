@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::PingJobResult, v1::JobResult},
+    job_types::v1::JobType,
 };
 use protify::proto_types::Timestamp;
 use rand::random;
@@ -84,6 +85,7 @@ impl MonitorPort for PingAdapter {
                     id: job.id.clone(),
                     batch_id: job.batch_id.clone(),
                     run_id,
+                    job_type: JobType::Ping.into(),
                     timestamp: Some(get_timestamp()?),
                     ping: Some(PingJobResult {
                         reachable: true,
@@ -114,6 +116,7 @@ impl MonitorPort for PingAdapter {
                     id: job.id.clone(),
                     batch_id: job.batch_id.clone(),
                     run_id,
+                    job_type: JobType::Ping.into(),
                     timestamp: Some(get_timestamp()?),
                     ping: Some(PingJobResult {
                         reachable: false,
@@ -191,6 +194,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![1, 0, 0, 1].into(),
@@ -233,6 +237,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1].into(),
@@ -271,6 +276,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 0, 0, 1].into(),
@@ -284,6 +290,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 1, 1, 1].into(),
@@ -299,6 +306,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: first_ipv6_addr.octets().to_vec().into(),
@@ -314,6 +322,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: second_ipv6_addr.octets().to_vec().into(),
@@ -321,6 +330,9 @@ mod tests {
             }),
             ..Default::default()
         };
+
+        dbg!(&res);
+
         assert!(
             res == expected_result_alt_1
                 || res == expected_result_alt_2
@@ -358,6 +370,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: false,
                     ..Default::default()

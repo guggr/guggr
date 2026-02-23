@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::HttpJobResult, v1::JobResult},
+    job_types::v1::JobType,
 };
 use tracing::info;
 
@@ -108,6 +109,7 @@ impl MonitorPort for HttpAdapter {
             batch_id: job.batch_id.clone(),
             run_id,
             timestamp: Some(timestamp.to_proto()),
+            job_type: JobType::Http.into(),
             http: Some(http_job_result),
             ..Default::default()
         };
@@ -155,6 +157,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Http.into(),
                 http: Some(HttpJobResult {
                     reachable: true,
                     ip_address: vec![127, 0, 0, 1].into(),
@@ -191,6 +194,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Http.into(),
                 http: Some(HttpJobResult {
                     reachable: false,
                     ip_address: vec![].into(),
