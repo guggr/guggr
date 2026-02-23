@@ -28,4 +28,6 @@ pub enum AuthError {
     Storage(#[from] StorageError),
     #[error("Auth Metadata has changed")]
     ChangedAuthMetadata,
+    #[error("Auth Metadata has changed")]
+    Unauthorized,
 }

@@ -2,8 +2,10 @@ pub mod auth;
 pub mod groups;
 pub mod middleware;
 pub mod users;
-use actix_web::{HttpResponse, Responder, get, http::header};
-use utoipa::ToSchema;
+use actix_web::{
+    HttpResponse, Responder, ResponseError, get,
+    http::{StatusCode, header},
+};
 use utoipa_actix_web::{self, service_config::ServiceConfig};
 
 use crate::core::domain::errors::{AuthError, StorageError};
@@ -53,31 +55,37 @@ async fn swagger_ui_redirect() -> impl Responder {
         .finish()
 }
 
-fn map_storage_error(err: &StorageError) -> HttpResponse {
-    match err {
-        StorageError::Internal(_)
-        | StorageError::Unavailable(_)
-        | StorageError::TimestampConversion => HttpResponse::InternalServerError()
-            .json(err_body("unexpected", "Something went wrong".to_string())),
-        StorageError::NotFound => {
-            HttpResponse::NotFound().json(err_body("not found", "No record found".to_string()))
+impl ResponseError for StorageError {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    fn error_response(&self) -> HttpResponse {
+        match self {
+            Self::NotFound => HttpResponse::NotFound().finish(),
+            Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
+                HttpResponse::InternalServerError().finish()
+            }
         }
     }
 }
 
-fn map_auth_error(err: &AuthError) -> HttpResponse {
-    match err {
-        AuthError::ChangedAuthMetadata => HttpResponse::Unauthorized().finish(),
-        _ => HttpResponse::InternalServerError().finish(),
+impl ResponseError for AuthError {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            Self::JwtError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::UNAUTHORIZED,
+        }
     }
-}
-
-#[derive(serde::Serialize, ToSchema)]
-struct ErrorBody {
-    code: &'static str,
-    message: String,
-}
-
-const fn err_body(code: &'static str, message: String) -> ErrorBody {
-    ErrorBody { code, message }
+    fn error_response(&self) -> HttpResponse {
+        match self {
+            Self::JwtError(_) => HttpResponse::InternalServerError().finish(),
+            _ => HttpResponse::Unauthorized().finish(),
+        }
+    }
 }

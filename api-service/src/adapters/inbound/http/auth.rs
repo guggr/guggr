@@ -1,19 +1,17 @@
 use std::sync::Arc;
 
-use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
+use actix_web::{HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, post, web};
 use compact_jwt::JwsEs256Signer;
 use config::ApiServiceConfig;
 use utoipa_actix_web::service_config::ServiceConfig;
 
-use crate::{
-    adapters::inbound::http::{ErrorBody, map_auth_error},
-    core::{
-        domain::auth_helper::{create_token, invalidate_token, refresh_token, verify_password},
-        models::auth::{
-            AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
-        },
-        ports::storage::StoragePort,
+use crate::core::{
+    domain::{
+        auth_helper::{create_token, invalidate_token, refresh_token, verify_password},
+        errors::AuthError,
     },
+    models::auth::{AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
+    ports::storage::StoragePort,
 };
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -48,7 +46,7 @@ pub fn get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
     responses(
         (status = 200, description = "Access- and refresh-token", body = TokenResponse),
         (status = 401, description = "Not Authorized"),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     tag = "auth"
 )]
@@ -59,30 +57,30 @@ pub async fn login(
     config: web::Data<ApiServiceConfig>,
     req: HttpRequest,
     body: web::Json<LoginRequest>,
-) -> impl Responder {
+) -> actix_web::Result<impl Responder> {
     let meta = get_auth_metadata(&req);
-    drop(req);
     let login_req = body.into_inner();
-    let Ok(user) = api.auth().get_user_by_email(&login_req.email) else {
-        return HttpResponse::Unauthorized().finish();
-    };
-    let ok = verify_password(&login_req.password, &user.password).unwrap_or(false);
-    if !ok {
-        return HttpResponse::Unauthorized().finish();
-    }
+    let token_response = web::block(move || {
+        let Ok(user) = api.auth().get_user_by_email(&login_req.email) else {
+            return Err(AuthError::Unauthorized);
+        };
+        let ok = verify_password(&login_req.password, &user.password).unwrap_or(false);
+        if !ok {
+            return Err(AuthError::Unauthorized);
+        }
 
-    create_token(
-        signer.get_ref(),
-        api.get_ref(),
-        meta,
-        &user.id,
-        config.auth_ttl(),
-        config.auth_refresh_ttl(),
-    )
-    .map_or_else(
-        |err| map_auth_error(&err),
-        |token_response| HttpResponse::Ok().json(token_response),
-    )
+        create_token(
+            signer.get_ref(),
+            api.get_ref(),
+            meta,
+            &user.id,
+            config.auth_ttl(),
+            config.auth_refresh_ttl(),
+        )
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(token_response))
 }
 
 #[utoipa::path(
@@ -91,7 +89,7 @@ pub async fn login(
     responses(
         (status = 200, description = "Access- and refresh-token", body = TokenResponse),
         (status = 401, description = "Not Authorized"),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     tag = "auth"
 )]
@@ -102,20 +100,21 @@ pub async fn token_refresh(
     config: web::Data<ApiServiceConfig>,
     req: HttpRequest,
     body: web::Json<TokenRefreshRequest>,
-) -> impl Responder {
+) -> actix_web::Result<impl Responder> {
     let meta = get_auth_metadata(&req);
-    refresh_token(
-        signer.get_ref(),
-        api.get_ref(),
-        meta,
-        &body.into_inner().refresh_token,
-        config.auth_ttl(),
-        config.auth_refresh_ttl(),
-    )
-    .map_or_else(
-        |err| map_auth_error(&err),
-        |token_response| HttpResponse::Ok().json(token_response),
-    )
+    let token_response = web::block(move || {
+        refresh_token(
+            signer.get_ref(),
+            api.get_ref(),
+            meta,
+            &body.into_inner().refresh_token,
+            config.auth_ttl(),
+            config.auth_refresh_ttl(),
+        )
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(token_response))
 }
 
 #[utoipa::path(
@@ -123,7 +122,7 @@ pub async fn token_refresh(
     operation_id = "auth_logout",
     responses(
         (status = 204, description = "Successful logout"),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     tag = "auth"
 )]
@@ -132,14 +131,15 @@ pub async fn logout(
     api: web::Data<Arc<dyn StoragePort>>,
     signer: web::Data<JwsEs256Signer>,
     body: web::Json<LogoutRequest>,
-) -> impl Responder {
-    invalidate_token(
-        signer.get_ref(),
-        api.get_ref(),
-        &body.into_inner().refresh_token,
-    )
-    .map_or_else(
-        |err| map_auth_error(&err),
-        |()| HttpResponse::NoContent().finish(),
-    )
+) -> actix_web::Result<impl Responder> {
+    web::block(move || {
+        invalidate_token(
+            signer.get_ref(),
+            api.get_ref(),
+            &body.into_inner().refresh_token,
+        )
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::NoContent().finish())
 }

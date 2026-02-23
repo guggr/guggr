@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
+use actix_web::{
+    HttpResponse, Responder, delete, error::ErrorInternalServerError, get, patch, post, web,
+};
 use garde_actix_web::web::Json;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
-    adapters::inbound::http::{ErrorBody, map_storage_error, middleware::auth::Auth},
+    adapters::inbound::http::middleware::auth::Auth,
     core::{
         models::user::{CreateUser, DisplayUser, UpdateUser},
         ports::storage::StoragePort,
@@ -30,7 +32,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     responses(
         (status = 200, description = "Created user", body = DisplayUser),
         (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -39,28 +41,28 @@ pub fn configure(cfg: &mut ServiceConfig) {
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: Json<CreateUser>,
-) -> impl Responder {
-    match api.user().create(body.into_inner()) {
-        Ok(r) => HttpResponse::Ok().json(r),
-        Err(e) => map_storage_error(&e),
-    }
+) -> actix_web::Result<impl Responder> {
+    let user = web::block(move || api.user().create(body.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(user))
 }
 
 #[utoipa::path(
     operation_id = "list_user",
     responses(
         (status = 200, description = "List users", body = [DisplayUser]),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[get("")]
-pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
-    match api.user().list(5) {
-        Ok(users) => HttpResponse::Ok().json(users),
-        Err(e) => map_storage_error(&e),
-    }
+pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<impl Responder> {
+    let users = web::block(move || api.user().list(5))
+        .await
+        .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(users))
 }
 
 #[utoipa::path(
@@ -70,18 +72,23 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
     ),
     responses(
         (status = 200, description = "User", body = DisplayUser),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
     tag = "users"
 )]
 #[get("/{id}")]
-pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) -> impl Responder {
-    match api.user().get_by_id(&path.into_inner()) {
-        Ok(Some(user)) => HttpResponse::Ok().json(user),
-        Ok(None) => HttpResponse::NotFound().json("not found"),
-        Err(e) => map_storage_error(&e),
-    }
+pub async fn get(
+    api: web::Data<Arc<dyn StoragePort>>,
+    path: web::Path<String>,
+) -> actix_web::Result<impl Responder> {
+    web::block(move || api.user().get_by_id(&path.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??
+        .map_or_else(
+            || Ok(HttpResponse::NotFound().finish()),
+            |user| Ok(HttpResponse::Ok().json(user)),
+        )
 }
 
 #[utoipa::path(
@@ -94,7 +101,7 @@ pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) 
     responses(
         (status = 200, description = "Patched user", body = DisplayUser),
         (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -104,11 +111,11 @@ pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
     body: Json<UpdateUser>,
-) -> impl Responder {
-    match api.user().update(&path.into_inner(), body.into_inner()) {
-        Ok(r) => HttpResponse::Ok().json(r),
-        Err(e) => map_storage_error(&e),
-    }
+) -> actix_web::Result<impl Responder> {
+    let user = web::block(move || api.user().update(&path.into_inner(), body.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(user))
 }
 #[utoipa::path(
         operation_id = "delete_user",
@@ -118,7 +125,7 @@ pub async fn update(
     ),
     responses(
         (status = 204, description = "Deleted"),
-        (status = 500, description = "Storage error", body = ErrorBody)
+        (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -127,10 +134,10 @@ pub async fn update(
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
-) -> impl Responder {
+) -> actix_web::Result<impl Responder> {
     let id = path.into_inner();
-    match api.user().delete(&id) {
-        Ok(()) => HttpResponse::NoContent().finish(),
-        Err(e) => map_storage_error(&e),
-    }
+    web::block(move || api.user().delete(&id))
+        .await
+        .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::NoContent().finish())
 }
