@@ -3,6 +3,7 @@ use crate::core::{
     models::{
         auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth},
         group::{CreateGroup, DisplayGroup, UpdateGroup},
+        role::{CreateRole, DisplayRole, UpdateRole},
         user::{CreateUser, DisplayUser, UpdateUser},
     },
 };
@@ -26,6 +27,7 @@ pub trait AuthOperations {
 pub trait StoragePort: Send + Sync {
     fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
     fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
+    fn role(&self) -> &(dyn CrudOperations<CreateRole, UpdateRole, DisplayRole> + Send + Sync);
     fn auth(&self) -> &(dyn AuthOperations + Send + Sync);
 }
 
@@ -37,10 +39,12 @@ pub mod tests {
     pub struct MockStore {
         pub group: MockStoreGroup,
         pub user: MockStoreUser,
+        pub role: MockStoreRole,
         pub auth: MockStoreAuth,
     }
     pub struct MockStoreGroup;
     pub struct MockStoreUser;
+    pub struct MockStoreRole;
     pub struct MockStoreAuth;
 
     impl Default for MockStore {
@@ -54,6 +58,7 @@ pub mod tests {
             Self {
                 group: MockStoreGroup,
                 user: MockStoreUser,
+                role: MockStoreRole,
                 auth: MockStoreAuth,
             }
         }
@@ -68,7 +73,9 @@ pub mod tests {
         fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
             &self.user
         }
-
+        fn role(&self) -> &(dyn CrudOperations<CreateRole, UpdateRole, DisplayRole> + Send + Sync) {
+            &self.role
+        }
         fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
             &self.auth
         }
@@ -139,7 +146,35 @@ pub mod tests {
             Ok(vec![DisplayUser::default(); limit as usize])
         }
     }
-
+    impl CrudOperations<CreateRole, UpdateRole, DisplayRole> for MockStoreRole {
+        fn create(&self, new_value: CreateRole) -> Result<DisplayRole, StorageError> {
+            let user = DisplayRole {
+                name: new_value.name,
+                ..Default::default()
+            };
+            Ok(user)
+        }
+        fn update(&self, id: &str, update_value: UpdateRole) -> Result<DisplayRole, StorageError> {
+            let user = DisplayRole {
+                id: id.to_string(),
+                name: update_value.name.unwrap_or_default(),
+            };
+            Ok(user)
+        }
+        fn get_by_id(&self, id: &str) -> Result<Option<DisplayRole>, StorageError> {
+            let user = DisplayRole {
+                id: id.to_string(),
+                ..Default::default()
+            };
+            Ok(Some(user))
+        }
+        fn delete(&self, _id: &str) -> Result<(), StorageError> {
+            Ok(())
+        }
+        fn list(&self, limit: i64) -> Result<Vec<DisplayRole>, StorageError> {
+            Ok(vec![DisplayRole::default(); limit as usize])
+        }
+    }
     impl AuthOperations for MockStoreAuth {
         fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError> {
             Ok(UserAuth {
