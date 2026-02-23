@@ -40,6 +40,24 @@
         system:
         let
           pkgs = nixpkgsFor.${system};
+          rustNightlyToolchain = pkgs.rust-bin.nightly.latest.minimal.override {
+            extensions = [ "rustfmt" ];
+          };
+
+          rustfmt-nightly = pkgs.symlinkJoin {
+            name = "rustfmt-nightly";
+            paths = [ rustNightlyToolchain ];
+            nativeBuildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/cargo \
+              --set DYLD_LIBRARY_PATH "${rustNightlyToolchain}/lib" \
+              --set LD_LIBRARY_PATH "${rustNightlyToolchain}/lib" \
+              --set RUSTFMT "${rustNightlyToolchain}/bin/rustfmt" \
+              --add-flags "fmt"
+              mv $out/bin/cargo $out/bin/rustfmt-nightly
+            '';
+          };
+
         in
         {
           default = pkgs.mkShell {
@@ -57,6 +75,7 @@
               diesel-cli-ext
               libpq
               rust-bin.stable.latest.default
+              rustfmt-nightly
               protobuf_33
             ];
             LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
