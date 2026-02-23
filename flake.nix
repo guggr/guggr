@@ -57,6 +57,7 @@
               diesel-cli-ext
               libpq
               rust-bin.stable.latest.default
+              protobuf_33
             ];
             LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
           };
