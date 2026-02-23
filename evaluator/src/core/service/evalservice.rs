@@ -55,7 +55,10 @@ mod tests {
 
     use async_trait::async_trait;
     use database_client::models::{JobResultHttp, JobResultPing, JobRun};
-    use gen_proto_types::job_result::types::v1::{HttpJobResult, PingJobResult};
+    use gen_proto_types::{
+        job_result::types::v1::{HttpJobResult, PingJobResult},
+        job_types::v1::JobType,
+    };
     use ipnet::Ipv4Net;
     use protify::proto_types::Timestamp;
 
@@ -121,19 +124,41 @@ mod tests {
             job_result: &JobResult,
             notified: bool,
         ) -> Result<(), JobEvaluatorError> {
-            let reachable = match (&job_result.http, &job_result.ping) {
-                (Some(http), _) => http.reachable,
-                (_, Some(ping)) => ping.reachable,
-                _ => return Err(JobEvaluatorError::Internal(job_result.run_id.clone())),
+            let reachable = match &job_result.job_type() {
+                JobType::Http => {
+                    if let Some(http) = &job_result.http {
+                        self.write_job_result_http(&job_result.run_id, http)?;
+                    } else {
+                        return Err(JobEvaluatorError::Internal(format!(
+                            "expected job with job id '{}', run id '{}' and HTTP type to contain a HTTP job result body, but it did not",
+                            job_result.id, job_result.run_id
+                        )));
+                    }
+                    job_result.http.as_ref().is_some_and(|r| r.reachable)
+                }
+                JobType::Ping => {
+                    if let Some(ping) = &job_result.ping {
+                        self.write_job_result_ping(&job_result.run_id, ping)?;
+                    } else {
+                        return Err(JobEvaluatorError::Internal(format!(
+                            "expected job with job id '{}', run id '{}' and ping type to contain a ping job result body, but it did not",
+                            job_result.id, job_result.run_id
+                        )));
+                    }
+                    job_result.ping.as_ref().is_some_and(|r| r.reachable)
+                }
+                JobType::Unspecified => {
+                    return Err(JobEvaluatorError::Internal(format!(
+                        "received unspecified job type for run id '{}', job id '{}'",
+                        job_result.run_id, job_result.id,
+                    )));
+                }
             };
+
             let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)
                 .map_err(PostgresAdapterError::from)?;
             *self.job_result.lock().unwrap() = Some(job_run);
-            if let Some(http) = &job_result.http {
-                self.write_job_result_http(&job_result.run_id, http)?;
-            } else if let Some(ping) = &job_result.ping {
-                self.write_job_result_ping(&job_result.run_id, ping)?;
-            }
+
             Ok(())
         }
     }
@@ -165,13 +190,13 @@ mod tests {
         }
     }
 
-    fn mock_result(id: String, timestamp: Timestamp) -> JobResult {
+    fn mock_result(id: String, job_type: JobType, timestamp: Timestamp) -> JobResult {
         JobResult {
             id,
             timestamp: Some(timestamp),
             batch_id: "abcd".to_string(),
             run_id: "abcd".to_string(),
-            job_type: 0,
+            job_type: job_type.into(),
             http: None,
             ping: None,
         }
@@ -189,6 +214,7 @@ mod tests {
         let service = EvalService::new(mock_adapter);
         let job = mock_result(
             "bogus".to_string(),
+            JobType::Unspecified,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
@@ -212,6 +238,7 @@ mod tests {
         );
         let mut job = mock_result(
             "enabled".to_string(),
+            JobType::Ping,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
@@ -237,6 +264,7 @@ mod tests {
         );
         let mut job = mock_result(
             "disabled".to_string(),
+            JobType::Ping,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
@@ -256,6 +284,7 @@ mod tests {
         let service = EvalService::new(mock_adapter);
         let job = mock_result(
             "enabled".to_string(),
+            JobType::Http,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
@@ -263,7 +292,7 @@ mod tests {
         );
 
         let err = service.evaluate_job_result(&job).await.unwrap_err();
-        assert_eq!(err, JobEvaluatorError::Internal("abcd".to_string()));
+        assert_eq!(err, JobEvaluatorError::Internal("expected job with job id 'enabled', run id 'abcd' and HTTP type to contain a HTTP job result body, but it did not".to_string()));
     }
 
     #[tokio::test]
@@ -281,6 +310,7 @@ mod tests {
         );
         let mut job = mock_result(
             "disabled".to_string(),
+            JobType::Ping,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
@@ -314,6 +344,7 @@ mod tests {
         );
         let mut job = mock_result(
             "disabled".to_string(),
+            JobType::Http,
             Timestamp {
                 seconds: 0,
                 nanos: 0,
