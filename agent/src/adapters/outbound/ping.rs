@@ -71,7 +71,7 @@ impl MonitorPort for PingAdapter {
 
         pinger.timeout(Duration::from_secs(1));
 
-        let job_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
+        let ping_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
             Ok((packet, latency)) => {
                 info!(
                     "received ping {} from {}",
@@ -81,25 +81,14 @@ impl MonitorPort for PingAdapter {
                     },
                     ping_details.host
                 );
-                JobResult {
-                    id: job.id.clone(),
-                    batch_id: job.batch_id.clone(),
-                    run_id,
-                    job_type: JobType::Ping.into(),
-                    timestamp: Some(get_timestamp()?),
-                    ping: Some(PingJobResult {
-                        reachable: true,
-                        ip_address: match packet {
-                            IcmpPacket::V4(packet) => {
-                                packet.get_real_dest().octets().to_vec().into()
-                            }
-                            IcmpPacket::V6(packet) => {
-                                packet.get_real_dest().octets().to_vec().into()
-                            }
-                        },
-                        latency: Some(latency.to_proto()),
-                    }),
-                    ..Default::default()
+
+                PingJobResult {
+                    reachable: true,
+                    ip_address: match packet {
+                        IcmpPacket::V4(packet) => packet.get_real_dest().octets().to_vec().into(),
+                        IcmpPacket::V6(packet) => packet.get_real_dest().octets().to_vec().into(),
+                    },
+                    latency: Some(latency.to_proto()),
                 }
             }
             Err(e) => {
@@ -112,23 +101,24 @@ impl MonitorPort for PingAdapter {
                         ));
                     }
                 }
-                JobResult {
-                    id: job.id.clone(),
-                    batch_id: job.batch_id.clone(),
-                    run_id,
-                    job_type: JobType::Ping.into(),
-                    timestamp: Some(get_timestamp()?),
-                    ping: Some(PingJobResult {
-                        reachable: false,
-                        ip_address: vec![].into(),
-                        latency: None,
-                    }),
-                    ..Default::default()
+
+                PingJobResult {
+                    reachable: false,
+                    ip_address: vec![].into(),
+                    latency: None,
                 }
             }
         };
 
-        Ok(job_result)
+        Ok(JobResult {
+            id: job.id.clone(),
+            batch_id: job.batch_id.clone(),
+            run_id,
+            job_type: JobType::Ping.into(),
+            timestamp: Some(get_timestamp()?),
+            ping: Some(ping_result),
+            ..Default::default()
+        })
     }
 }
 
