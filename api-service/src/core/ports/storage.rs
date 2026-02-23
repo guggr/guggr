@@ -33,8 +33,8 @@ pub trait JobRunCrudOperations {
     fn list_by_job_id(&self, job_id: &str, limit: i64) -> Result<Vec<DisplayJobRun>, StorageError>;
 }
 
-pub trait JobDetailOperations<C, U, D> {
-    fn create(&self, new_value: C) -> Result<D, StorageError>;
+pub trait JobDetailOperations<U, D> {
+    fn create(&self, new_value: D) -> Result<D, StorageError>;
     fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
     fn update(&self, id: &str, update_value: U) -> Result<D, StorageError>;
 }

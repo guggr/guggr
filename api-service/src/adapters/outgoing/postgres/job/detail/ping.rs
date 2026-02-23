@@ -10,9 +10,7 @@ use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
         domain::errors::StorageError,
-        models::job::ping::detail::{
-            CreateJobDetailsPing, DisplayJobDetailsPing, UpdateJobDetailsPing,
-        },
+        models::job::ping::detail::{DisplayJobDetailsPing, UpdateJobDetailsPing},
         ports::storage::JobDetailOperations,
     },
 };
@@ -30,17 +28,17 @@ impl PostgresJobPingAdapter {
     }
 }
 
-impl JobDetailOperations<CreateJobDetailsPing, UpdateJobDetailsPing, DisplayJobDetailsPing>
-    for PostgresJobPingAdapter
-{
+impl JobDetailOperations<UpdateJobDetailsPing, DisplayJobDetailsPing> for PostgresJobPingAdapter {
     fn create(
         &self,
-        new_value: CreateJobDetailsPing,
+        new_value: DisplayJobDetailsPing,
     ) -> Result<DisplayJobDetailsPing, StorageError> {
         use database_client::schema::job_details_ping::dsl::job_details_ping;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let n: models::JobDetailsPing = new_value.transmogrify();
+
         let result: models::JobDetailsPing = diesel::insert_into(job_details_ping)
-            .values(models::JobDetailsPing::from(new_value))
+            .values(n)
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 

@@ -1,4 +1,4 @@
-use database_client::{models::JobDetailsPing, schema::job_details_ping};
+use database_client::schema::job_details_ping;
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
@@ -27,11 +27,10 @@ pub struct UpdateJobDetailsPing {
     pub host: Option<String>,
 }
 
-impl From<CreateJobDetailsPing> for JobDetailsPing {
-    fn from(value: CreateJobDetailsPing) -> Self {
-        Self {
-            id: nanoid::nanoid!(),
-            host: value.host,
-        }
+// can't impl `From` as I need the id of the parent job
+pub fn to_job_detail_ping(id: &str, j: CreateJobDetailsPing) -> DisplayJobDetailsPing {
+    DisplayJobDetailsPing {
+        id: id.to_string(),
+        host: j.host,
     }
 }

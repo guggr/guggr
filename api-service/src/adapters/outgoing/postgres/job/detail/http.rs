@@ -1,4 +1,4 @@
-use database_client::models;
+use database_client::models::{self, JobDetailsHttp};
 use diesel::{
     PgConnection,
     prelude::*,
@@ -10,9 +10,7 @@ use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
         domain::errors::StorageError,
-        models::job::http::detail::{
-            CreateJobDetailsHttp, DisplayJobDetailsHttp, UpdateJobDetailsHttp,
-        },
+        models::job::http::detail::{DisplayJobDetailsHttp, UpdateJobDetailsHttp},
         ports::storage::JobDetailOperations,
     },
 };
@@ -30,17 +28,16 @@ impl PostgresJobHttpAdapter {
     }
 }
 
-impl JobDetailOperations<CreateJobDetailsHttp, UpdateJobDetailsHttp, DisplayJobDetailsHttp>
-    for PostgresJobHttpAdapter
-{
+impl JobDetailOperations<UpdateJobDetailsHttp, DisplayJobDetailsHttp> for PostgresJobHttpAdapter {
     fn create(
         &self,
-        new_value: CreateJobDetailsHttp,
+        new_value: DisplayJobDetailsHttp,
     ) -> Result<DisplayJobDetailsHttp, StorageError> {
         use database_client::schema::job_details_http::dsl::job_details_http;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let n: JobDetailsHttp = new_value.transmogrify();
         let result: models::JobDetailsHttp = diesel::insert_into(job_details_http)
-            .values(models::JobDetailsHttp::from(new_value))
+            .values(n)
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
 

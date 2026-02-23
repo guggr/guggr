@@ -19,7 +19,7 @@ use crate::{
         domain::errors::StorageError,
         models::job::{
             CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdatableJob, UpdateJob,
-            UpdateJobDetails,
+            UpdateJobDetails, http::detail::to_job_detail_http, ping::detail::to_job_detail_ping,
         },
         ports::storage::{JobCrudOperations, JobDetailOperations, JobRunCrudOperations},
     },
@@ -54,8 +54,12 @@ impl JobCrudOperations for PostgresJobAdapter {
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         let detail = match new_value.details {
-            CreateJobDetails::Http(d) => DisplayJobDetails::Http(self.http.create(d)?),
-            CreateJobDetails::Ping(d) => DisplayJobDetails::Ping(self.ping.create(d)?),
+            CreateJobDetails::Http(d) => {
+                DisplayJobDetails::Http(self.http.create(to_job_detail_http(&new_job.id, d))?)
+            }
+            CreateJobDetails::Ping(d) => {
+                DisplayJobDetails::Ping(self.ping.create(to_job_detail_ping(&new_job.id, d))?)
+            }
         };
         let mut r: DisplayJob = DisplayJob::from(new_job);
         r.details = detail;
