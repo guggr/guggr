@@ -15,27 +15,27 @@ pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
     let group = CreateGroup {
         name: "This group is cool".to_string(),
     };
-    postgres.group.create(group).await?;
+    postgres.group.create(group)?;
 
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup").await?;
+    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
     dbg!(r);
 
     let updated = UpdateGroup {
         name: Some("other description".to_string()),
     };
 
-    postgres.group.update("mycoolgroup", updated).await?;
+    postgres.group.update("mycoolgroup", updated)?;
 
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup").await?;
+    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
     dbg!(r);
 
-    let entries: Vec<DisplayGroup> = postgres.group.list(5).await?;
+    let entries: Vec<DisplayGroup> = postgres.group.list(5)?;
     dbg!(entries);
 
     // this is kind of ugly, need to check how this can be done better
-    postgres.group.delete("mycoolgroup").await?;
+    postgres.group.delete("mycoolgroup")?;
 
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup").await?;
+    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
     dbg!(r);
 
     Ok(())

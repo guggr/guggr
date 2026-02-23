@@ -21,7 +21,7 @@ pub fn verify_password(password: &str, phc_hash: &str) -> Result<bool, AuthError
 use compact_jwt::{
     JwsEs256Signer, JwsSigner, JwsSignerToVerifier, JwsVerifier, Jwt, JwtUnverified,
 };
-pub async fn create_token(
+pub fn create_token(
     signer: &JwsEs256Signer,
     storage: &Arc<dyn StoragePort>,
     meta: AuthMetadata,
@@ -56,7 +56,7 @@ pub async fn create_token(
         user_agent: meta.user_agent,
         expires_on: refresh_jwt_exp,
     };
-    storage.auth().create_refresh_token(new_token).await?;
+    storage.auth().create_refresh_token(new_token)?;
 
     Ok(TokenResponse {
         access_token: jwt_signed.to_string(),
@@ -64,7 +64,7 @@ pub async fn create_token(
     })
 }
 
-pub async fn refresh_token(
+pub fn refresh_token(
     signer: &JwsEs256Signer,
     storage: &Arc<dyn StoragePort>,
     meta: AuthMetadata,
@@ -76,25 +76,25 @@ pub async fn refresh_token(
         .jti
         .ok_or(AuthError::JtiMissing)?;
 
-    let old_record = storage.auth().get_refresh_token(&jti).await?;
+    let old_record = storage.auth().get_refresh_token(&jti)?;
     let old_user = old_record.user_id.clone();
     let old_meta: AuthMetadata = old_record.transmogrify();
     if meta != old_meta {
         return Err(AuthError::ChangedAuthMetadata);
     }
-    let new_token = create_token(signer, storage, meta, &old_user, ttl, ttl_refresh).await?;
-    invalidate_token(signer, storage, old_token).await?;
+    let new_token = create_token(signer, storage, meta, &old_user, ttl, ttl_refresh)?;
+    invalidate_token(signer, storage, old_token)?;
     Ok(new_token)
 }
 
-pub async fn invalidate_token(
+pub fn invalidate_token(
     signer: &JwsEs256Signer,
     storage: &Arc<dyn StoragePort>,
     token: &str,
 ) -> Result<(), AuthError> {
     let jwt = verify_jwt(signer, token)?;
     if let Some(jti) = jwt.jti {
-        storage.auth().delete_refresh_token(&jti).await?;
+        storage.auth().delete_refresh_token(&jti)?;
     }
     Ok(())
 }
@@ -137,8 +137,7 @@ mod tests {
         let ttl = 60;
         let ttl_refresh = 600;
         let user_id = "bob";
-        let token =
-            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        let token = create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh)?;
         let v = verify_jwt(&signer, &token.access_token)?;
         let a = signer.sign(&v)?;
         assert_eq!(token.access_token, a.to_string());
@@ -151,14 +150,9 @@ mod tests {
                 ttl,
                 ttl_refresh,
             )
-            .await
             .is_ok()
         );
-        assert!(
-            invalidate_token(&signer, &storage, &token.refresh_token)
-                .await
-                .is_ok()
-        );
+        assert!(invalidate_token(&signer, &storage, &token.refresh_token).is_ok());
         Ok(())
     }
 
@@ -173,8 +167,7 @@ mod tests {
         let ttl = 0;
         let ttl_refresh = 0;
         let user_id = "bob";
-        let token =
-            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        let token = create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh)?;
         actix_web::rt::time::sleep(Duration::from_secs(1)).await;
         assert_eq!(
             verify_jwt(&signer, &token.access_token).unwrap_err(),
@@ -189,7 +182,6 @@ mod tests {
                 ttl,
                 ttl_refresh,
             )
-            .await
             .unwrap_err(),
             AuthError::JwtExpired
         );
@@ -207,8 +199,7 @@ mod tests {
         let ttl = 0;
         let ttl_refresh = 0;
         let user_id = "bob";
-        let token =
-            create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh).await?;
+        let token = create_token(&signer, &storage, meta.clone(), user_id, ttl, ttl_refresh)?;
         assert_eq!(
             refresh_token(
                 &signer,
@@ -219,7 +210,6 @@ mod tests {
                 ttl,
                 ttl_refresh,
             )
-            .await
             .unwrap_err(),
             AuthError::JtiMissing
         );

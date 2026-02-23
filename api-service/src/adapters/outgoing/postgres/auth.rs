@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use database_client::models;
 use diesel::{
     PgConnection,
@@ -28,9 +27,8 @@ impl PostgresAuthAdapter {
     }
 }
 
-#[async_trait]
 impl AuthOperations for PostgresAuthAdapter {
-    async fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError> {
+    fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError> {
         use database_client::schema::user::dsl::{self, user};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let u = user
@@ -40,7 +38,7 @@ impl AuthOperations for PostgresAuthAdapter {
         Ok(u.transmogrify())
     }
 
-    async fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError> {
+    fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError> {
         use database_client::schema::refresh_token::dsl::refresh_token;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::insert_into(refresh_token)
@@ -50,7 +48,7 @@ impl AuthOperations for PostgresAuthAdapter {
         Ok(())
     }
 
-    async fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError> {
+    fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let r = refresh_token
@@ -59,7 +57,7 @@ impl AuthOperations for PostgresAuthAdapter {
             .map_err(PostgresAdapterError::from)?;
         Ok(DisplayRefreshToken::from(r))
     }
-    async fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError> {
+    fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(refresh_token.filter(dsl::jti.eq(jti)))

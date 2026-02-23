@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use database_client::models;
 use diesel::{
     PgConnection,
@@ -28,9 +27,8 @@ impl PostgresGroupAdapter {
     }
 }
 
-#[async_trait]
 impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAdapter {
-    async fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, StorageError> {
+    fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let result: models::Group = diesel::insert_into(group)
@@ -41,11 +39,7 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
         Ok(result.transmogrify())
     }
 
-    async fn update(
-        &self,
-        id: &str,
-        update_value: UpdateGroup,
-    ) -> Result<DisplayGroup, StorageError> {
+    fn update(&self, id: &str, update_value: UpdateGroup) -> Result<DisplayGroup, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
@@ -56,7 +50,7 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
         Ok(result.transmogrify())
     }
 
-    async fn get_by_id(&self, id: &str) -> Result<Option<DisplayGroup>, StorageError> {
+    fn get_by_id(&self, id: &str) -> Result<Option<DisplayGroup>, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         match group.find(id).first::<models::Group>(&mut conn) {
@@ -66,7 +60,7 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
         }
     }
 
-    async fn delete(&self, id: &str) -> Result<(), StorageError> {
+    fn delete(&self, id: &str) -> Result<(), StorageError> {
         use database_client::schema::group::dsl::{self, group};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(group.filter(dsl::id.eq(id)))
@@ -75,7 +69,7 @@ impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAda
         Ok(())
     }
 
-    async fn list(&self, limit: i64) -> Result<Vec<DisplayGroup>, StorageError> {
+    fn list(&self, limit: i64) -> Result<Vec<DisplayGroup>, StorageError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let groups: Vec<models::Group> = group

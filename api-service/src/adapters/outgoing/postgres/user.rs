@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use database_client::models;
 use diesel::{
     PgConnection,
@@ -28,9 +27,8 @@ impl PostgresUserAdapter {
     }
 }
 
-#[async_trait]
 impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter {
-    async fn create(&self, new_value: CreateUser) -> Result<DisplayUser, StorageError> {
+    fn create(&self, new_value: CreateUser) -> Result<DisplayUser, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let u = models::User::try_from(new_value).map_err(StorageError::from)?;
@@ -42,11 +40,7 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
         Ok(result.transmogrify())
     }
 
-    async fn update(
-        &self,
-        id: &str,
-        update_value: UpdateUser,
-    ) -> Result<DisplayUser, StorageError> {
+    fn update(&self, id: &str, update_value: UpdateUser) -> Result<DisplayUser, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
@@ -57,7 +51,7 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
         Ok(result.transmogrify())
     }
 
-    async fn get_by_id(&self, id: &str) -> Result<Option<DisplayUser>, StorageError> {
+    fn get_by_id(&self, id: &str) -> Result<Option<DisplayUser>, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         match user.find(id).first::<models::User>(&mut conn) {
@@ -67,7 +61,7 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
         }
     }
 
-    async fn delete(&self, id: &str) -> Result<(), StorageError> {
+    fn delete(&self, id: &str) -> Result<(), StorageError> {
         use database_client::schema::group::dsl::{self, group};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(group.filter(dsl::id.eq(id)))
@@ -76,7 +70,7 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
         Ok(())
     }
 
-    async fn list(&self, limit: i64) -> Result<Vec<DisplayUser>, StorageError> {
+    fn list(&self, limit: i64) -> Result<Vec<DisplayUser>, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let users: Vec<models::User> = user

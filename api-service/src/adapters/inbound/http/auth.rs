@@ -63,7 +63,7 @@ pub async fn login(
     let meta = get_auth_metadata(&req);
     drop(req);
     let login_req = body.into_inner();
-    let Ok(user) = api.auth().get_user_by_email(&login_req.email).await else {
+    let Ok(user) = api.auth().get_user_by_email(&login_req.email) else {
         return HttpResponse::Unauthorized().finish();
     };
     let ok = verify_password(&login_req.password, &user.password).unwrap_or(false);
@@ -79,7 +79,6 @@ pub async fn login(
         config.auth_ttl(),
         config.auth_refresh_ttl(),
     )
-    .await
     .map_or_else(
         |err| map_auth_error(&err),
         |token_response| HttpResponse::Ok().json(token_response),
@@ -113,7 +112,6 @@ pub async fn token_refresh(
         config.auth_ttl(),
         config.auth_refresh_ttl(),
     )
-    .await
     .map_or_else(
         |err| map_auth_error(&err),
         |token_response| HttpResponse::Ok().json(token_response),
@@ -140,7 +138,6 @@ pub async fn logout(
         api.get_ref(),
         &body.into_inner().refresh_token,
     )
-    .await
     .map_or_else(
         |err| map_auth_error(&err),
         |()| HttpResponse::NoContent().finish(),

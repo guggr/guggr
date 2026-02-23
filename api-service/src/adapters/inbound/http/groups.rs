@@ -40,7 +40,7 @@ pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: Json<CreateGroup>,
 ) -> impl Responder {
-    match api.group().create(body.into_inner()).await {
+    match api.group().create(body.into_inner()) {
         Ok(r) => HttpResponse::NoContent().json(r),
         Err(e) => map_storage_error(&e),
     }
@@ -57,7 +57,7 @@ pub async fn create(
 )]
 #[get("")]
 pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
-    match api.group().list(5).await {
+    match api.group().list(5) {
         Ok(groups) => HttpResponse::Ok().json(groups),
         Err(e) => map_storage_error(&e),
     }
@@ -78,7 +78,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> impl Responder {
 )]
 #[get("/{id}")]
 pub async fn get(api: web::Data<Arc<dyn StoragePort>>, path: web::Path<String>) -> impl Responder {
-    match api.group().get_by_id(&path.into_inner()).await {
+    match api.group().get_by_id(&path.into_inner()) {
         Ok(Some(group)) => HttpResponse::Ok().json(group),
         Ok(None) => HttpResponse::NotFound().json("not found"),
         Err(e) => map_storage_error(&e),
@@ -105,11 +105,7 @@ pub async fn update(
     path: web::Path<String>,
     body: Json<UpdateGroup>,
 ) -> impl Responder {
-    match api
-        .group()
-        .update(&path.into_inner(), body.into_inner())
-        .await
-    {
+    match api.group().update(&path.into_inner(), body.into_inner()) {
         Ok(r) => HttpResponse::Ok().json(r),
         Err(e) => map_storage_error(&e),
     }
@@ -132,7 +128,7 @@ pub async fn delete(
     path: web::Path<String>,
 ) -> impl Responder {
     let id = path.into_inner();
-    match api.group().delete(&id).await {
+    match api.group().delete(&id) {
         Ok(()) => HttpResponse::NoContent().finish(),
         Err(e) => map_storage_error(&e),
     }
