@@ -13,7 +13,7 @@ use crate::core::models::job::{
 pub mod http;
 pub mod ping;
 pub mod run;
-
+#[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
 pub struct CreateJob {
     pub name: String,
@@ -21,6 +21,7 @@ pub struct CreateJob {
     pub group_id: String,
     pub notify_users: bool,
     pub custom_notification: Option<String>,
+    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
     pub run_every: Duration,
     pub last_scheduled: Option<NaiveDateTime>,
     pub details: CreateJobDetails,
