@@ -61,6 +61,7 @@ impl ResponseError for StorageError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::NotFound => StatusCode::NOT_FOUND,
+            Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
@@ -70,6 +71,7 @@ impl ResponseError for StorageError {
     fn error_response(&self) -> HttpResponse {
         match self {
             Self::NotFound => HttpResponse::NotFound().finish(),
+            Self::Unauthorized => HttpResponse::Unauthorized().finish(),
             Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
                 HttpResponse::InternalServerError().finish()
             }

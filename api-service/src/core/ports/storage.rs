@@ -18,6 +18,14 @@ pub trait CrudOperations<N, U, D> {
     fn list(&self, limit: i64) -> Result<Vec<D>, StorageError>;
 }
 
+pub trait RestrictedCrudOperations<N, U, D> {
+    fn create(&self, new_value: N) -> Result<D, StorageError>;
+    fn update(&self, user_id: Option<&str>, id: &str, update_value: U) -> Result<D, StorageError>;
+    fn get_by_id(&self, user_id: Option<&str>, id: &str) -> Result<Option<D>, StorageError>;
+    fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError>;
+    fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<D>, StorageError>;
+}
+
 pub trait JobCrudOperations {
     fn create(&self, new_value: CreateJob) -> Result<DisplayJob, StorageError>;
     fn update(&self, id: &str, update_value: UpdateJob) -> Result<DisplayJob, StorageError>;
@@ -45,10 +53,14 @@ pub trait AuthOperations {
     fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
     fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError>;
     fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError>;
+    fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, StorageError>;
+    fn is_owner(&self, id: &str) -> Result<bool, StorageError>;
 }
 
 pub trait StoragePort: Send + Sync {
-    fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
+    fn group(
+        &self,
+    ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
     fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
     fn role(&self) -> &(dyn CrudOperations<CreateRole, UpdateRole, DisplayRole> + Send + Sync);
     fn auth(&self) -> &(dyn AuthOperations + Send + Sync);
@@ -57,6 +69,8 @@ pub trait StoragePort: Send + Sync {
 
 #[cfg(test)]
 pub mod tests {
+
+    use std::vec;
 
     use super::*;
 
@@ -111,7 +125,8 @@ pub mod tests {
     impl StoragePort for MockStore {
         fn group(
             &self,
-        ) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync) {
+        ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync)
+        {
             &self.group
         }
         fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
@@ -128,7 +143,7 @@ pub mod tests {
         }
     }
 
-    impl CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for MockStoreGroup {
+    impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for MockStoreGroup {
         fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, StorageError> {
             let user = DisplayGroup {
                 name: new_value.name,
@@ -138,6 +153,7 @@ pub mod tests {
         }
         fn update(
             &self,
+            _user_id: Option<&str>,
             id: &str,
             update_value: UpdateGroup,
         ) -> Result<DisplayGroup, StorageError> {
@@ -147,17 +163,25 @@ pub mod tests {
             };
             Ok(group)
         }
-        fn get_by_id(&self, id: &str) -> Result<Option<DisplayGroup>, StorageError> {
+        fn get_by_id(
+            &self,
+            _user_id: Option<&str>,
+            id: &str,
+        ) -> Result<Option<DisplayGroup>, StorageError> {
             let group = DisplayGroup {
                 id: id.to_string(),
                 ..Default::default()
             };
             Ok(Some(group))
         }
-        fn delete(&self, _id: &str) -> Result<(), StorageError> {
+        fn delete(&self, _user_id: Option<&str>, _id: &str) -> Result<(), StorageError> {
             Ok(())
         }
-        fn list(&self, limit: i64) -> Result<Vec<DisplayGroup>, StorageError> {
+        fn list(
+            &self,
+            _user_id: Option<&str>,
+            limit: i64,
+        ) -> Result<Vec<DisplayGroup>, StorageError> {
             Ok(vec![DisplayGroup::default(); limit as usize])
         }
     }
@@ -242,6 +266,12 @@ pub mod tests {
         }
         fn delete_refresh_token(&self, _jti: &str) -> Result<(), StorageError> {
             Ok(())
+        }
+        fn get_roles_by_user(&self, _id: &str) -> Result<Vec<DisplayRole>, StorageError> {
+            Ok(vec![])
+        }
+        fn is_owner(&self, _id: &str) -> Result<bool, StorageError> {
+            Ok(true)
         }
     }
     impl JobCrudOperations for MockStoreJob {

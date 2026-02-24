@@ -19,7 +19,10 @@ use crate::{
             role::{CreateRole, DisplayRole, UpdateRole},
             user::{CreateUser, DisplayUser, UpdateUser},
         },
-        ports::storage::{AuthOperations, CrudOperations, JobCrudOperations, StoragePort},
+        ports::storage::{
+            AuthOperations, CrudOperations, JobCrudOperations, RestrictedCrudOperations,
+            StoragePort,
+        },
     },
 };
 pub struct PostgresAdapter {
@@ -102,7 +105,9 @@ impl PostgresAdapter {
 
 #[async_trait]
 impl StoragePort for PostgresAdapter {
-    fn group(&self) -> &(dyn CrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync) {
+    fn group(
+        &self,
+    ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync) {
         &self.group
     }
     fn user(&self) -> &(dyn CrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
