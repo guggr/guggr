@@ -28,6 +28,9 @@ pub struct TokenResponse {
     pub refresh_token: String,
 }
 
+#[derive(Debug, Serialize, ToSchema, LabelledGeneric, Clone)]
+pub struct UserId(pub String);
+
 #[derive(Debug, Serialize, PartialEq, Eq, LabelledGeneric, Default, Clone)]
 pub struct AuthMetadata {
     pub ip_address: String,
