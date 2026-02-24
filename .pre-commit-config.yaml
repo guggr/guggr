@@ -86,3 +86,10 @@ repos:
         language: system
         entry: cargo machete
         pass_filenames: false
+
+      - id: api-service-check-spec
+        name: check openapi spec
+        files: ^api-service/
+        language: system
+        entry: api-service/openapi-check.sh
+        pass_filenames: false
