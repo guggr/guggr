@@ -9,6 +9,7 @@ pub struct ApiServiceConfig {
     port: u16,
     auth_ttl: i64,
     auth_refresh_ttl: i64,
+    auth_secret: String,
 }
 
 impl ApiServiceConfig {
@@ -17,12 +18,13 @@ impl ApiServiceConfig {
         let port: u16 = env::var("API_SERVICE_PORT")?.parse()?;
         let auth_ttl: i64 = env::var("API_SERVICE_AUTH_TTL")?.parse()?;
         let auth_refresh_ttl: i64 = env::var("API_SERVICE_AUTH_REFRESH_TTL")?.parse()?;
-
+        let auth_secret = env::var("API_SERVICE_AUTH_SECRET")?;
         Ok(Self {
             host,
             port,
             auth_ttl,
             auth_refresh_ttl,
+            auth_secret,
         })
     }
 
@@ -37,6 +39,10 @@ impl ApiServiceConfig {
     pub fn bind_address(&self) -> (&str, u16) {
         (&self.host, self.port)
     }
+
+    pub fn auth_secret(&self) -> Vec<u8> {
+        self.auth_secret.as_bytes().to_vec()
+    }
 }
 
 #[cfg(test)]
@@ -49,6 +55,7 @@ mod tests {
             ("API_SERVICE_PORT", Some("8000")),
             ("API_SERVICE_AUTH_TTL", Some("3600")),
             ("API_SERVICE_AUTH_REFRESH_TTL", Some("604800")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
         ];
         temp_env::with_vars(env_vars, || {
             let config = ApiServiceConfig::from_env().unwrap();
@@ -58,7 +65,8 @@ mod tests {
                     host: "localhost".to_string(),
                     port: 8000,
                     auth_ttl: 3600,
-                    auth_refresh_ttl: 604800
+                    auth_refresh_ttl: 604800,
+                    auth_secret: "very-secret".to_string()
                 }
             );
             assert_eq!(config.bind_address(), ("localhost", 8000));
@@ -74,6 +82,7 @@ mod tests {
             ("API_SERVICE_PORT", Some("80000")),
             ("API_SERVICE_AUTH_TTL", Some("3600")),
             ("API_SERVICE_AUTH_REFRESH_TTL", Some("604800")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
         ];
         temp_env::with_vars(env_vars, || {
             assert!(matches!(
