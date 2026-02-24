@@ -76,8 +76,7 @@ pub struct UpdateableUser {
     pub name: Option<String>,
     pub email: Option<String>,
     pub password: Option<String>,
-    pub jwt_secret: Option<String>,
-    pub jwt_salt: Option<String>,
+    pub jwt_secret: Option<Vec<u8>>,
 }
 
 impl TryFrom<CreateUser> for User {
@@ -93,8 +92,7 @@ impl TryFrom<CreateUser> for User {
             name: value.name,
             email: value.email,
             password: pwhash,
-            jwt_secret: nanoid::nanoid!(32),
-            jwt_salt: nanoid::nanoid!(16),
+            jwt_secret: nanoid::nanoid!(32).as_bytes().to_vec(),
         })
     }
 }
@@ -112,8 +110,7 @@ impl TryFrom<UpdateUser> for UpdateableUser {
                 name: value.name,
                 email: value.email,
                 password: Some(pwhash),
-                jwt_secret: Some(nanoid::nanoid!(32)),
-                jwt_salt: Some(nanoid::nanoid!(16)),
+                jwt_secret: Some(nanoid::nanoid!(32).as_bytes().to_vec()),
             });
         }
         Ok(Self {
@@ -121,7 +118,6 @@ impl TryFrom<UpdateUser> for UpdateableUser {
             email: value.email,
             password: None,
             jwt_secret: None,
-            jwt_salt: None,
         })
     }
 }
@@ -139,8 +135,7 @@ mod tests {
             name: "john".to_string(),
             email: "bogus".to_string(),
             password: "secret".to_string(),
-            jwt_secret: "secret2".to_string(),
-            jwt_salt: "salt".to_string(),
+            jwt_secret: vec![],
         };
         let d: DisplayUser = u.transmogrify();
         assert_eq!(

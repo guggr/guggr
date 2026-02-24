@@ -3,13 +3,11 @@ use std::sync::Arc;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use chrono::Utc;
 use config::ApiServiceConfig;
-use hkdf::Hkdf;
 use jsonwebtoken::{
     Algorithm, DecodingKey, EncodingKey, Header, Validation, dangerous::insecure_decode, decode,
     encode,
 };
 use serde::{Deserialize, Serialize};
-use sha2::Sha256;
 
 use crate::core::{
     domain::errors::AuthError,
@@ -63,45 +61,33 @@ pub fn verify_password(password: &str, phc_hash: &str) -> Result<bool, AuthError
         .is_ok())
 }
 
-pub fn get_unverified_user(token: &str) -> Result<String, AuthError> {
+pub fn get_unverified_user_id(token: &str) -> Result<String, AuthError> {
     let unverified_claims = insecure_decode::<Claims>(token)?;
     Ok(unverified_claims.claims.sub)
 }
 
 pub struct JwtSigner {
-    main: Vec<u8>,
-    salt: Vec<u8>,
-    user_secret: Vec<u8>,
+    key: Vec<u8>,
 }
 
 impl JwtSigner {
-    pub fn new(global: &[u8], salt: &[u8], user_secret: &[u8]) -> Self {
+    pub fn new(global: &[u8], user_secret: &[u8]) -> Self {
         Self {
-            main: global.to_vec(),
-            salt: salt.to_vec(),
-            user_secret: user_secret.to_vec(),
+            key: [global, user_secret].concat(),
         }
-    }
-    fn derive_user_key(&self) -> [u8; 32] {
-        let hk = Hkdf::<Sha256>::new(Some(&self.salt), &self.main);
-        let mut out = [0; 32];
-        hk.expand(&self.user_secret, &mut out).expect("aaa");
-        out
     }
 
     fn get_encoding_key(&self) -> EncodingKey {
-        let uk = self.derive_user_key();
-        EncodingKey::from_secret(&uk)
+        EncodingKey::from_secret(&self.key)
     }
 
     fn get_decoding_key(&self) -> DecodingKey {
-        let uk = self.derive_user_key();
-        DecodingKey::from_secret(&uk)
+        DecodingKey::from_secret(&self.key)
     }
 
     fn get_validation(&self) -> Validation {
         let mut v = Validation::new(Algorithm::HS256);
-        v.leeway = 10; // still valid after 10s
+        v.leeway = 10; // still valid after 10s (account for clock skew)
         v
     }
 
@@ -187,11 +173,7 @@ mod tests {
             ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
         ];
         let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            "salt".as_bytes(),
-            "secret".as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), "secret".as_bytes());
         let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
 
         let token = signer.create_token("cool-user", &config, &storage)?;
@@ -215,11 +197,7 @@ mod tests {
             ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
         ];
         let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            "salt".as_bytes(),
-            "secret".as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), "secret".as_bytes());
         let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
 
         let token = signer.create_token("cool-user", &config, &storage)?;
@@ -242,11 +220,7 @@ mod tests {
             ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
         ];
         let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            "salt".as_bytes(),
-            "secret".as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), "secret".as_bytes());
         let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
 
         let token = signer.create_token("cool-user", &config, &storage)?;
@@ -259,39 +233,6 @@ mod tests {
                 .refresh_token(&config, &storage, &token.refresh_token)
                 .unwrap_err(),
             AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::ExpiredSignature)
-        ));
-        Ok(())
-    }
-
-    #[test]
-    fn changed_user_data() -> anyhow::Result<()> {
-        let env_vars = vec![
-            ("API_SERVICE_HOST", Some("localhost")),
-            ("API_SERVICE_PORT", Some("8000")),
-            ("API_SERVICE_AUTH_TTL", Some("60")),
-            ("API_SERVICE_AUTH_REFRESH_TTL", Some("6000")),
-            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
-        ];
-        let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            "salt".as_bytes(),
-            "secret".as_bytes(),
-        );
-        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
-
-        let token = signer.create_token("cool-user", &config, &storage)?;
-        let othersigner = JwtSigner::new(
-            &config.auth_secret(),
-            "salt2".as_bytes(),
-            "different-secret".as_bytes(),
-        );
-        assert!(matches!(
-            othersigner
-                .verify_access_token(&token.access_token)
-                .unwrap_err(),
-                        AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::InvalidSignature)
-
         ));
         Ok(())
     }

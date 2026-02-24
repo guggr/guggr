@@ -15,7 +15,7 @@ use futures_util::future::{self, LocalBoxFuture};
 use tracing::error;
 
 use crate::core::{
-    domain::auth_helper::{JwtSigner, get_unverified_user},
+    domain::auth_helper::{JwtSigner, get_unverified_user_id},
     ports::storage::StoragePort,
 };
 
@@ -89,7 +89,7 @@ where
             Some(t) if !t.is_empty() => t,
             _ => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
-        let unverified_user = match get_unverified_user(token) {
+        let unverified_user = match get_unverified_user_id(token) {
             Ok(u) => u,
             Err(_) => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
@@ -98,11 +98,7 @@ where
             Ok(u) => u,
             Err(_) => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            user.jwt_salt.as_bytes(),
-            user.jwt_secret.as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
         if signer.verify_access_token(token).is_err() {
             return Box::pin(futures_util::future::err(unauthorized_with_bearer()));
         }

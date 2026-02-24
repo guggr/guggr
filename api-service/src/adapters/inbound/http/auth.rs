@@ -6,7 +6,7 @@ use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
     domain::{
-        auth_helper::{JwtSigner, get_unverified_user, verify_password},
+        auth_helper::{JwtSigner, get_unverified_user_id, verify_password},
         errors::AuthError,
     },
     models::auth::{AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
@@ -64,11 +64,7 @@ pub async fn login(
         if !ok {
             return Err(AuthError::Unauthorized);
         }
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            user.jwt_salt.as_bytes(),
-            user.jwt_secret.as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
 
         signer.create_token(&user.id, config.get_ref(), api.get_ref())
     })
@@ -95,14 +91,10 @@ pub async fn token_refresh(
 ) -> actix_web::Result<impl Responder> {
     let token_response = web::block(move || {
         let old_token = body.into_inner().refresh_token;
-        let unverified_user = get_unverified_user(&old_token)?;
+        let unverified_user = get_unverified_user_id(&old_token)?;
 
         let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            user.jwt_salt.as_bytes(),
-            user.jwt_secret.as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
 
         signer.refresh_token(config.get_ref(), api.get_ref(), &old_token)
     })
@@ -128,14 +120,10 @@ pub async fn logout(
 ) -> actix_web::Result<impl Responder> {
     web::block(move || {
         let old_token = body.into_inner().refresh_token;
-        let unverified_user = get_unverified_user(&old_token)?;
+        let unverified_user = get_unverified_user_id(&old_token)?;
 
         let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
-        let signer = JwtSigner::new(
-            &config.auth_secret(),
-            user.jwt_salt.as_bytes(),
-            user.jwt_secret.as_bytes(),
-        );
+        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
         signer.invalidate_token(api.get_ref(), &old_token)
     })
     .await

@@ -30,8 +30,6 @@ garde = { workspace = true , features = ["email"] }
 ipnet = { workspace = true }
 serde_with = { workspace = true, features = ["chrono"] }
 jsonwebtoken = { workspace = true , features = ["rust_crypto"] }
-hkdf = { workspace = true }
-sha2 = { workspace = true }
 
 [dev-dependencies]
 temp-env = { workspace = true }

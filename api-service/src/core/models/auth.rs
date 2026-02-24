@@ -41,15 +41,12 @@ pub struct UserAuth {
     pub id: String,
     pub email: String,
     pub password: String,
-    pub jwt_secret: String,
-    pub jwt_salt: String,
-    // TODO roles
+    pub jwt_secret: Vec<u8>,
 }
 
 #[derive(Debug, LabelledGeneric, Default)]
 pub struct UserAuthJwt {
-    pub jwt_secret: String,
-    pub jwt_salt: String,
+    pub jwt_secret: Vec<u8>,
 }
 
 #[derive(Debug, Default)]

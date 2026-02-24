@@ -228,15 +228,11 @@ pub mod tests {
                 id: "cool-user".to_string(),
                 email: email.to_string(),
                 password: "cool-pass".to_string(),
-                jwt_secret: "secret".to_string(),
-                jwt_salt: "salt".to_string(),
+                jwt_secret: vec![],
             })
         }
         fn get_user_jwt_secrets(&self, _id: &str) -> Result<UserAuthJwt, StorageError> {
-            Ok(UserAuthJwt {
-                jwt_secret: "secret".to_string(),
-                jwt_salt: "salt".to_string(),
-            })
+            Ok(UserAuthJwt { jwt_secret: vec![] })
         }
         fn create_refresh_token(&self, _token: CreateRefreshToken) -> Result<(), StorageError> {
             Ok(())
