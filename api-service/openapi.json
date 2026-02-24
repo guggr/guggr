@@ -1,0 +1,1389 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "api-service",
+		"description": "guggr api definition",
+		"contact": {
+			"name": "Guggr"
+		},
+		"license": {
+			"name": ""
+		},
+		"version": "0.1.0"
+	},
+	"paths": {
+		"/api/v1/auth/login": {
+			"post": {
+				"tags": ["auth"],
+				"operationId": "auth_login",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Access- and refresh-token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not Authorized"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				}
+			}
+		},
+		"/api/v1/auth/logout": {
+			"post": {
+				"tags": ["auth"],
+				"operationId": "auth_logout",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenRefreshRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"204": {
+						"description": "Successful logout"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				}
+			}
+		},
+		"/api/v1/auth/token/refresh": {
+			"post": {
+				"tags": ["auth"],
+				"operationId": "auth_refresh_token",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TokenRefreshRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Access- and refresh-token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not Authorized"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				}
+			}
+		},
+		"/api/v1/groups": {
+			"get": {
+				"tags": ["groups"],
+				"operationId": "list_group",
+				"responses": {
+					"200": {
+						"description": "List groups",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayGroup"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"post": {
+				"tags": ["groups"],
+				"operationId": "create_group",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateGroup"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Created group",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/groups/{id}": {
+			"get": {
+				"tags": ["groups"],
+				"operationId": "get_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Group",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Group Not Found"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"delete": {
+				"tags": ["groups"],
+				"operationId": "delete_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"patch": {
+				"tags": ["groups"],
+				"operationId": "update_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateGroup"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Patched group",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/jobs": {
+			"get": {
+				"tags": ["jobs"],
+				"operationId": "list_job",
+				"responses": {
+					"200": {
+						"description": "List jobs",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayJob"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"post": {
+				"tags": ["jobs"],
+				"operationId": "create_job",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateJob"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Created job",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/jobs/{id}": {
+			"get": {
+				"tags": ["jobs"],
+				"operationId": "get_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Job",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"delete": {
+				"tags": ["jobs"],
+				"operationId": "delete_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"patch": {
+				"tags": ["jobs"],
+				"operationId": "update_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateJob"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Created job",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/jobs/{id}/runs": {
+			"get": {
+				"tags": ["jobs"],
+				"operationId": "list_job_runs",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "List jobs runs",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayJobRun"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/openapi.json": {
+			"get": {
+				"tags": ["docs"],
+				"operationId": "openapi_json_redirect",
+				"responses": {
+					"307": {
+						"description": "Temporary redirect to /api/openapi.json"
+					}
+				}
+			}
+		},
+		"/api/v1/ping": {
+			"get": {
+				"operationId": "ping",
+				"responses": {
+					"200": {
+						"description": "pong"
+					}
+				}
+			}
+		},
+		"/api/v1/roles": {
+			"get": {
+				"tags": ["roles"],
+				"operationId": "list_role",
+				"responses": {
+					"200": {
+						"description": "List roles",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayRole"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"post": {
+				"tags": ["roles"],
+				"operationId": "create_role",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateRole"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Created role",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayRole"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/roles/{id}": {
+			"get": {
+				"tags": ["roles"],
+				"operationId": "get_role",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Role id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Role",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayRole"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"delete": {
+				"tags": ["roles"],
+				"operationId": "delete_role",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Role id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"patch": {
+				"tags": ["roles"],
+				"operationId": "update_role",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Role id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRole"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Patched role",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayRole"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/swagger-ui/{arg0}": {
+			"get": {
+				"tags": ["docs"],
+				"operationId": "swagger_ui_redirect",
+				"responses": {
+					"307": {
+						"description": "Temporary redirect to /api/swagger-ui/"
+					}
+				}
+			}
+		},
+		"/api/v1/users": {
+			"get": {
+				"tags": ["users"],
+				"operationId": "list_user",
+				"responses": {
+					"200": {
+						"description": "List users",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayUser"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"post": {
+				"tags": ["users"],
+				"operationId": "create_user",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateUser"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Created user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayUser"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		},
+		"/api/v1/users/{id}": {
+			"get": {
+				"tags": ["users"],
+				"operationId": "get_user",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "User id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayUser"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"delete": {
+				"tags": ["users"],
+				"operationId": "delete_user",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "User id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			},
+			"patch": {
+				"tags": ["users"],
+				"operationId": "update_user",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "User id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateUser"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Patched user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayUser"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"500": {
+						"description": "Storage error"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"CreateGroup": {
+				"type": "object",
+				"required": ["name"],
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			},
+			"CreateJob": {
+				"type": "object",
+				"required": ["name", "job_type_id", "group_id", "notify_users", "run_every", "details"],
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"$ref": "#/components/schemas/CreateJobDetails"
+					},
+					"group_id": {
+						"type": "string"
+					},
+					"job_type_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"notify_users": {
+						"type": "boolean"
+					},
+					"run_every": {
+						"type": "string"
+					}
+				}
+			},
+			"CreateJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/CreateJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/CreateJobDetailsPing"
+							}
+						}
+					}
+				]
+			},
+			"CreateJobDetailsHttp": {
+				"type": "object",
+				"required": ["url"],
+				"properties": {
+					"url": {
+						"type": "string"
+					}
+				}
+			},
+			"CreateJobDetailsPing": {
+				"type": "object",
+				"required": ["host"],
+				"properties": {
+					"host": {
+						"type": "string"
+					}
+				}
+			},
+			"CreateRole": {
+				"type": "object",
+				"required": ["name"],
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			},
+			"CreateUser": {
+				"type": "object",
+				"required": ["name", "email", "password"],
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1
+					},
+					"password": {
+						"type": "string",
+						"format": "password",
+						"minLength": 8
+					}
+				}
+			},
+			"DisplayGroup": {
+				"type": "object",
+				"required": ["id", "name"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJob": {
+				"type": "object",
+				"required": [
+					"id",
+					"name",
+					"job_type_id",
+					"group_id",
+					"notify_users",
+					"run_every",
+					"details"
+				],
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"$ref": "#/components/schemas/DisplayJobDetails"
+					},
+					"group_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"job_type_id": {
+						"type": "string"
+					},
+					"last_scheduled": {
+						"type": ["string", "null"],
+						"format": "date-time"
+					},
+					"name": {
+						"type": "string"
+					},
+					"notify_users": {
+						"type": "boolean"
+					},
+					"run_every": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/DisplayJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/DisplayJobDetailsPing"
+							}
+						}
+					}
+				]
+			},
+			"DisplayJobDetailsHttp": {
+				"type": "object",
+				"required": ["id", "url"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"url": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJobDetailsPing": {
+				"type": "object",
+				"required": ["id", "host"],
+				"properties": {
+					"host": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJobResultHttp": {
+				"type": "object",
+				"required": ["id", "ip_address", "status_code", "latency", "payload"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"ip_address": {
+						"type": "string",
+						"format": "cidr",
+						"example": "192.0.2.5/32"
+					},
+					"latency": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"payload": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32",
+							"minimum": 0
+						}
+					},
+					"status_code": {
+						"type": "integer",
+						"format": "int32"
+					}
+				}
+			},
+			"DisplayJobResultPing": {
+				"type": "object",
+				"required": ["id", "ip_address", "latency"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"ip_address": {
+						"type": "string",
+						"format": "cidr",
+						"example": "192.0.2.5/32"
+					},
+					"latency": {
+						"type": "integer",
+						"format": "int32"
+					}
+				}
+			},
+			"DisplayJobRun": {
+				"type": "object",
+				"required": [
+					"id",
+					"job_id",
+					"timestamp",
+					"triggered_notification",
+					"batch_id",
+					"reachable",
+					"details"
+				],
+				"properties": {
+					"batch_id": {
+						"type": "string"
+					},
+					"details": {
+						"$ref": "#/components/schemas/DisplayJobRunDetails"
+					},
+					"id": {
+						"type": "string"
+					},
+					"job_id": {
+						"type": "string"
+					},
+					"reachable": {
+						"type": "boolean"
+					},
+					"timestamp": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"triggered_notification": {
+						"type": "boolean"
+					}
+				}
+			},
+			"DisplayJobRunDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/DisplayJobResultHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/DisplayJobResultPing"
+							}
+						}
+					}
+				]
+			},
+			"DisplayRole": {
+				"type": "object",
+				"required": ["id", "name"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayUser": {
+				"type": "object",
+				"required": ["id", "name", "email"],
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"LoginRequest": {
+				"type": "object",
+				"required": ["email", "password"],
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				}
+			},
+			"TokenRefreshRequest": {
+				"type": "object",
+				"required": ["refresh_token"],
+				"properties": {
+					"refresh_token": {
+						"type": "string"
+					}
+				}
+			},
+			"TokenResponse": {
+				"type": "object",
+				"required": ["access_token", "refresh_token"],
+				"properties": {
+					"access_token": {
+						"type": "string"
+					},
+					"refresh_token": {
+						"type": "string"
+					}
+				}
+			},
+			"UpdateGroup": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": ["string", "null"],
+						"minLength": 1
+					}
+				}
+			},
+			"UpdateJob": {
+				"type": "object",
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"oneOf": [
+							{
+								"type": "null"
+							},
+							{
+								"$ref": "#/components/schemas/UpdateJobDetails"
+							}
+						]
+					},
+					"group_id": {
+						"type": ["string", "null"]
+					},
+					"id": {
+						"type": ["string", "null"]
+					},
+					"job_type_id": {
+						"type": ["string", "null"]
+					},
+					"last_scheduled": {
+						"type": ["string", "null"],
+						"format": "date-time"
+					},
+					"name": {
+						"type": ["string", "null"]
+					},
+					"notify_users": {
+						"type": ["boolean", "null"]
+					},
+					"run_every": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/UpdateJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/UpdateJobDetailsPing"
+							}
+						}
+					}
+				]
+			},
+			"UpdateJobDetailsHttp": {
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateJobDetailsPing": {
+				"type": "object",
+				"properties": {
+					"host": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateRole": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": ["string", "null"],
+						"minLength": 1
+					}
+				}
+			},
+			"UpdateUser": {
+				"type": "object",
+				"properties": {
+					"email": {
+						"type": ["string", "null"],
+						"format": "email"
+					},
+					"name": {
+						"type": ["string", "null"],
+						"minLength": 1
+					},
+					"password": {
+						"type": ["string", "null"],
+						"format": "password",
+						"minLength": 8
+					}
+				}
+			}
+		},
+		"securitySchemes": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
+	}
+}

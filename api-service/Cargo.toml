@@ -38,3 +38,7 @@ temp-env = { workspace = true }
 
 [package.metadata.cargo-machete]
 ignored = ["frunk_core"]
+
+[[bin]]
+name = "gen-openapi"
+path = "./src/gen_openapi.rs"
