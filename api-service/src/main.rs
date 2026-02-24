@@ -4,7 +4,7 @@ use actix_web::{App, HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
     adapters::{
-        inbound::http::{self, auth, groups, job, users},
+        inbound::http::{self, auth, groups, job, role, users},
         outgoing::postgres::PostgresAdapter,
     },
     core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
@@ -40,6 +40,7 @@ async fn main() -> Result<()> {
                     .configure(groups::configure)
                     .configure(users::configure)
                     .configure(job::configure)
+                    .configure(role::configure)
                     .configure(auth::configure)
                     .configure(http::configure),
             )

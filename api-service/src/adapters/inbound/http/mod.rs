@@ -2,6 +2,7 @@ pub mod auth;
 pub mod groups;
 pub mod job;
 pub mod middleware;
+pub mod role;
 pub mod users;
 use actix_web::{
     HttpResponse, Responder, ResponseError, get,
