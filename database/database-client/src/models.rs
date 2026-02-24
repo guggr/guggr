@@ -85,8 +85,6 @@ pub struct JobType {
 pub struct RefreshToken {
     pub jti: String,
     pub user_id: String,
-    pub ip_address: String,
-    pub user_agent: String,
     pub expires_on: NaiveDateTime,
 }
 
@@ -104,6 +102,8 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password: String,
+    pub jwt_secret: String,
+    pub jwt_salt: String,
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, LabelledGeneric)]

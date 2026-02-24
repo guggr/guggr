@@ -74,8 +74,6 @@ diesel::table! {
     refresh_token (jti) {
         jti -> Text,
         user_id -> Text,
-        ip_address -> Text,
-        user_agent -> Text,
         expires_on -> Timestamp,
     }
 }
@@ -93,6 +91,8 @@ diesel::table! {
         name -> Text,
         email -> Text,
         password -> Text,
+        jwt_secret -> Text,
+        jwt_salt -> Text,
     }
 }
 
