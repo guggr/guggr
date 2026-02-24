@@ -33,5 +33,8 @@ jsonwebtoken = { workspace = true , features = ["rust_crypto"] }
 hkdf = { workspace = true }
 sha2 = { workspace = true }
 
+[dev-dependencies]
+temp-env = { workspace = true }
+
 [package.metadata.cargo-machete]
 ignored = ["frunk_core"]

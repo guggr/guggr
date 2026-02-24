@@ -99,6 +99,12 @@ impl JwtSigner {
         DecodingKey::from_secret(&uk)
     }
 
+    fn get_validation(&self) -> Validation {
+        let mut v = Validation::new(Algorithm::HS256);
+        v.leeway = 10; // still valid after 10s
+        v
+    }
+
     pub fn create_token(
         &self,
         user_id: &str,
@@ -129,7 +135,7 @@ impl JwtSigner {
         old_token: &str,
     ) -> Result<TokenResponse, AuthError> {
         let dk = self.get_decoding_key();
-        let jti = decode::<RefreshClaims>(old_token, &dk, &Validation::new(Algorithm::HS256))?
+        let jti = decode::<RefreshClaims>(old_token, &dk, &self.get_validation())?
             .claims
             .jti;
         let old_record = storage.auth().get_refresh_token(&jti)?;
@@ -145,7 +151,7 @@ impl JwtSigner {
         old_token: &str,
     ) -> Result<(), AuthError> {
         let dk = self.get_decoding_key();
-        let jti = decode::<RefreshClaims>(old_token, &dk, &Validation::new(Algorithm::HS256))?
+        let jti = decode::<RefreshClaims>(old_token, &dk, &self.get_validation())?
             .claims
             .jti;
         storage.auth().delete_refresh_token(&jti)?;
@@ -154,7 +160,153 @@ impl JwtSigner {
 
     pub fn verify_access_token(&self, token: &str) -> Result<(), AuthError> {
         let dk = self.get_decoding_key();
-        decode::<Claims>(&token, &dk, &Validation::new(Algorithm::HS256))?;
+        decode::<Claims>(&token, &dk, &self.get_validation())?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use argon2::{
+        PasswordHasher,
+        password_hash::{SaltString, rand_core::OsRng},
+    };
+    use jsonwebtoken::errors::ErrorKind;
+
+    use super::*;
+    use crate::core::ports::storage::tests::MockStore;
+
+    #[test]
+    fn valid_token() -> anyhow::Result<()> {
+        let env_vars = vec![
+            ("API_SERVICE_HOST", Some("localhost")),
+            ("API_SERVICE_PORT", Some("8000")),
+            ("API_SERVICE_AUTH_TTL", Some("60")),
+            ("API_SERVICE_AUTH_REFRESH_TTL", Some("6000")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
+        ];
+        let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            "salt".as_bytes(),
+            "secret".as_bytes(),
+        );
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+
+        let token = signer.create_token("cool-user", &config, &storage)?;
+        assert!(
+            signer
+                .refresh_token(&config, &storage, &token.refresh_token)
+                .is_ok(),
+        );
+        signer.verify_access_token(&token.access_token)?;
+        assert!(signer.verify_access_token(&token.access_token).is_ok(),);
+        Ok(())
+    }
+
+    #[test]
+    fn jti_missing_from_refresh() -> anyhow::Result<()> {
+        let env_vars = vec![
+            ("API_SERVICE_HOST", Some("localhost")),
+            ("API_SERVICE_PORT", Some("8000")),
+            ("API_SERVICE_AUTH_TTL", Some("60")),
+            ("API_SERVICE_AUTH_REFRESH_TTL", Some("6000")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
+        ];
+        let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            "salt".as_bytes(),
+            "secret".as_bytes(),
+        );
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+
+        let token = signer.create_token("cool-user", &config, &storage)?;
+        assert!(matches!(
+            signer
+                .refresh_token(&config, &storage, &token.access_token)
+                .unwrap_err(),
+            AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::Json(_))
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn jwt_expired() -> anyhow::Result<()> {
+        let env_vars = vec![
+            ("API_SERVICE_HOST", Some("localhost")),
+            ("API_SERVICE_PORT", Some("8000")),
+            ("API_SERVICE_AUTH_TTL", Some("-11")),
+            ("API_SERVICE_AUTH_REFRESH_TTL", Some("-11")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
+        ];
+        let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            "salt".as_bytes(),
+            "secret".as_bytes(),
+        );
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+
+        let token = signer.create_token("cool-user", &config, &storage)?;
+        assert!(matches!(
+            signer.verify_access_token(&token.access_token).unwrap_err(),
+            AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::ExpiredSignature)
+        ));
+        assert!(matches!(
+            signer
+                .refresh_token(&config, &storage, &token.refresh_token)
+                .unwrap_err(),
+            AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::ExpiredSignature)
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn changed_user_data() -> anyhow::Result<()> {
+        let env_vars = vec![
+            ("API_SERVICE_HOST", Some("localhost")),
+            ("API_SERVICE_PORT", Some("8000")),
+            ("API_SERVICE_AUTH_TTL", Some("60")),
+            ("API_SERVICE_AUTH_REFRESH_TTL", Some("6000")),
+            ("API_SERVICE_AUTH_SECRET", Some("very-secret")),
+        ];
+        let config = temp_env::with_vars(env_vars, || ApiServiceConfig::from_env().unwrap());
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            "salt".as_bytes(),
+            "secret".as_bytes(),
+        );
+        let storage: Arc<dyn StoragePort> = Arc::new(MockStore::new());
+
+        let token = signer.create_token("cool-user", &config, &storage)?;
+        let othersigner = JwtSigner::new(
+            &config.auth_secret(),
+            "salt2".as_bytes(),
+            "different-secret".as_bytes(),
+        );
+        assert!(matches!(
+            othersigner
+                .verify_access_token(&token.access_token)
+                .unwrap_err(),
+                        AuthError::JwtError(e) if matches!(e.kind(), ErrorKind::InvalidSignature)
+
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn validate_passwords() -> anyhow::Result<()> {
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let s = "secret".to_string();
+        let h = argon2
+            .hash_password(s.as_bytes(), &salt)
+            .unwrap()
+            .to_string();
+        assert!(verify_password(&s, &h)?);
+        assert!(!verify_password("othersecret", &h)?);
         Ok(())
     }
 }

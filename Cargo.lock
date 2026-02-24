@@ -375,6 +375,7 @@ dependencies = [
  "serde",
  "serde_with",
  "sha2",
+ "temp-env",
  "thiserror 2.0.18",
  "tracing",
  "tracing-actix-web",
