@@ -91,8 +91,7 @@ diesel::table! {
         name -> Text,
         email -> Text,
         password -> Text,
-        jwt_secret -> Text,
-        jwt_salt -> Text,
+        jwt_secret -> Bytea,
     }
 }
 

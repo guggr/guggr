@@ -102,8 +102,7 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password: String,
-    pub jwt_secret: String,
-    pub jwt_salt: String,
+    pub jwt_secret: Vec<u8>,
 }
 
 #[derive(Queryable, Debug, Identifiable, Insertable, PartialEq, Eq, Clone, LabelledGeneric)]
