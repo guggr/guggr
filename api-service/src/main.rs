@@ -4,7 +4,7 @@ use actix_web::{App, HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
     adapters::{
-        inbound::http::{self, auth, groups, job, role, users},
+        inbound::http::{self, auth, groups, jobs, roles, users},
         outgoing::postgres::PostgresAdapter,
     },
     core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
@@ -39,8 +39,8 @@ async fn main() -> Result<()> {
                 utoipa_actix_web::scope("/api/v1")
                     .configure(groups::configure)
                     .configure(users::configure)
-                    .configure(job::configure)
-                    .configure(role::configure)
+                    .configure(jobs::configure)
+                    .configure(roles::configure)
                     .configure(auth::configure)
                     .configure(http::configure),
             )
