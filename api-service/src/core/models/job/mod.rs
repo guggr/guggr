@@ -72,7 +72,7 @@ pub enum UpdateJobDetails {
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, AsChangeset)]
 #[diesel(table_name = job)]
-pub struct UpdatableJob {
+pub struct UpdateableJob {
     pub id: Option<String>,
     pub name: Option<String>,
     pub job_type_id: Option<String>,
@@ -114,7 +114,7 @@ impl From<Job> for DisplayJob {
     }
 }
 
-impl From<UpdateJob> for UpdatableJob {
+impl From<UpdateJob> for UpdateableJob {
     fn from(value: UpdateJob) -> Self {
         Self {
             id: value.id,

@@ -18,8 +18,9 @@ use crate::{
     core::{
         domain::errors::StorageError,
         models::job::{
-            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdatableJob, UpdateJob,
-            UpdateJobDetails, http::detail::to_job_detail_http, ping::detail::to_job_detail_ping,
+            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateJob,
+            UpdateJobDetails, UpdateableJob, http::detail::to_job_detail_http,
+            ping::detail::to_job_detail_ping,
         },
         ports::storage::{JobCrudOperations, JobDetailOperations, JobRunCrudOperations},
     },
@@ -71,7 +72,7 @@ impl JobCrudOperations for PostgresJobAdapter {
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
         let updated_job: models::Job = diesel::update(job.find(id))
-            .set(UpdatableJob::from(update_value.clone()))
+            .set(UpdateableJob::from(update_value.clone()))
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         if let Some(details) = update_value.details {
