@@ -30,7 +30,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     request_body = CreateJob,
     operation_id = "create_job",
     responses(
-        (status = 200, description = "Created group", body = DisplayJob),
+        (status = 200, description = "Created job", body = DisplayJob),
         (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
@@ -77,7 +77,7 @@ pub async fn get(
     request_body = UpdateJob,
     operation_id = "update_job",
     responses(
-        (status = 200, description = "Created group", body = DisplayJob),
+        (status = 200, description = "Created job", body = DisplayJob),
         (status = 500, description = "Storage error")
     ),
     security(("bearerAuth" = [])),
@@ -96,7 +96,7 @@ pub async fn update(
 }
 
 #[utoipa::path(
-    operation_id = "update_job",
+    operation_id = "delete_job",
     params(
         ("id" = String, Path, description = "Job id")
     ),

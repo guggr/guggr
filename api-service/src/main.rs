@@ -10,7 +10,6 @@ use api_service::{
     core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
     telemetry::init_tracing,
 };
-use compact_jwt::JwsEs256Signer;
 use config::{ApiServiceConfig, PostgresConfig};
 use tracing::debug;
 use tracing_actix_web::TracingLogger;
@@ -27,7 +26,6 @@ async fn main() -> Result<()> {
     let postgres: Arc<dyn StoragePort> =
         Arc::from(PostgresAdapter::new(&postgres_config.connection_url())?);
     let api = Data::new(postgres.clone());
-    let signer = Data::new(JwsEs256Signer::generate_es256()?);
     let dconfig = Data::new(config.clone());
 
     HttpServer::new(move || {
@@ -36,7 +34,6 @@ async fn main() -> Result<()> {
             .into_utoipa_app()
             .openapi(ApiDoc::openapi())
             .app_data(api.clone())
-            .app_data(signer.clone())
             .app_data(dconfig.clone())
             .service(
                 utoipa_actix_web::scope("/api/v1")

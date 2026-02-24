@@ -10,7 +10,7 @@ use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
         domain::errors::StorageError,
-        models::auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth},
+        models::auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
         ports::storage::AuthOperations,
     },
 };
@@ -64,5 +64,14 @@ impl AuthOperations for PostgresAuthAdapter {
             .execute(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(())
+    }
+    fn get_user_jwt_secrets(&self, id: &str) -> Result<UserAuthJwt, StorageError> {
+        use database_client::schema::user::dsl::{self, user};
+        let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let u = user
+            .filter(dsl::id.eq(id))
+            .first::<models::User>(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+        Ok(u.transmogrify())
     }
 }

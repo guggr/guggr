@@ -19,7 +19,7 @@ pub enum AuthError {
     #[error("No Record found")]
     InvalidHashformat,
     #[error("Error while handling JWT: {0}")]
-    JwtError(#[from] compact_jwt::error::JwtError),
+    JwtError(#[from] jsonwebtoken::errors::Error),
     #[error("JWT expired")]
     JwtExpired,
     #[error("JTI claim not present")]

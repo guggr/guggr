@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
 use actix_web::{HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, post, web};
-use compact_jwt::JwsEs256Signer;
 use config::ApiServiceConfig;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
     domain::{
-        auth_helper::{create_token, invalidate_token, refresh_token, verify_password},
+        auth_helper::{JwtSigner, get_unverified_user, verify_password},
         errors::AuthError,
     },
     models::auth::{AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
@@ -24,7 +23,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
 }
 
 // get auth relevant metadata like ip and user agent
-pub fn get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
+pub fn _get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
     let ip = req
         .peer_addr()
         .map(|addr| addr.ip().to_string())
@@ -53,12 +52,9 @@ pub fn get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
 #[post("/login")]
 pub async fn login(
     api: web::Data<Arc<dyn StoragePort>>,
-    signer: web::Data<JwsEs256Signer>,
     config: web::Data<ApiServiceConfig>,
-    req: HttpRequest,
     body: web::Json<LoginRequest>,
 ) -> actix_web::Result<impl Responder> {
-    let meta = get_auth_metadata(&req);
     let login_req = body.into_inner();
     let token_response = web::block(move || {
         let Ok(user) = api.auth().get_user_by_email(&login_req.email) else {
@@ -68,15 +64,13 @@ pub async fn login(
         if !ok {
             return Err(AuthError::Unauthorized);
         }
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            user.jwt_salt.as_bytes(),
+            user.jwt_secret.as_bytes(),
+        );
 
-        create_token(
-            signer.get_ref(),
-            api.get_ref(),
-            meta,
-            &user.id,
-            config.auth_ttl(),
-            config.auth_refresh_ttl(),
-        )
+        signer.create_token(&user.id, config.get_ref(), api.get_ref())
     })
     .await
     .map_err(ErrorInternalServerError)??;
@@ -96,21 +90,21 @@ pub async fn login(
 #[post("/token/refresh")]
 pub async fn token_refresh(
     api: web::Data<Arc<dyn StoragePort>>,
-    signer: web::Data<JwsEs256Signer>,
     config: web::Data<ApiServiceConfig>,
-    req: HttpRequest,
     body: web::Json<TokenRefreshRequest>,
 ) -> actix_web::Result<impl Responder> {
-    let meta = get_auth_metadata(&req);
     let token_response = web::block(move || {
-        refresh_token(
-            signer.get_ref(),
-            api.get_ref(),
-            meta,
-            &body.into_inner().refresh_token,
-            config.auth_ttl(),
-            config.auth_refresh_ttl(),
-        )
+        let old_token = body.into_inner().refresh_token;
+        let unverified_user = get_unverified_user(&old_token)?;
+
+        let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            user.jwt_salt.as_bytes(),
+            user.jwt_secret.as_bytes(),
+        );
+
+        signer.refresh_token(config.get_ref(), api.get_ref(), &old_token)
     })
     .await
     .map_err(ErrorInternalServerError)??;
@@ -129,15 +123,20 @@ pub async fn token_refresh(
 #[post("/logout")]
 pub async fn logout(
     api: web::Data<Arc<dyn StoragePort>>,
-    signer: web::Data<JwsEs256Signer>,
+    config: web::Data<ApiServiceConfig>,
     body: web::Json<LogoutRequest>,
 ) -> actix_web::Result<impl Responder> {
     web::block(move || {
-        invalidate_token(
-            signer.get_ref(),
-            api.get_ref(),
-            &body.into_inner().refresh_token,
-        )
+        let old_token = body.into_inner().refresh_token;
+        let unverified_user = get_unverified_user(&old_token)?;
+
+        let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
+        let signer = JwtSigner::new(
+            &config.auth_secret(),
+            user.jwt_salt.as_bytes(),
+            user.jwt_secret.as_bytes(),
+        );
+        signer.invalidate_token(api.get_ref(), &old_token)
     })
     .await
     .map_err(ErrorInternalServerError)??;

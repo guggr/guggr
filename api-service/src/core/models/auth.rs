@@ -41,23 +41,27 @@ pub struct UserAuth {
     pub id: String,
     pub email: String,
     pub password: String,
+    pub jwt_secret: String,
+    pub jwt_salt: String,
     // TODO roles
+}
+
+#[derive(Debug, LabelledGeneric, Default)]
+pub struct UserAuthJwt {
+    pub jwt_secret: String,
+    pub jwt_salt: String,
 }
 
 #[derive(Debug, Default)]
 pub struct CreateRefreshToken {
     pub jti: String,
     pub user_id: String,
-    pub ip_address: String,
-    pub user_agent: String,
     pub expires_on: i64,
 }
 
 #[derive(Debug, LabelledGeneric, Default)]
 pub struct DisplayRefreshToken {
     pub user_id: String,
-    pub ip_address: String,
-    pub user_agent: String,
     pub expires_on: i64,
 }
 
@@ -70,20 +74,15 @@ impl TryFrom<CreateRefreshToken> for RefreshToken {
         Ok(Self {
             jti: value.jti,
             user_id: value.user_id,
-            ip_address: value.ip_address,
-            user_agent: value.user_agent,
             expires_on: exp,
         })
     }
 }
 impl From<RefreshToken> for DisplayRefreshToken {
     fn from(value: RefreshToken) -> Self {
-        let ip = value.ip_address.clone();
         let exp = Utc.from_utc_datetime(&value.expires_on).timestamp();
         Self {
             user_id: value.user_id,
-            ip_address: ip,
-            user_agent: value.user_agent,
             expires_on: exp,
         }
     }

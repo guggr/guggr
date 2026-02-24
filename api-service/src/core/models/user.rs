@@ -81,6 +81,8 @@ impl TryFrom<CreateUser> for User {
             name: value.name,
             email: value.email,
             password: pwhash,
+            jwt_secret: nanoid::nanoid!(32),
+            jwt_salt: nanoid::nanoid!(16),
         })
     }
 }
@@ -98,6 +100,8 @@ mod tests {
             name: "john".to_string(),
             email: "bogus".to_string(),
             password: "secret".to_string(),
+            jwt_secret: "secret2".to_string(),
+            jwt_salt: "salt".to_string(),
         };
         let d: DisplayUser = u.transmogrify();
         assert_eq!(

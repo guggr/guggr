@@ -1,7 +1,7 @@
 use crate::core::{
     domain::errors::StorageError,
     models::{
-        auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth},
+        auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
         group::{CreateGroup, DisplayGroup, UpdateGroup},
         job::{CreateJob, DisplayJob, UpdateJob, run::DisplayJobRun},
         role::{CreateRole, DisplayRole, UpdateRole},
@@ -41,6 +41,7 @@ pub trait JobDetailOperations<U, D> {
 
 pub trait AuthOperations {
     fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError>;
+    fn get_user_jwt_secrets(&self, id: &str) -> Result<UserAuthJwt, StorageError>;
     fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
     fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError>;
     fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError>;
@@ -227,6 +228,14 @@ pub mod tests {
                 id: "cool-user".to_string(),
                 email: email.to_string(),
                 password: "cool-pass".to_string(),
+                jwt_secret: "secret".to_string(),
+                jwt_salt: "salt".to_string(),
+            })
+        }
+        fn get_user_jwt_secrets(&self, _id: &str) -> Result<UserAuthJwt, StorageError> {
+            Ok(UserAuthJwt {
+                jwt_secret: "secret".to_string(),
+                jwt_salt: "salt".to_string(),
             })
         }
         fn create_refresh_token(&self, _token: CreateRefreshToken) -> Result<(), StorageError> {
