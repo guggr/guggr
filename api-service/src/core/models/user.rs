@@ -68,6 +68,18 @@ pub struct UpdateUser {
     pub password: Option<String>,
 }
 
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, AsChangeset, LabelledGeneric, Default,
+)]
+#[diesel(table_name = user)]
+pub struct UpdateableUser {
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub password: Option<String>,
+    pub jwt_secret: Option<String>,
+    pub jwt_salt: Option<String>,
+}
+
 impl TryFrom<CreateUser> for User {
     type Error = argon2::password_hash::Error;
     fn try_from(value: CreateUser) -> Result<Self, Self::Error> {
@@ -83,6 +95,33 @@ impl TryFrom<CreateUser> for User {
             password: pwhash,
             jwt_secret: nanoid::nanoid!(32),
             jwt_salt: nanoid::nanoid!(16),
+        })
+    }
+}
+
+impl TryFrom<UpdateUser> for UpdateableUser {
+    type Error = argon2::password_hash::Error;
+    fn try_from(value: UpdateUser) -> Result<Self, Self::Error> {
+        if let Some(password) = value.password {
+            let salt = SaltString::generate(&mut OsRng);
+            let argon2 = Argon2::default();
+            let pwhash = argon2
+                .hash_password(password.as_bytes(), &salt)?
+                .to_string();
+            return Ok(Self {
+                name: value.name,
+                email: value.email,
+                password: Some(pwhash),
+                jwt_secret: Some(nanoid::nanoid!(32)),
+                jwt_salt: Some(nanoid::nanoid!(16)),
+            });
+        }
+        Ok(Self {
+            name: value.name,
+            email: value.email,
+            password: None,
+            jwt_secret: None,
+            jwt_salt: None,
         })
     }
 }

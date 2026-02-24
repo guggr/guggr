@@ -10,7 +10,7 @@ use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
         domain::errors::StorageError,
-        models::user::{CreateUser, DisplayUser, UpdateUser},
+        models::user::{CreateUser, DisplayUser, UpdateUser, UpdateableUser},
         ports::storage::CrudOperations,
     },
 };
@@ -43,9 +43,9 @@ impl CrudOperations<CreateUser, UpdateUser, DisplayUser> for PostgresUserAdapter
     fn update(&self, id: &str, update_value: UpdateUser) -> Result<DisplayUser, StorageError> {
         use database_client::schema::user::dsl::user;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-
+        let u = UpdateableUser::try_from(update_value).map_err(StorageError::from)?;
         let result: models::User = diesel::update(user.find(id))
-            .set(&update_value)
+            .set(&u)
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(result.transmogrify())
