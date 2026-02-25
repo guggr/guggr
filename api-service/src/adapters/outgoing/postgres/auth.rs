@@ -1,6 +1,7 @@
-use database_client::models;
+use database_client::models::{self, Role};
 use diesel::{
     PgConnection,
+    dsl::exists,
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
@@ -10,7 +11,10 @@ use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
         domain::errors::StorageError,
-        models::auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
+        models::{
+            auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
+            role::DisplayRole,
+        },
         ports::storage::AuthOperations,
     },
 };
@@ -73,5 +77,30 @@ impl AuthOperations for PostgresAuthAdapter {
             .first::<models::User>(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(u.transmogrify())
+    }
+    fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, StorageError> {
+        use database_client::schema::{role, user_group_mapping};
+        let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let roles: Vec<Role> = user_group_mapping::table
+            .inner_join(role::table)
+            .filter(user_group_mapping::user_id.eq(id))
+            .select((role::id, role::name))
+            .load(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+
+        Ok(roles.iter().map(|f| f.clone().transmogrify()).collect())
+    }
+    fn is_owner(&self, id: &str) -> Result<bool, StorageError> {
+        use database_client::schema::{role, user_group_mapping};
+        let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+        let owner: bool = diesel::select(exists(
+            user_group_mapping::table
+                .inner_join(role::table)
+                .filter(user_group_mapping::user_id.eq(id))
+                .filter(role::id.eq("owner")),
+        ))
+        .get_result(&mut conn)
+        .map_err(PostgresAdapterError::from)?;
+        Ok(owner)
     }
 }

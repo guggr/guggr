@@ -4,7 +4,7 @@ use std::{
 };
 
 use actix_web::{
-    Error, HttpResponse,
+    Error, HttpMessage, HttpResponse,
     dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
     error::{self},
     http::header,
@@ -16,6 +16,7 @@ use tracing::error;
 
 use crate::core::{
     domain::auth_helper::{JwtSigner, get_unverified_user_id},
+    models::auth::UserId,
     ports::storage::StoragePort,
 };
 
@@ -102,6 +103,12 @@ where
         if signer.verify_access_token(token).is_err() {
             return Box::pin(futures_util::future::err(unauthorized_with_bearer()));
         }
+
+        // at this point the unverified user id is actually verified
+        // here we just add it to the request that is passed down to the handlers so we
+        // don't need to verify the token a second time to get its user
+        let u = UserId(unverified_user);
+        req.extensions_mut().insert(u);
 
         let fut = self.service.call(req);
         Box::pin(fut)

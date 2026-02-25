@@ -11,6 +11,8 @@ pub enum StorageError {
     NotFound,
     #[error("Timestamp conversion error")]
     TimestampConversion,
+    #[error("User not authorized")]
+    Unauthorized,
 }
 
 /// Errors for everything Authentication related
@@ -28,6 +30,6 @@ pub enum AuthError {
     Storage(#[from] StorageError),
     #[error("Auth Metadata has changed")]
     ChangedAuthMetadata,
-    #[error("Auth Metadata has changed")]
+    #[error("User not authorized")]
     Unauthorized,
 }

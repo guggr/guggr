@@ -12,15 +12,8 @@ use utoipa_actix_web::AppExt;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
-    adapters::{
-        inbound::http::{self, auth, groups, jobs, roles, users},
-        outgoing::postgres::PostgresAdapter,
-    },
-    core::{
-        domain::openapi_helper::ApiDoc,
-        models::group::{CreateGroup, DisplayGroup, UpdateGroup},
-        ports::storage::{CrudOperations, StoragePort},
-    },
+    adapters::inbound::http::{self, auth, groups, jobs, roles, users},
+    core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
 };
 
 /// Initializes and returns configured Actix [`App`] and corresponding
@@ -75,35 +68,4 @@ pub fn init_app_openapi(
     }
 
     app.split_for_parts()
-}
-
-/// TODO delete this
-pub async fn example_usage(postgres: PostgresAdapter) -> anyhow::Result<()> {
-    let group = CreateGroup {
-        name: "This group is cool".to_string(),
-    };
-    postgres.group.create(group)?;
-
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
-    dbg!(r);
-
-    let updated = UpdateGroup {
-        name: Some("other description".to_string()),
-    };
-
-    postgres.group.update("mycoolgroup", updated)?;
-
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
-    dbg!(r);
-
-    let entries: Vec<DisplayGroup> = postgres.group.list(5)?;
-    dbg!(entries);
-
-    // this is kind of ugly, need to check how this can be done better
-    postgres.group.delete("mycoolgroup")?;
-
-    let r: Option<DisplayGroup> = postgres.group.get_by_id("mycoolgroup")?;
-    dbg!(r);
-
-    Ok(())
 }

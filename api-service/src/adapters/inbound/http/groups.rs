@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
 use actix_web::{
-    HttpResponse, Responder, delete, error::ErrorInternalServerError, get, patch, post, web,
+    HttpMessage, HttpRequest, HttpResponse, Responder, delete, error::ErrorInternalServerError,
+    get, patch, post, web,
 };
 use garde_actix_web::web::Json;
 use utoipa_actix_web::service_config::ServiceConfig;
@@ -9,7 +10,11 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
-        models::group::{CreateGroup, DisplayGroup, UpdateGroup},
+        domain::errors::{AuthError, StorageError},
+        models::{
+            auth::UserId,
+            group::{CreateGroup, DisplayGroup, UpdateGroup},
+        },
         ports::storage::StoragePort,
     },
 };
@@ -41,11 +46,22 @@ pub fn configure(cfg: &mut ServiceConfig) {
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: Json<CreateGroup>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    let user = web::block(move || api.group().create(body.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??;
-    Ok(HttpResponse::Ok().json(user))
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let group = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.group().create(body.into_inner());
+        }
+        Err(StorageError::Unauthorized)
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
+    Ok(HttpResponse::Ok().json(group))
 }
 
 #[utoipa::path(
@@ -58,10 +74,23 @@ pub async fn create(
     tag = "groups"
 )]
 #[get("")]
-pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<impl Responder> {
-    let groups = web::block(move || api.group().list(5))
-        .await
-        .map_err(ErrorInternalServerError)??;
+pub async fn list(
+    api: web::Data<Arc<dyn StoragePort>>,
+    req: HttpRequest,
+) -> actix_web::Result<impl Responder> {
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let groups = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.group().list(None, 5);
+        }
+        api.group().list(Some(&req_userid.0), 5)
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(groups))
 }
 
@@ -82,14 +111,27 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<imp
 pub async fn get(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    web::block(move || api.group().get_by_id(&path.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??
-        .map_or_else(
-            || Ok(HttpResponse::NotFound().finish()),
-            |group| Ok(HttpResponse::Ok().json(group)),
-        )
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.group().get_by_id(None, &path.into_inner());
+        }
+
+        api.group()
+            .get_by_id(Some(&req_userid.0), &path.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??
+    .map_or_else(
+        || Ok(HttpResponse::NotFound().finish()),
+        |group| Ok(HttpResponse::Ok().json(group)),
+    )
 }
 
 #[utoipa::path(
@@ -111,10 +153,25 @@ pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
     body: Json<UpdateGroup>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    let group = web::block(move || api.group().update(&path.into_inner(), body.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let group = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api
+                .group()
+                .update(None, &path.into_inner(), body.into_inner());
+        }
+
+        api.group()
+            .update(Some(&req_userid.0), &path.into_inner(), body.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(group))
 }
 #[utoipa::path(
@@ -133,10 +190,21 @@ pub async fn update(
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
     let id = path.into_inner();
-    web::block(move || api.group().delete(&id))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.group().delete(None, &id);
+        }
+        api.group().delete(Some(&req_userid.0), &id)
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::NoContent().finish())
 }
