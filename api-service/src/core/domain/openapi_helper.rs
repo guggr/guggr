@@ -1,10 +1,15 @@
+use actix_web::{
+    HttpRequest, HttpResponse, ResponseError, error::InternalError, http::header::ContentType,
+};
+use serde::Serialize;
 use utoipa::{
-    Modify,
+    Modify, ToSchema,
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
 };
 #[derive(utoipa::OpenApi)]
 #[openapi(
     modifiers(&JwtSecurityScheme),
+    components(schemas(ValidationErrorBody))
 )]
 pub struct ApiDoc;
 
@@ -25,6 +30,28 @@ impl Modify for JwtSecurityScheme {
             );
         }
     }
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+/// returned Error body for Validation Errors
+pub struct ValidationErrorBody {
+    pub message: String,
+}
+
+/// error handler that converts errors into validation errors
+pub fn json_error_handler(
+    err: garde_actix_web::error::Error,
+    _req: &HttpRequest,
+) -> actix_web::Error {
+    let status = err.status_code();
+
+    let resp = HttpResponse::build(status)
+        .insert_header(ContentType::json())
+        .json(ValidationErrorBody {
+            message: err.to_string(),
+        });
+
+    InternalError::from_response(err, resp).into()
 }
 
 #[derive(utoipa::IntoResponses)]
@@ -83,4 +110,4 @@ pub struct Unauthorized;
 
 #[derive(utoipa::ToResponse)]
 #[response(description = "Validation / Deserializing failed")]
-pub struct Validation;
+pub struct Validation(pub ValidationErrorBody);

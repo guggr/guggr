@@ -13,7 +13,10 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     adapters::inbound::http::{self, auth, groups, jobs, roles, users},
-    core::{domain::openapi_helper::ApiDoc, ports::storage::StoragePort},
+    core::{
+        domain::openapi_helper::{ApiDoc, json_error_handler},
+        ports::storage::StoragePort,
+    },
 };
 
 /// Initializes and returns configured Actix [`App`] and corresponding
@@ -45,6 +48,7 @@ pub fn init_app_openapi(
         .wrap(TracingLogger::default())
         .into_utoipa_app()
         .openapi(ApiDoc::openapi())
+        .app_data(garde_actix_web::web::JsonConfig::default().error_handler(json_error_handler))
         .service(
             utoipa_actix_web::scope("/api/v1")
                 .configure(groups::configure)

@@ -39,7 +39,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -70,7 +77,14 @@
 						"description": "Successful logout"
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -108,7 +122,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -180,7 +201,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -314,7 +342,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -394,7 +429,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -527,7 +569,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -675,7 +724,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -809,7 +865,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -900,7 +963,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -1034,7 +1104,14 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed"
+						"description": "Validation / Deserializing failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationErrorBody"
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "User is not Authorized / Authenticated"
@@ -1565,6 +1642,16 @@
 						"type": ["string", "null"],
 						"format": "password",
 						"minLength": 8
+					}
+				}
+			},
+			"ValidationErrorBody": {
+				"type": "object",
+				"description": "returned Error body for Validation Errors",
+				"required": ["message"],
+				"properties": {
+					"message": {
+						"type": "string"
 					}
 				}
 			}
