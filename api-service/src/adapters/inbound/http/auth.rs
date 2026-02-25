@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, post, web};
+use actix_web::{HttpResponse, Responder, error::ErrorInternalServerError, post, web};
 use config::ApiServiceConfig;
 use utoipa_actix_web::service_config::ServiceConfig;
 
@@ -10,7 +10,7 @@ use crate::core::{
         errors::AuthError,
         openapi_helper::GenericResponsesAuth,
     },
-    models::auth::{AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
+    models::auth::{LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
     ports::storage::StoragePort,
 };
 
@@ -22,23 +22,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .service(logout);
 
     cfg.service(scope);
-}
-
-// get auth relevant metadata like ip and user agent
-pub fn _get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
-    let ip = req
-        .peer_addr()
-        .map(|addr| addr.ip().to_string())
-        .unwrap_or_default();
-    let ua = req
-        .headers()
-        .get("User-Agent")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("unknown");
-    AuthMetadata {
-        ip_address: ip,
-        user_agent: ua.to_string(),
-    }
 }
 
 #[utoipa::path(

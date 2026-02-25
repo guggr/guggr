@@ -28,8 +28,6 @@ pub enum AuthError {
     JtiMissing,
     #[error("Storage: {0}")]
     Storage(#[from] StorageError),
-    #[error("Auth Metadata has changed")]
-    ChangedAuthMetadata,
     #[error("User not authorized")]
     Unauthorized,
 }

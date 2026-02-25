@@ -37,12 +37,6 @@ pub struct TokenResponse {
 /// path
 pub struct UserId(pub String);
 
-#[derive(Debug, Serialize, PartialEq, Eq, LabelledGeneric, Default, Clone)]
-pub struct AuthMetadata {
-    pub ip_address: String,
-    pub user_agent: String,
-}
-
 // DB DTO models below
 
 #[derive(Debug, LabelledGeneric, Default)]
