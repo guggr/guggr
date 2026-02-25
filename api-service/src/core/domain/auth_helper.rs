@@ -55,6 +55,11 @@ impl RefreshClaims {
     }
 }
 
+/// compares the supplied password with the supplied argon hash
+///
+/// # Errors
+/// [`AuthError::InvalidHashformat`] if the supplied password hash has an
+/// invalid format
 pub fn verify_password(password: &str, phc_hash: &str) -> Result<bool, AuthError> {
     let parsed = PasswordHash::new(phc_hash).map_err(|_| AuthError::InvalidHashformat)?;
 
@@ -63,6 +68,10 @@ pub fn verify_password(password: &str, phc_hash: &str) -> Result<bool, AuthError
         .is_ok())
 }
 
+/// gets the **unverified** user id. The JWT is **NOT** verified at this point
+///
+/// # Errors
+/// [`AuthError::JwtError`] if the supplied token can't be decoded
 pub fn get_unverified_user_id(token: &str) -> Result<String, AuthError> {
     let unverified_claims = insecure_decode::<Claims>(token)?;
     Ok(unverified_claims.claims.sub)
