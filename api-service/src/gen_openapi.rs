@@ -1,30 +1,20 @@
-use std::fs;
+use std::{fs::File, io::Write};
 
-use actix_web::App;
-use api_service::{
-    adapters::inbound::http::{self, auth, groups, jobs, roles, users},
-    core::domain::openapi_helper::ApiDoc,
-};
-use tracing_actix_web::TracingLogger;
-use utoipa::OpenApi;
-use utoipa_actix_web::{self, AppExt};
+use api_service::init_app_openapi;
 
 fn main() -> anyhow::Result<()> {
-    let (_, a) = App::new()
-        .wrap(TracingLogger::default())
-        .into_utoipa_app()
-        .openapi(ApiDoc::openapi())
-        .service(
-            utoipa_actix_web::scope("/api/v1")
-                .configure(groups::configure)
-                .configure(users::configure)
-                .configure(jobs::configure)
-                .configure(roles::configure)
-                .configure(auth::configure)
-                .configure(http::configure),
-        )
-        .split_for_parts();
+    let args: Vec<String> = std::env::args().collect();
 
-    fs::write("api-service/openapi.json", a.to_pretty_json()?)?;
+    let path = if args.len() >= 2 {
+        args[1].clone()
+    } else {
+        "api-service/openapi.json".to_owned()
+    };
+
+    let (_, openapi_spec) = init_app_openapi(None, None, false);
+
+    let mut file = File::create(path)?;
+    file.write_all(openapi_spec.to_pretty_json()?.as_bytes())?;
+
     Ok(())
 }

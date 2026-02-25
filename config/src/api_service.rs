@@ -36,8 +36,8 @@ impl ApiServiceConfig {
         self.auth_refresh_ttl
     }
 
-    pub fn bind_address(&self) -> (&str, u16) {
-        (&self.host, self.port)
+    pub fn bind_address(&self) -> (String, u16) {
+        (self.host.to_owned(), self.port)
     }
 
     pub fn auth_secret(&self) -> Vec<u8> {
@@ -69,7 +69,7 @@ mod tests {
                     auth_secret: "very-secret".to_string()
                 }
             );
-            assert_eq!(config.bind_address(), ("localhost", 8000));
+            assert_eq!(config.bind_address(), ("localhost".to_owned(), 8000));
             assert_eq!(config.auth_ttl(), 3600);
             assert_eq!(config.auth_refresh_ttl(), 604800);
         })
