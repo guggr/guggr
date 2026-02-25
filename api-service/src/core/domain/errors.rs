@@ -22,10 +22,6 @@ pub enum AuthError {
     InvalidHashformat,
     #[error("Error while handling JWT: {0}")]
     JwtError(#[from] jsonwebtoken::errors::Error),
-    #[error("JWT expired")]
-    JwtExpired,
-    #[error("JTI claim not present")]
-    JtiMissing,
     #[error("Storage: {0}")]
     Storage(#[from] StorageError),
     #[error("User not authorized")]
