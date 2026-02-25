@@ -1,14 +1,19 @@
 use std::sync::Arc;
 
 use actix_web::{
-    HttpResponse, Responder, delete, error::ErrorInternalServerError, get, patch, post, web,
+    HttpMessage, HttpRequest, HttpResponse, Responder, delete, error::ErrorInternalServerError,
+    get, patch, post, web,
 };
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
-        models::job::{CreateJob, DisplayJob, UpdateJob, run::DisplayJobRun},
+        domain::errors::AuthError,
+        models::{
+            auth::UserId,
+            job::{CreateJob, DisplayJob, UpdateJob, run::DisplayJobRun},
+        },
         ports::storage::StoragePort,
     },
 };
@@ -40,10 +45,21 @@ pub fn configure(cfg: &mut ServiceConfig) {
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: web::Json<CreateJob>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    let job = web::block(move || api.job().create(body.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let job = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.job().create(None, body.into_inner());
+        }
+        api.job().create(Some(&req_userid.0), body.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(job))
 }
 
@@ -63,14 +79,25 @@ pub async fn create(
 pub async fn get(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    web::block(move || api.job().get_by_id(&path.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??
-        .map_or_else(
-            || Ok(HttpResponse::NotFound().finish()),
-            |job| Ok(HttpResponse::Ok().json(job)),
-        )
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.job().get_by_id(None, &path.into_inner());
+        }
+        api.job().get_by_id(Some(&req_userid.0), &path.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??
+    .map_or_else(
+        || Ok(HttpResponse::NotFound().finish()),
+        |job| Ok(HttpResponse::Ok().json(job)),
+    )
 }
 
 #[utoipa::path(
@@ -88,10 +115,24 @@ pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     body: web::Json<UpdateJob>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    let job = web::block(move || api.job().update(&path.into_inner(), body.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let job = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api
+                .job()
+                .update(None, &path.into_inner(), body.into_inner());
+        }
+        api.job()
+            .update(Some(&req_userid.0), &path.into_inner(), body.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(job))
 }
 
@@ -111,10 +152,21 @@ pub async fn update(
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    web::block(move || api.job().delete(&path.into_inner()))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.job().delete(None, &path.into_inner());
+        }
+        api.job().delete(Some(&req_userid.0), &path.into_inner())
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(()))
 }
 
@@ -128,10 +180,23 @@ pub async fn delete(
     tag = "jobs"
 )]
 #[get("")]
-pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<impl Responder> {
-    let jobs = web::block(move || api.job().list(5))
-        .await
-        .map_err(ErrorInternalServerError)??;
+pub async fn list(
+    api: web::Data<Arc<dyn StoragePort>>,
+    req: HttpRequest,
+) -> actix_web::Result<impl Responder> {
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let jobs = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.job().list(None, 5);
+        }
+        api.job().list(Some(&req_userid.0), 5)
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(jobs))
 }
 
@@ -151,9 +216,22 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<imp
 pub async fn list_runs(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
+    req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
-    let jobs = web::block(move || api.job().run().list_by_job_id(&path.into_inner(), 5))
-        .await
-        .map_err(ErrorInternalServerError)??;
+    let req_userid = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(AuthError::Unauthorized)?;
+    let jobs = web::block(move || {
+        if api.auth().is_owner(&req_userid.0)? {
+            return api.job().run().list_by_job_id(None, &path.into_inner(), 5);
+        }
+        api.job()
+            .run()
+            .list_by_job_id(Some(&req_userid.0), &path.into_inner(), 5)
+    })
+    .await
+    .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(jobs))
 }

@@ -1,6 +1,7 @@
 use database_client::models::{self, Job};
 use diesel::{
     PgConnection,
+    dsl::exists,
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
@@ -47,10 +48,30 @@ impl PostgresJobAdapter {
 }
 
 impl JobCrudOperations for PostgresJobAdapter {
-    fn create(&self, new_value: CreateJob) -> Result<DisplayJob, StorageError> {
-        use database_client::schema::job::dsl::job;
+    fn create(
+        &self,
+        user_id: Option<&str>,
+        new_value: CreateJob,
+    ) -> Result<DisplayJob, StorageError> {
+        use database_client::schema::{job, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        let new_job: models::Job = diesel::insert_into(job)
+        if let Some(u_id) = user_id {
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(new_value.group_id.clone()))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
+        let new_job: models::Job = diesel::insert_into(job::dsl::job)
             .values(Job::from(new_value.clone()))
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
@@ -67,11 +88,32 @@ impl JobCrudOperations for PostgresJobAdapter {
         Ok(r)
     }
 
-    fn update(&self, id: &str, update_value: UpdateJob) -> Result<DisplayJob, StorageError> {
-        use database_client::schema::job::dsl::job;
+    fn update(
+        &self,
+        user_id: Option<&str>,
+        id: &str,
+        update_value: UpdateJob,
+    ) -> Result<DisplayJob, StorageError> {
+        use database_client::schema::{job, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-
-        let updated_job: models::Job = diesel::update(job.find(id))
+        if let Some(u_id) = user_id {
+            let new_group = update_value.group_id.clone().unwrap_or(id.to_string());
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(id).and(job::id.eq(new_group)))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
+        let updated_job: models::Job = diesel::update(job::dsl::job.find(id))
             .set(UpdateableJob::from(update_value.clone()))
             .get_result(&mut conn)
             .map_err(PostgresAdapterError::from)?;
@@ -99,10 +141,33 @@ impl JobCrudOperations for PostgresJobAdapter {
         Ok(r)
     }
 
-    fn get_by_id(&self, id: &str) -> Result<Option<DisplayJob>, StorageError> {
-        use database_client::schema::{job, job_details_http, job_details_ping};
+    fn get_by_id(
+        &self,
+        user_id: Option<&str>,
+        id: &str,
+    ) -> Result<Option<DisplayJob>, StorageError> {
+        use database_client::schema::{
+            job, job_details_http, job_details_ping, user_group_mapping,
+        };
 
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+
+        if let Some(u_id) = user_id {
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(id))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
 
         let http_row: Option<(models::Job, models::JobDetailsHttp)> = job::table
             .inner_join(job_details_http::table.on(job_details_http::id.eq(job::id)))
@@ -135,27 +200,59 @@ impl JobCrudOperations for PostgresJobAdapter {
         Ok(None)
     }
 
-    fn delete(&self, id: &str) -> Result<(), StorageError> {
-        use database_client::schema::job::dsl::{self, job};
+    fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError> {
+        use database_client::schema::{job, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        diesel::delete(job.filter(dsl::id.eq(id)))
+
+        if let Some(u_id) = user_id {
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(id))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
+
+        diesel::delete(job::dsl::job.filter(job::dsl::id.eq(id)))
             .execute(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         // the detail tables have CASCADE ON DELETE set
         Ok(())
     }
 
-    fn list(&self, limit: i64) -> Result<Vec<DisplayJob>, StorageError> {
-        use database_client::schema::{job, job_details_http, job_details_ping};
+    fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<DisplayJob>, StorageError> {
+        use database_client::schema::{
+            job, job_details_http, job_details_ping, user_group_mapping,
+        };
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
-        let http_rows: Vec<(models::Job, models::JobDetailsHttp)> = job::table
-            .inner_join(job_details_http::table.on(job_details_http::id.eq(job::id)))
-            .select((job::all_columns, job_details_http::all_columns))
-            .limit(limit)
-            .load(&mut conn)
-            .map_err(PostgresAdapterError::from)?;
-
+        let http_rows: Vec<(models::Job, models::JobDetailsHttp)> = if let Some(u_id) = user_id {
+            job::table
+                .inner_join(
+                    user_group_mapping::table.on(user_group_mapping::group_id.eq(job::group_id)),
+                )
+                .filter(user_group_mapping::user_id.eq(u_id))
+                .inner_join(job_details_http::table.on(job_details_http::id.eq(job::id)))
+                .select((job::all_columns, job_details_http::all_columns))
+                .limit(limit)
+                .load(&mut conn)
+                .map_err(PostgresAdapterError::from)?
+        } else {
+            job::table
+                .inner_join(job_details_http::table.on(job_details_http::id.eq(job::id)))
+                .select((job::all_columns, job_details_http::all_columns))
+                .limit(limit)
+                .load(&mut conn)
+                .map_err(PostgresAdapterError::from)?
+        };
         if !http_rows.is_empty() {
             return Ok(http_rows
                 .into_iter()
@@ -168,12 +265,25 @@ impl JobCrudOperations for PostgresJobAdapter {
                 .collect());
         }
 
-        let ping_rows: Vec<(models::Job, models::JobDetailsPing)> = job::table
-            .inner_join(job_details_ping::table.on(job_details_ping::id.eq(job::id)))
-            .select((job::all_columns, job_details_ping::all_columns))
-            .limit(limit)
-            .load(&mut conn)
-            .map_err(PostgresAdapterError::from)?;
+        let ping_rows: Vec<(models::Job, models::JobDetailsPing)> = if let Some(u_id) = user_id {
+            job::table
+                .inner_join(
+                    user_group_mapping::table.on(user_group_mapping::group_id.eq(job::group_id)),
+                )
+                .filter(user_group_mapping::user_id.eq(u_id))
+                .inner_join(job_details_ping::table.on(job_details_ping::id.eq(job::id)))
+                .select((job::all_columns, job_details_ping::all_columns))
+                .limit(limit)
+                .load(&mut conn)
+                .map_err(PostgresAdapterError::from)?
+        } else {
+            job::table
+                .inner_join(job_details_ping::table.on(job_details_ping::id.eq(job::id)))
+                .select((job::all_columns, job_details_ping::all_columns))
+                .limit(limit)
+                .load(&mut conn)
+                .map_err(PostgresAdapterError::from)?
+        };
 
         if !ping_rows.is_empty() {
             return Ok(ping_rows

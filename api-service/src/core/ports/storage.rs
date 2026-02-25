@@ -27,18 +27,40 @@ pub trait RestrictedCrudOperations<N, U, D> {
 }
 
 pub trait JobCrudOperations {
-    fn create(&self, new_value: CreateJob) -> Result<DisplayJob, StorageError>;
-    fn update(&self, id: &str, update_value: UpdateJob) -> Result<DisplayJob, StorageError>;
-    fn get_by_id(&self, id: &str) -> Result<Option<DisplayJob>, StorageError>;
-    fn delete(&self, id: &str) -> Result<(), StorageError>;
-    fn list(&self, limit: i64) -> Result<Vec<DisplayJob>, StorageError>;
+    fn create(
+        &self,
+        user_id: Option<&str>,
+        new_value: CreateJob,
+    ) -> Result<DisplayJob, StorageError>;
+    fn update(
+        &self,
+        user_id: Option<&str>,
+        id: &str,
+        update_value: UpdateJob,
+    ) -> Result<DisplayJob, StorageError>;
+    fn get_by_id(
+        &self,
+        user_id: Option<&str>,
+        id: &str,
+    ) -> Result<Option<DisplayJob>, StorageError>;
+    fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError>;
+    fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<DisplayJob>, StorageError>;
 
     fn run(&self) -> &(dyn JobRunCrudOperations + Send + Sync);
 }
 
 pub trait JobRunCrudOperations {
-    fn get_by_job_id(&self, job_id: &str) -> Result<Option<DisplayJobRun>, StorageError>;
-    fn list_by_job_id(&self, job_id: &str, limit: i64) -> Result<Vec<DisplayJobRun>, StorageError>;
+    fn get_by_job_id(
+        &self,
+        user_id: Option<&str>,
+        job_id: &str,
+    ) -> Result<Option<DisplayJobRun>, StorageError>;
+    fn list_by_job_id(
+        &self,
+        user_id: Option<&str>,
+        job_id: &str,
+        limit: i64,
+    ) -> Result<Vec<DisplayJobRun>, StorageError>;
 }
 
 pub trait JobDetailOperations<U, D> {
@@ -275,31 +297,53 @@ pub mod tests {
         }
     }
     impl JobCrudOperations for MockStoreJob {
-        fn create(&self, _new_value: CreateJob) -> Result<DisplayJob, StorageError> {
+        fn create(
+            &self,
+            _user_id: Option<&str>,
+            _new_value: CreateJob,
+        ) -> Result<DisplayJob, StorageError> {
             todo!()
         }
-        fn delete(&self, _id: &str) -> Result<(), StorageError> {
+        fn delete(&self, _user_id: Option<&str>, _id: &str) -> Result<(), StorageError> {
             todo!()
         }
-        fn get_by_id(&self, _id: &str) -> Result<Option<DisplayJob>, StorageError> {
+        fn get_by_id(
+            &self,
+            _user_id: Option<&str>,
+            _id: &str,
+        ) -> Result<Option<DisplayJob>, StorageError> {
             todo!()
         }
-        fn list(&self, _limit: i64) -> Result<Vec<DisplayJob>, StorageError> {
+        fn list(
+            &self,
+            _user_id: Option<&str>,
+            _limit: i64,
+        ) -> Result<Vec<DisplayJob>, StorageError> {
             todo!()
         }
         fn run(&self) -> &(dyn JobRunCrudOperations + Send + Sync) {
             &self.run
         }
-        fn update(&self, _id: &str, _update_value: UpdateJob) -> Result<DisplayJob, StorageError> {
+        fn update(
+            &self,
+            _user_id: Option<&str>,
+            _id: &str,
+            _update_value: UpdateJob,
+        ) -> Result<DisplayJob, StorageError> {
             todo!()
         }
     }
     impl JobRunCrudOperations for MockStoreJobRun {
-        fn get_by_job_id(&self, _job_id: &str) -> Result<Option<DisplayJobRun>, StorageError> {
+        fn get_by_job_id(
+            &self,
+            _user_id: Option<&str>,
+            _job_id: &str,
+        ) -> Result<Option<DisplayJobRun>, StorageError> {
             todo!()
         }
         fn list_by_job_id(
             &self,
+            _user_id: Option<&str>,
             _job_id: &str,
             _limit: i64,
         ) -> Result<Vec<DisplayJobRun>, StorageError> {

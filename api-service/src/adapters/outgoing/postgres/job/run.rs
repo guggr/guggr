@@ -1,6 +1,7 @@
 use database_client::models;
 use diesel::{
     PgConnection,
+    dsl::exists,
     prelude::*,
     r2d2::{ConnectionManager, Pool},
 };
@@ -29,9 +30,32 @@ impl PostgresJobRunAdapter {
 }
 
 impl JobRunCrudOperations for PostgresJobRunAdapter {
-    fn get_by_job_id(&self, job_id: &str) -> Result<Option<DisplayJobRun>, StorageError> {
-        use database_client::schema::{job_result_http, job_result_ping, job_runs};
+    fn get_by_job_id(
+        &self,
+        user_id: Option<&str>,
+        job_id: &str,
+    ) -> Result<Option<DisplayJobRun>, StorageError> {
+        use database_client::schema::{
+            job, job_result_http, job_result_ping, job_runs, user_group_mapping,
+        };
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
+
+        if let Some(u_id) = user_id {
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(job_id))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
 
         let http_row: Option<(models::JobRun, models::JobResultHttp)> = job_runs::table
             .inner_join(job_result_http::table.on(job_result_http::id.eq(job_runs::id)))
@@ -62,10 +86,33 @@ impl JobRunCrudOperations for PostgresJobRunAdapter {
         }
         Ok(None)
     }
-    fn list_by_job_id(&self, job_id: &str, limit: i64) -> Result<Vec<DisplayJobRun>, StorageError> {
-        use database_client::schema::{job_result_http, job_result_ping, job_runs};
+    fn list_by_job_id(
+        &self,
+        user_id: Option<&str>,
+        job_id: &str,
+        limit: i64,
+    ) -> Result<Vec<DisplayJobRun>, StorageError> {
+        use database_client::schema::{
+            job, job_result_http, job_result_ping, job_runs, user_group_mapping,
+        };
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
+        if let Some(u_id) = user_id {
+            let allowed: bool = diesel::select(exists(
+                job::table
+                    .inner_join(
+                        user_group_mapping::table
+                            .on(user_group_mapping::group_id.eq(job::group_id)),
+                    )
+                    .filter(job::id.eq(job_id))
+                    .filter(user_group_mapping::user_id.eq(u_id)),
+            ))
+            .get_result(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+            if !allowed {
+                return Err(StorageError::Unauthorized);
+            }
+        };
         let http_rows: Vec<(models::JobRun, models::JobResultHttp)> = job_runs::table
             .inner_join(job_result_http::table.on(job_result_http::id.eq(job_runs::id)))
             .filter(job_runs::job_id.eq(job_id))
