@@ -17,6 +17,7 @@ use utoipa::ToSchema;
     Validate,
     Default,
 )]
+/// sent to the database for creating a new group
 pub struct CreateGroup {
     #[garde(ascii, length(min = 1))]
     #[schema(min_length = 1)]
@@ -26,6 +27,7 @@ pub struct CreateGroup {
 #[derive(
     Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
 )]
+/// returned from the database when displaying a group
 pub struct DisplayGroup {
     pub id: String,
     pub name: String,
@@ -45,6 +47,7 @@ pub struct DisplayGroup {
     Default,
 )]
 #[diesel(table_name = group)]
+/// sent to the database when updating a group
 pub struct UpdateGroup {
     #[garde(ascii, length(min = 1))]
     #[schema(min_length = 1)]

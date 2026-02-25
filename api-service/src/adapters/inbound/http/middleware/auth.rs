@@ -19,7 +19,8 @@ use crate::core::{
     models::auth::UserId,
     ports::storage::StoragePort,
 };
-
+/// return a 401 response with the `www-authenticate` header having the value
+/// `Bearer`
 fn unauthorized_with_bearer() -> actix_web::Error {
     let resp = HttpResponse::Unauthorized()
         .insert_header((header::WWW_AUTHENTICATE, "Bearer"))
@@ -28,6 +29,7 @@ fn unauthorized_with_bearer() -> actix_web::Error {
     error::InternalError::from_response("", resp).into()
 }
 
+/// Is the `AuthMiddleware` factory and builds it
 pub struct Auth;
 
 impl<S, B> Transform<S, ServiceRequest> for Auth
@@ -47,6 +49,7 @@ where
     }
 }
 
+/// Checks the supplied JWT token and allows or denies access
 pub struct AuthMiddleware<S> {
     service: S,
 }

@@ -17,6 +17,7 @@ use utoipa::ToSchema;
     Validate,
     Default,
 )]
+/// sent to the database for creating a new role
 pub struct CreateRole {
     #[garde(ascii, length(min = 1))]
     #[schema(min_length = 1)]
@@ -26,6 +27,7 @@ pub struct CreateRole {
 #[derive(
     Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
 )]
+/// returned from the database when displaying a role
 pub struct DisplayRole {
     pub id: String,
     pub name: String,
@@ -45,6 +47,7 @@ pub struct DisplayRole {
     Default,
 )]
 #[diesel(table_name = role)]
+/// sent to the database when updating a role
 pub struct UpdateRole {
     #[garde(ascii, length(min = 1))]
     #[schema(min_length = 1)]

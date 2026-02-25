@@ -19,6 +19,7 @@ use crate::{
     },
 };
 
+/// configures all paths under the subpath `/groups`
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/groups")
         .wrap(Auth)
@@ -43,6 +44,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     tag = "groups"
 )]
 #[post("")]
+/// create endpoint for groups
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: Json<CreateGroup>,
@@ -74,6 +76,7 @@ pub async fn create(
     tag = "groups"
 )]
 #[get("")]
+/// list endpoint for groups
 pub async fn list(
     api: web::Data<Arc<dyn StoragePort>>,
     req: HttpRequest,
@@ -108,6 +111,7 @@ pub async fn list(
     tag = "groups"
 )]
 #[get("/{id}")]
+/// get endpoint for groups
 pub async fn get(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -149,6 +153,7 @@ pub async fn get(
     tag = "groups"
 )]
 #[patch("/{id}")]
+/// update endpoint for groups
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -187,6 +192,7 @@ pub async fn update(
     tag = "groups"
 )]
 #[delete("/{id}")]
+/// delete endpoint for groups
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,

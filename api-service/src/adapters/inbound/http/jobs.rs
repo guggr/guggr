@@ -18,6 +18,7 @@ use crate::{
     },
 };
 
+/// configures all paths under the subpath `/jobs`
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/jobs")
         .wrap(Auth)
@@ -42,6 +43,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     tag = "jobs"
 )]
 #[post("")]
+/// create endpoint for jobs
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: web::Json<CreateJob>,
@@ -76,6 +78,7 @@ pub async fn create(
     tag = "jobs"
 )]
 #[get("/{id}")]
+/// get endpoint for jobs
 pub async fn get(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -111,6 +114,7 @@ pub async fn get(
     tag = "jobs"
 )]
 #[patch("/{id}")]
+/// update endpoint for jobs
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     body: web::Json<UpdateJob>,
@@ -149,6 +153,7 @@ pub async fn update(
     tag = "jobs"
 )]
 #[delete("/{id}")]
+/// delete endpoint for jobs
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -180,6 +185,7 @@ pub async fn delete(
     tag = "jobs"
 )]
 #[get("")]
+/// list endpoint for jobs
 pub async fn list(
     api: web::Data<Arc<dyn StoragePort>>,
     req: HttpRequest,
@@ -213,6 +219,7 @@ pub async fn list(
     tag = "jobs"
 )]
 #[get("/{id}/runs")]
+/// list endpoint for job runs
 pub async fn list_runs(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,

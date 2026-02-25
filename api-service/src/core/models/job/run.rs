@@ -9,6 +9,7 @@ use crate::core::models::job::{
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, Serialize, ToSchema)]
+/// returned from the database when displaying a jobrun
 pub struct DisplayJobRun {
     pub id: String,
     pub job_id: String,
@@ -20,6 +21,7 @@ pub struct DisplayJobRun {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, Serialize, ToSchema)]
+/// returned from the database when displaying a jobrun with its details
 pub enum DisplayJobRunDetails {
     Http(DisplayJobResultHttp),
     Ping(DisplayJobResultPing),

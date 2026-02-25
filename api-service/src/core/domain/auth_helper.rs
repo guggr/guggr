@@ -15,6 +15,7 @@ use crate::core::{
     ports::storage::StoragePort,
 };
 
+/// JWT Claims for the access token
 #[derive(Serialize, Deserialize, Debug)]
 struct Claims {
     sub: String,
@@ -33,6 +34,7 @@ impl Claims {
     }
 }
 
+/// JWT Claims for the refresh token
 #[derive(Serialize, Deserialize, Debug)]
 struct RefreshClaims {
     sub: String,
@@ -66,7 +68,9 @@ pub fn get_unverified_user_id(token: &str) -> Result<String, AuthError> {
     Ok(unverified_claims.claims.sub)
 }
 
+/// JWT Signer
 pub struct JwtSigner {
+    /// key that is made out of `global-secret || user-secret`
     key: Vec<u8>,
 }
 
@@ -91,6 +95,7 @@ impl JwtSigner {
         v
     }
 
+    /// Create and sign a new JWT Access and Refresh token
     pub fn create_token(
         &self,
         user_id: &str,
@@ -114,6 +119,7 @@ impl JwtSigner {
         })
     }
 
+    /// Get a new Access and Refresh token from an old Refresh token
     pub fn refresh_token(
         &self,
         config: &ApiServiceConfig,
@@ -131,6 +137,7 @@ impl JwtSigner {
         Ok(new_token)
     }
 
+    /// Invalidate an older Refresh token
     pub fn invalidate_token(
         &self,
         storage: &Arc<dyn StoragePort>,
@@ -144,6 +151,7 @@ impl JwtSigner {
         Ok(())
     }
 
+    /// Verify an access token
     pub fn verify_access_token(&self, token: &str) -> Result<(), AuthError> {
         let dk = self.get_decoding_key();
         decode::<Claims>(&token, &dk, &self.get_validation())?;

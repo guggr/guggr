@@ -14,6 +14,7 @@ use crate::{
     },
 };
 
+/// configures all paths under the subpath `/users`
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/users")
         .wrap(Auth)
@@ -38,6 +39,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     tag = "users"
 )]
 #[post("")]
+/// create endpoint for users
 pub async fn create(
     api: web::Data<Arc<dyn StoragePort>>,
     body: Json<CreateUser>,
@@ -58,6 +60,7 @@ pub async fn create(
     tag = "users"
 )]
 #[get("")]
+/// list endpoint for users
 pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<impl Responder> {
     let users = web::block(move || api.user().list(5))
         .await
@@ -78,6 +81,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<imp
     tag = "users"
 )]
 #[get("/{id}")]
+/// get endpoint for users
 pub async fn get(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -107,6 +111,7 @@ pub async fn get(
     tag = "users"
 )]
 #[patch("/{id}")]
+/// update endpoint for users
 pub async fn update(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,
@@ -131,6 +136,7 @@ pub async fn update(
     tag = "users"
 )]
 #[delete("/{id}")]
+/// delete endpoint for users
 pub async fn delete(
     api: web::Data<Arc<dyn StoragePort>>,
     path: web::Path<String>,

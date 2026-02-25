@@ -7,6 +7,7 @@ use utoipa::ToSchema;
 #[derive(
     Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Default, Deserialize,
 )]
+/// sent to the database for creating a new job detail
 pub struct CreateJobDetailsPing {
     pub host: String,
 }
@@ -14,6 +15,7 @@ pub struct CreateJobDetailsPing {
 #[derive(
     Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Default, Serialize,
 )]
+/// returned from the database when displaying a job detail
 pub struct DisplayJobDetailsPing {
     pub id: String,
     pub host: String,

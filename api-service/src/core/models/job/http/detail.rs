@@ -7,6 +7,7 @@ use utoipa::ToSchema;
 #[derive(
     Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Default, Deserialize,
 )]
+/// sent to the database for creating a new job detail
 pub struct CreateJobDetailsHttp {
     pub url: String,
 }
@@ -14,6 +15,7 @@ pub struct CreateJobDetailsHttp {
 #[derive(
     Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Default, Serialize,
 )]
+/// returned from the database when displaying a job detail
 pub struct DisplayJobDetailsHttp {
     pub id: String,
     pub url: String,

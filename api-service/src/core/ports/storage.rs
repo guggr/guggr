@@ -9,46 +9,126 @@ use crate::core::{
     },
 };
 
+/// Adds generitc CRUD Operations for the following DTO models:
 /// `N`: `NewStruct`, `U`: `UpdateStruct`, `D`: `DisplayStruct`
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
 pub trait CrudOperations<N, U, D> {
+    /// creates the `NewStruct` and returns the `DisplayStruct`
     fn create(&self, new_value: N) -> Result<D, StorageError>;
+    /// updates with UpdateStruct and returns the new `DisplayStruct`
     fn update(&self, id: &str, update_value: U) -> Result<D, StorageError>;
+    /// gets a `DisplayStruct` and returns it if it's found
     fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
+    /// deletes a record based on the `id`
     fn delete(&self, id: &str) -> Result<(), StorageError>;
+    /// lists the `DisplayStruct` with the specified limit
     fn list(&self, limit: i64) -> Result<Vec<D>, StorageError>;
 }
 
+/// Adds generitc restricted CRUD Operations for the following DTO models:
+/// `N`: `NewStruct`, `U`: `UpdateStruct`, `D`: `DisplayStruct`
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
+/// - the user does not have permissions
 pub trait RestrictedCrudOperations<N, U, D> {
+    /// creates the `NewStruct` and returns the `DisplayStruct`
     fn create(&self, new_value: N) -> Result<D, StorageError>;
+    /// updates with the `UpdateStruct` and returns the new `DisplayStruct`
+    /// either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn update(&self, user_id: Option<&str>, id: &str, update_value: U) -> Result<D, StorageError>;
+    /// gets a `DisplayStruct` and returns it if it's found either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn get_by_id(&self, user_id: Option<&str>, id: &str) -> Result<Option<D>, StorageError>;
+    /// deletes a record based on the `id` either if:
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError>;
+    /// lists the `DisplayStruct` with the specified limit either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<D>, StorageError>;
 }
 
+/// Adds restricted [`database_client::models::Job`] CRUD Operations:
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
+/// - the user does not have permissions
 pub trait JobCrudOperations {
+    /// creates the [`CreateJob`] and returns the new [`DisplayJob`] either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   will own that record
+    /// - no `user_id` is supplied
     fn create(
         &self,
         user_id: Option<&str>,
         new_value: CreateJob,
     ) -> Result<DisplayJob, StorageError>;
+    /// updates with the [`UpdateJob`] and returns the new [`DisplayJob`] either
+    /// if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn update(
         &self,
         user_id: Option<&str>,
         id: &str,
         update_value: UpdateJob,
     ) -> Result<DisplayJob, StorageError>;
+    /// gets a [`DisplayJob`] and returns it if it's found either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn get_by_id(
         &self,
         user_id: Option<&str>,
         id: &str,
     ) -> Result<Option<DisplayJob>, StorageError>;
+    /// deletes a record based on the `id` either if:
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError>;
+    /// lists the [`DisplayJob`] with the specified limit either if
+    /// - a `user_id` is supplied, and the `user_id` is part of the group that
+    ///   owns that record
+    /// - no `user_id` is supplied
     fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<DisplayJob>, StorageError>;
 
     fn run(&self) -> &(dyn JobRunCrudOperations + Send + Sync);
 }
 
+/// Adds restricted [`database_client::models::JobRun`] get/list Operations:
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
+/// - the user does not have permissions
 pub trait JobRunCrudOperations {
     fn get_by_job_id(
         &self,
@@ -63,22 +143,51 @@ pub trait JobRunCrudOperations {
     ) -> Result<Vec<DisplayJobRun>, StorageError>;
 }
 
+/// Adds `JobDetails` CRU Operations for the following DTO models:
+/// `U`: `UpdateStruct`, `D`: `DisplayStruct`
+/// (delete is handled by the database due to the FK CASCADE ON DELETE
+/// constraint)
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
+/// - the user does not have permissions
 pub trait JobDetailOperations<U, D> {
     fn create(&self, new_value: D) -> Result<D, StorageError>;
     fn get_by_id(&self, id: &str) -> Result<Option<D>, StorageError>;
     fn update(&self, id: &str, update_value: U) -> Result<D, StorageError>;
 }
 
+/// Adds Auth relevant Operations:
+///
+/// # Errors
+/// Will return [`StorageError`] if either
+/// - the database is unavailable
+/// - no record was found
+/// - the timestamp could not be converted
+/// - an internal error occurred
 pub trait AuthOperations {
+    /// get `UserAuth` by a user's email
     fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError>;
+    /// get `UserAuthJwt` by a user's id
     fn get_user_jwt_secrets(&self, id: &str) -> Result<UserAuthJwt, StorageError>;
+    /// create a new refresh token record in the database
     fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
+    /// get a `DisplayRefreshToken` by a jti claim
     fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError>;
+    /// delete a refresh token by a jti claim
     fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError>;
+    /// get all `DisplayRole` by a user's id
     fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, StorageError>;
+    /// check whether the user has the owner role
     fn is_owner(&self, id: &str) -> Result<bool, StorageError>;
 }
 
+/// Combines the [`RestrictedCrudOperations`], [`CrudOperations`],
+/// [`AuthOperations`] and [`JobCrudOperations`] traits into a single trait
 pub trait StoragePort: Send + Sync {
     fn group(
         &self,

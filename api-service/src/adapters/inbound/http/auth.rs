@@ -13,6 +13,7 @@ use crate::core::{
     ports::storage::StoragePort,
 };
 
+/// configures all paths under the subpath `/auth`
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/auth")
         .service(login)
@@ -50,6 +51,7 @@ pub fn _get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
     tag = "auth"
 )]
 #[post("/login")]
+/// login endpoint
 pub async fn login(
     api: web::Data<Arc<dyn StoragePort>>,
     config: web::Data<ApiServiceConfig>,
@@ -84,6 +86,7 @@ pub async fn login(
     tag = "auth"
 )]
 #[post("/token/refresh")]
+/// token refresh endpoint
 pub async fn token_refresh(
     api: web::Data<Arc<dyn StoragePort>>,
     config: web::Data<ApiServiceConfig>,
@@ -113,6 +116,7 @@ pub async fn token_refresh(
     tag = "auth"
 )]
 #[post("/logout")]
+/// logout endpoint
 pub async fn logout(
     api: web::Data<Arc<dyn StoragePort>>,
     config: web::Data<ApiServiceConfig>,

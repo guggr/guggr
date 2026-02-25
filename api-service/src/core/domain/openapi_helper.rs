@@ -11,6 +11,7 @@ pub struct ApiDoc;
 
 pub struct JwtSecurityScheme;
 
+/// Adds the security scheme `bearerAuth` to the openapi spec
 impl Modify for JwtSecurityScheme {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
         if let Some(components) = openapi.components.as_mut() {

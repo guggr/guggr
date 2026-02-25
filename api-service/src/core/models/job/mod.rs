@@ -15,6 +15,7 @@ pub mod ping;
 pub mod run;
 #[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
+/// sent to the database for creating a new job
 pub struct CreateJob {
     pub name: String,
     pub job_type_id: String,
@@ -27,12 +28,14 @@ pub struct CreateJob {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Deserialize)]
+/// sent to the database for creating a new job and its details
 pub enum CreateJobDetails {
     Http(CreateJobDetailsHttp),
     Ping(CreateJobDetailsPing),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema)]
+/// returned from the database when displaying a job
 pub struct DisplayJob {
     pub id: String,
     pub name: String,
@@ -46,12 +49,14 @@ pub struct DisplayJob {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
+/// returned from the database when displaying a job and its details
 pub enum DisplayJobDetails {
     Http(DisplayJobDetailsHttp),
     Ping(DisplayJobDetailsPing),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
+/// request by a user to update a job
 pub struct UpdateJob {
     pub id: Option<String>,
     pub name: Option<String>,
@@ -65,6 +70,7 @@ pub struct UpdateJob {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
+/// request by a user to update a job and its details
 pub enum UpdateJobDetails {
     Http(UpdateJobDetailsHttp),
     Ping(UpdateJobDetailsPing),
@@ -72,6 +78,7 @@ pub enum UpdateJobDetails {
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, AsChangeset)]
 #[diesel(table_name = job)]
+/// sent to the database when updating a job
 pub struct UpdateableJob {
     pub id: Option<String>,
     pub name: Option<String>,

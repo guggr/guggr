@@ -15,6 +15,7 @@
 		"/api/v1/auth/login": {
 			"post": {
 				"tags": ["auth"],
+				"summary": "login endpoint",
 				"operationId": "auth_login",
 				"requestBody": {
 					"content": {
@@ -49,6 +50,7 @@
 		"/api/v1/auth/logout": {
 			"post": {
 				"tags": ["auth"],
+				"summary": "logout endpoint",
 				"operationId": "auth_logout",
 				"requestBody": {
 					"content": {
@@ -73,6 +75,7 @@
 		"/api/v1/auth/token/refresh": {
 			"post": {
 				"tags": ["auth"],
+				"summary": "token refresh endpoint",
 				"operationId": "auth_refresh_token",
 				"requestBody": {
 					"content": {
@@ -107,6 +110,7 @@
 		"/api/v1/groups": {
 			"get": {
 				"tags": ["groups"],
+				"summary": "list endpoint for groups",
 				"operationId": "list_group",
 				"responses": {
 					"200": {
@@ -134,6 +138,7 @@
 			},
 			"post": {
 				"tags": ["groups"],
+				"summary": "create endpoint for groups",
 				"operationId": "create_group",
 				"requestBody": {
 					"content": {
@@ -173,6 +178,7 @@
 		"/api/v1/groups/{id}": {
 			"get": {
 				"tags": ["groups"],
+				"summary": "get endpoint for groups",
 				"operationId": "get_group",
 				"parameters": [
 					{
@@ -211,6 +217,7 @@
 			},
 			"delete": {
 				"tags": ["groups"],
+				"summary": "delete endpoint for groups",
 				"operationId": "delete_group",
 				"parameters": [
 					{
@@ -239,6 +246,7 @@
 			},
 			"patch": {
 				"tags": ["groups"],
+				"summary": "update endpoint for groups",
 				"operationId": "update_group",
 				"parameters": [
 					{
@@ -289,6 +297,7 @@
 		"/api/v1/jobs": {
 			"get": {
 				"tags": ["jobs"],
+				"summary": "list endpoint for jobs",
 				"operationId": "list_job",
 				"responses": {
 					"200": {
@@ -316,6 +325,7 @@
 			},
 			"post": {
 				"tags": ["jobs"],
+				"summary": "create endpoint for jobs",
 				"operationId": "create_job",
 				"requestBody": {
 					"content": {
@@ -352,6 +362,7 @@
 		"/api/v1/jobs/{id}": {
 			"get": {
 				"tags": ["jobs"],
+				"summary": "get endpoint for jobs",
 				"operationId": "get_job",
 				"parameters": [
 					{
@@ -387,6 +398,7 @@
 			},
 			"delete": {
 				"tags": ["jobs"],
+				"summary": "delete endpoint for jobs",
 				"operationId": "delete_job",
 				"parameters": [
 					{
@@ -415,6 +427,7 @@
 			},
 			"patch": {
 				"tags": ["jobs"],
+				"summary": "update endpoint for jobs",
 				"operationId": "update_job",
 				"parameters": [
 					{
@@ -461,6 +474,7 @@
 		"/api/v1/jobs/{id}/runs": {
 			"get": {
 				"tags": ["jobs"],
+				"summary": "list endpoint for job runs",
 				"operationId": "list_job_runs",
 				"parameters": [
 					{
@@ -522,6 +536,7 @@
 		"/api/v1/roles": {
 			"get": {
 				"tags": ["roles"],
+				"summary": "list endpoint for roles",
 				"operationId": "list_role",
 				"responses": {
 					"200": {
@@ -549,6 +564,7 @@
 			},
 			"post": {
 				"tags": ["roles"],
+				"summary": "create endpoint for roles",
 				"operationId": "create_role",
 				"requestBody": {
 					"content": {
@@ -588,6 +604,7 @@
 		"/api/v1/roles/{id}": {
 			"get": {
 				"tags": ["roles"],
+				"summary": "get endpoint for roles",
 				"operationId": "get_role",
 				"parameters": [
 					{
@@ -623,6 +640,7 @@
 			},
 			"delete": {
 				"tags": ["roles"],
+				"summary": "delete endpoint for roles",
 				"operationId": "delete_role",
 				"parameters": [
 					{
@@ -651,6 +669,7 @@
 			},
 			"patch": {
 				"tags": ["roles"],
+				"summary": "update endpoint for roles",
 				"operationId": "update_role",
 				"parameters": [
 					{
@@ -712,6 +731,7 @@
 		"/api/v1/users": {
 			"get": {
 				"tags": ["users"],
+				"summary": "list endpoint for users",
 				"operationId": "list_user",
 				"responses": {
 					"200": {
@@ -739,6 +759,7 @@
 			},
 			"post": {
 				"tags": ["users"],
+				"summary": "create endpoint for users",
 				"operationId": "create_user",
 				"requestBody": {
 					"content": {
@@ -778,6 +799,7 @@
 		"/api/v1/users/{id}": {
 			"get": {
 				"tags": ["users"],
+				"summary": "get endpoint for users",
 				"operationId": "get_user",
 				"parameters": [
 					{
@@ -813,6 +835,7 @@
 			},
 			"delete": {
 				"tags": ["users"],
+				"summary": "delete endpoint for users",
 				"operationId": "delete_user",
 				"parameters": [
 					{
@@ -841,6 +864,7 @@
 			},
 			"patch": {
 				"tags": ["users"],
+				"summary": "update endpoint for users",
 				"operationId": "update_user",
 				"parameters": [
 					{
@@ -893,6 +917,7 @@
 		"schemas": {
 			"CreateGroup": {
 				"type": "object",
+				"description": "sent to the database for creating a new group",
 				"required": ["name"],
 				"properties": {
 					"name": {
@@ -903,6 +928,7 @@
 			},
 			"CreateJob": {
 				"type": "object",
+				"description": "sent to the database for creating a new job",
 				"required": ["name", "job_type_id", "group_id", "notify_users", "run_every", "details"],
 				"properties": {
 					"custom_notification": {
@@ -948,10 +974,12 @@
 							}
 						}
 					}
-				]
+				],
+				"description": "sent to the database for creating a new job and its details"
 			},
 			"CreateJobDetailsHttp": {
 				"type": "object",
+				"description": "sent to the database for creating a new job detail",
 				"required": ["url"],
 				"properties": {
 					"url": {
@@ -961,6 +989,7 @@
 			},
 			"CreateJobDetailsPing": {
 				"type": "object",
+				"description": "sent to the database for creating a new job detail",
 				"required": ["host"],
 				"properties": {
 					"host": {
@@ -970,6 +999,7 @@
 			},
 			"CreateRole": {
 				"type": "object",
+				"description": "sent to the database for creating a new role",
 				"required": ["name"],
 				"properties": {
 					"name": {
@@ -980,6 +1010,7 @@
 			},
 			"CreateUser": {
 				"type": "object",
+				"description": "sent to the database for creating a new user",
 				"required": ["name", "email", "password"],
 				"properties": {
 					"email": {
@@ -999,6 +1030,7 @@
 			},
 			"DisplayGroup": {
 				"type": "object",
+				"description": "returned from the database when displaying a group",
 				"required": ["id", "name"],
 				"properties": {
 					"id": {
@@ -1011,6 +1043,7 @@
 			},
 			"DisplayJob": {
 				"type": "object",
+				"description": "returned from the database when displaying a job",
 				"required": [
 					"id",
 					"name",
@@ -1071,10 +1104,12 @@
 							}
 						}
 					}
-				]
+				],
+				"description": "returned from the database when displaying a job and its details"
 			},
 			"DisplayJobDetailsHttp": {
 				"type": "object",
+				"description": "returned from the database when displaying a job detail",
 				"required": ["id", "url"],
 				"properties": {
 					"id": {
@@ -1087,6 +1122,7 @@
 			},
 			"DisplayJobDetailsPing": {
 				"type": "object",
+				"description": "returned from the database when displaying a job detail",
 				"required": ["id", "host"],
 				"properties": {
 					"host": {
@@ -1099,6 +1135,7 @@
 			},
 			"DisplayJobResultHttp": {
 				"type": "object",
+				"description": "returned from the database when displaying a job result",
 				"required": ["id", "ip_address", "status_code", "latency", "payload"],
 				"properties": {
 					"id": {
@@ -1129,6 +1166,7 @@
 			},
 			"DisplayJobResultPing": {
 				"type": "object",
+				"description": "returned from the database when displaying a job result",
 				"required": ["id", "ip_address", "latency"],
 				"properties": {
 					"id": {
@@ -1147,6 +1185,7 @@
 			},
 			"DisplayJobRun": {
 				"type": "object",
+				"description": "returned from the database when displaying a jobrun",
 				"required": [
 					"id",
 					"job_id",
@@ -1201,10 +1240,12 @@
 							}
 						}
 					}
-				]
+				],
+				"description": "returned from the database when displaying a jobrun with its details"
 			},
 			"DisplayRole": {
 				"type": "object",
+				"description": "returned from the database when displaying a role",
 				"required": ["id", "name"],
 				"properties": {
 					"id": {
@@ -1217,6 +1258,7 @@
 			},
 			"DisplayUser": {
 				"type": "object",
+				"description": "returned from the database when displaying a user",
 				"required": ["id", "name", "email"],
 				"properties": {
 					"email": {
@@ -1232,6 +1274,7 @@
 			},
 			"LoginRequest": {
 				"type": "object",
+				"description": "request by the user to login",
 				"required": ["email", "password"],
 				"properties": {
 					"email": {
@@ -1244,6 +1287,7 @@
 			},
 			"TokenRefreshRequest": {
 				"type": "object",
+				"description": "request by the user to get a new [`TokenResponse`]",
 				"required": ["refresh_token"],
 				"properties": {
 					"refresh_token": {
@@ -1253,6 +1297,7 @@
 			},
 			"TokenResponse": {
 				"type": "object",
+				"description": "returned to the user on login / token refresh",
 				"required": ["access_token", "refresh_token"],
 				"properties": {
 					"access_token": {
@@ -1265,6 +1310,7 @@
 			},
 			"UpdateGroup": {
 				"type": "object",
+				"description": "sent to the database when updating a group",
 				"properties": {
 					"name": {
 						"type": ["string", "null"],
@@ -1274,6 +1320,7 @@
 			},
 			"UpdateJob": {
 				"type": "object",
+				"description": "request by a user to update a job",
 				"properties": {
 					"custom_notification": {
 						"type": ["string", "null"]
@@ -1332,7 +1379,8 @@
 							}
 						}
 					}
-				]
+				],
+				"description": "request by a user to update a job and its details"
 			},
 			"UpdateJobDetailsHttp": {
 				"type": "object",
@@ -1352,6 +1400,7 @@
 			},
 			"UpdateRole": {
 				"type": "object",
+				"description": "sent to the database when updating a role",
 				"properties": {
 					"name": {
 						"type": ["string", "null"],
@@ -1361,6 +1410,7 @@
 			},
 			"UpdateUser": {
 				"type": "object",
+				"description": "sent to the database when updating a user",
 				"properties": {
 					"email": {
 						"type": ["string", "null"],
