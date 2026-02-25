@@ -21,17 +21,13 @@ async fn main() -> Result<()> {
     let postgres: Arc<dyn StoragePort> =
         Arc::from(PostgresAdapter::new(&postgres_config.connection_url())?);
 
-    HttpServer::new(move || {
-        init_app_openapi(
-            Some(Data::new(postgres.clone())),
-            Some(Data::new(config.clone())),
-            true,
-        )
-        .0
-    })
-    .bind(bind_address)?
-    .run()
-    .await?;
+    let api = Data::new(postgres);
+    let dconfig = Data::new(config);
+
+    HttpServer::new(move || init_app_openapi(Some(api.clone()), Some(dconfig.clone()), true).0)
+        .bind(bind_address)?
+        .run()
+        .await?;
 
     Ok(())
 }
