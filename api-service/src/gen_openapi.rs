@@ -11,10 +11,10 @@ fn main() -> anyhow::Result<()> {
         "api-service/openapi.json".to_owned()
     };
 
-    let (_, a) = init_app_openapi(None, None, false);
+    let (_, openapi_spec) = init_app_openapi(None, None, false);
 
     let mut file = File::create(path)?;
-    file.write_all(a.to_pretty_json()?.as_bytes())?;
+    file.write_all(openapi_spec.to_pretty_json()?.as_bytes())?;
 
     Ok(())
 }
