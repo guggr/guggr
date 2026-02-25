@@ -43,6 +43,8 @@ test: test-rust
 # Run all rust recipes
 [group('bundle')]
 rust: fmt-rust lint-rust test-rust autoinherit machete
+	@just api-service gen-spec
+	pnpm prettier -w api-service/openapi.json
 
 # Run prettier
 [group('pnpm')]
