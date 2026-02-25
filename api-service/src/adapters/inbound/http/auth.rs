@@ -8,6 +8,7 @@ use crate::core::{
     domain::{
         auth_helper::{JwtSigner, get_unverified_user_id, verify_password},
         errors::AuthError,
+        openapi_helper::GenericResponsesAuth,
     },
     models::auth::{AuthMetadata, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
     ports::storage::StoragePort,
@@ -45,8 +46,7 @@ pub fn _get_auth_metadata(req: &HttpRequest) -> AuthMetadata {
     operation_id = "auth_login",
     responses(
         (status = 200, description = "Access- and refresh-token", body = TokenResponse),
-        (status = 401, description = "Not Authorized"),
-        (status = 500, description = "Storage error")
+        GenericResponsesAuth
     ),
     tag = "auth"
 )]
@@ -80,8 +80,7 @@ pub async fn login(
     operation_id = "auth_refresh_token",
     responses(
         (status = 200, description = "Access- and refresh-token", body = TokenResponse),
-        (status = 401, description = "Not Authorized"),
-        (status = 500, description = "Storage error")
+        GenericResponsesAuth
     ),
     tag = "auth"
 )]
@@ -111,7 +110,7 @@ pub async fn token_refresh(
     operation_id = "auth_logout",
     responses(
         (status = 204, description = "Successful logout"),
-        (status = 500, description = "Storage error")
+        GenericResponsesAuth
     ),
     tag = "auth"
 )]

@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "api-service",
-		"description": "guggr api definition",
+		"description": "",
 		"contact": {
 			"name": "Guggr"
 		},
@@ -38,11 +38,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Validation / Deserializing failed"
+					},
 					"401": {
-						"description": "Not Authorized"
+						"description": "User is not Authorized / Authenticated"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				}
 			}
@@ -66,8 +69,14 @@
 					"204": {
 						"description": "Successful logout"
 					},
+					"400": {
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				}
 			}
@@ -98,11 +107,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Validation / Deserializing failed"
+					},
 					"401": {
-						"description": "Not Authorized"
+						"description": "User is not Authorized / Authenticated"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				}
 			}
@@ -126,8 +138,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -162,10 +180,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -202,11 +226,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
 					"404": {
-						"description": "Group Not Found"
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -234,8 +261,14 @@
 					"204": {
 						"description": "Deleted"
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -281,10 +314,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -313,8 +352,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -348,8 +393,17 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -386,8 +440,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -415,8 +475,14 @@
 					"204": {
 						"description": "Deleted"
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -460,8 +526,17 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -501,8 +576,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -552,8 +633,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -588,10 +675,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -628,8 +721,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -657,8 +756,14 @@
 					"204": {
 						"description": "Deleted"
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -704,10 +809,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -747,8 +858,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -783,10 +900,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -823,8 +946,14 @@
 							}
 						}
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -852,8 +981,14 @@
 					"204": {
 						"description": "Deleted"
 					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
+					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [
@@ -899,10 +1034,16 @@
 						}
 					},
 					"400": {
-						"description": "Validation error"
+						"description": "Validation / Deserializing failed"
+					},
+					"401": {
+						"description": "User is not Authorized / Authenticated"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
-						"description": "Storage error"
+						"description": "Internal Server Error"
 					}
 				},
 				"security": [

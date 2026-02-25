@@ -9,6 +9,7 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
+        domain::openapi_helper::{GenericResponses, GenericResponsesCU},
         models::user::{CreateUser, DisplayUser, UpdateUser},
         ports::storage::StoragePort,
     },
@@ -32,8 +33,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_user",
     responses(
         (status = 200, description = "Created user", body = DisplayUser),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -54,7 +54,7 @@ pub async fn create(
     operation_id = "list_user",
     responses(
         (status = 200, description = "List users", body = [DisplayUser]),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -75,7 +75,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<imp
     ),
     responses(
         (status = 200, description = "User", body = DisplayUser),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -104,8 +104,7 @@ pub async fn get(
     request_body = UpdateUser,
     responses(
         (status = 200, description = "Patched user", body = DisplayUser),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "users"
@@ -130,7 +129,7 @@ pub async fn update(
     ),
     responses(
         (status = 204, description = "Deleted"),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "users"

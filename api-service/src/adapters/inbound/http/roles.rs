@@ -9,6 +9,7 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
+        domain::openapi_helper::{GenericResponses, GenericResponsesCU},
         models::role::{CreateRole, DisplayRole, UpdateRole},
         ports::storage::StoragePort,
     },
@@ -32,8 +33,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_role",
     responses(
         (status = 200, description = "Created role", body = DisplayRole),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "roles"
@@ -54,7 +54,7 @@ pub async fn create(
     operation_id = "list_role",
     responses(
         (status = 200, description = "List roles", body = [DisplayRole]),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "roles"
@@ -75,7 +75,7 @@ pub async fn list(api: web::Data<Arc<dyn StoragePort>>) -> actix_web::Result<imp
     ),
     responses(
         (status = 200, description = "Role", body = DisplayRole),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "roles"
@@ -104,8 +104,7 @@ pub async fn get(
     request_body = UpdateRole,
     responses(
         (status = 200, description = "Patched role", body = DisplayRole),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "roles"
@@ -130,7 +129,7 @@ pub async fn update(
     ),
     responses(
         (status = 204, description = "Deleted"),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "roles"

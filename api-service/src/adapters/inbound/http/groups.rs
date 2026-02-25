@@ -10,7 +10,10 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
-        domain::errors::{AuthError, StorageError},
+        domain::{
+            errors::{AuthError, StorageError},
+            openapi_helper::{GenericResponses, GenericResponsesCU},
+        },
         models::{
             auth::UserId,
             group::{CreateGroup, DisplayGroup, UpdateGroup},
@@ -37,8 +40,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_group",
     responses(
         (status = 200, description = "Created group", body = DisplayGroup),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "groups"
@@ -70,7 +72,7 @@ pub async fn create(
         operation_id = "list_group",
     responses(
         (status = 200, description = "List groups", body = [DisplayGroup]),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "groups"
@@ -104,8 +106,7 @@ pub async fn list(
     operation_id = "get_group",
     responses(
         (status = 200, description = "Group", body = DisplayGroup),
-        (status = 404, description = "Group Not Found"),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "groups"
@@ -146,8 +147,7 @@ pub async fn get(
     request_body = UpdateGroup,
     responses(
         (status = 200, description = "Patched group", body = DisplayGroup),
-        (status = 400, description = "Validation error"), // TODO get ToSchema for ValidationError
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "groups"
@@ -186,7 +186,7 @@ pub async fn update(
     operation_id = "delete_group",
     responses(
         (status = 204, description = "Deleted"),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "groups"

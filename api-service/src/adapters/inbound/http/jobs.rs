@@ -9,7 +9,10 @@ use utoipa_actix_web::service_config::ServiceConfig;
 use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
-        domain::errors::AuthError,
+        domain::{
+            errors::AuthError,
+            openapi_helper::{GenericResponses, GenericResponsesCU},
+        },
         models::{
             auth::UserId,
             job::{CreateJob, DisplayJob, UpdateJob, run::DisplayJobRun},
@@ -37,7 +40,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_job",
     responses(
         (status = 200, description = "Created job", body = DisplayJob),
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
@@ -72,7 +75,7 @@ pub async fn create(
     ),
     responses(
         (status = 200, description = "Job", body = DisplayJob),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
@@ -108,7 +111,7 @@ pub async fn get(
     operation_id = "update_job",
     responses(
         (status = 200, description = "Created job", body = DisplayJob),
-        (status = 500, description = "Storage error")
+        GenericResponsesCU
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
@@ -147,7 +150,7 @@ pub async fn update(
     ),
     responses(
         (status = 204, description = "Deleted"),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
@@ -179,7 +182,7 @@ pub async fn delete(
     operation_id = "list_job",
     responses(
         (status = 200, description = "List jobs", body = [DisplayJob]),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
@@ -213,7 +216,7 @@ pub async fn list(
     ),
     responses(
         (status = 200, description = "List jobs runs", body = [DisplayJobRun]),
-        (status = 500, description = "Storage error")
+        GenericResponses
     ),
     security(("bearerAuth" = [])),
     tag = "jobs"
