@@ -78,6 +78,7 @@
               rustfmt-nightly
               protobuf_33
               podman
+              docker-compose
             ];
             LD_LIBRARY_PATH = "${pkgs.libpq}/lib";
           };
