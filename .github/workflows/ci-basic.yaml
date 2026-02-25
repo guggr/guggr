@@ -32,6 +32,7 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
+      api: ${{ steps.filter.outputs.api }}
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dorny/paths-filter@v3.0.2
@@ -59,6 +60,7 @@ jobs:
             frontend:
               - frontend/web/**
             helm: charts/**
+            api: api-service/**
 
   pnpm-fmt:
     name: 🐛 formatting - pnpm
@@ -156,6 +158,23 @@ jobs:
       - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
+
+  check-openapi-spec:
+    name: 🧐 check - openapi spec
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - name: Check openapi spec
+        run: bash api-service/openapi-check.sh
 
   fetch-depth:
     name: 🧮 calculate fetch depth
