@@ -2,6 +2,9 @@
 
 guggr (Swabian for "looker") is a high-availability solution that keeps a constant eye on your workloads so you don't have to.
 
+> [!IMPORTANT]
+> guggr is still in early development and not ready for producation usage yet. Stay tuned!
+
 ## Differences to Common Monitoring Solutions
 
 - **Highly available** 🏗️: Uses RabbitMQ Quorum Queues and splits workloads to ensure that downtimes only impact small, isolated worker chunks.
