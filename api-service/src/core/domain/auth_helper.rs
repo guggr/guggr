@@ -160,6 +160,7 @@ pub fn refresh_token(
         .auth()
         .get_refresh_token(&hash_and_encode_refresh_token(old_token))?;
     if old_record.expires_on >= Utc::now().timestamp() {
+        invalidate_token(storage, old_token)?;
         return Err(AuthError::Unauthorized);
     }
     let old_user = old_record.user_id.clone();

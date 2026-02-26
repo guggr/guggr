@@ -1,3 +1,4 @@
+use chrono::Utc;
 use database_client::models::{self, Role};
 use diesel::{
     PgConnection,
@@ -65,6 +66,11 @@ impl AuthOperations for PostgresAuthAdapter {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(refresh_token.filter(dsl::token.eq(token)))
+            .execute(&mut conn)
+            .map_err(PostgresAdapterError::from)?;
+        // clean up expired tokens
+        let now = Utc::now().naive_utc();
+        diesel::delete(refresh_token.filter(dsl::expires_on.le(now)))
             .execute(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(())
