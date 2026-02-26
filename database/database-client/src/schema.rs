@@ -71,8 +71,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    refresh_token (jti) {
-        jti -> Text,
+    refresh_token (token) {
+        token -> Text,
         user_id -> Text,
         expires_on -> Timestamp,
     }

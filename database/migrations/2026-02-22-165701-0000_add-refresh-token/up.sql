@@ -1,9 +1,9 @@
 -- Your SQL goes here
 CREATE TABLE IF NOT EXISTS "refresh_token" (
-	"jti" TEXT NOT NULL UNIQUE,
+	"token" TEXT NOT NULL UNIQUE,
 	"user_id" TEXT NOT NULL,
 	"expires_on" TIMESTAMP NOT NULL,
-	PRIMARY KEY ("jti")
+	PRIMARY KEY ("token")
 );
 
 ALTER TABLE "refresh_token"
