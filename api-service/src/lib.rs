@@ -12,7 +12,7 @@ use utoipa_actix_web::AppExt;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
-    adapters::inbound::http::{self, auth, groups, jobs, roles, users},
+    adapters::inbound::http::{self, auth, groups},
     core::{
         domain::openapi_helper::{ApiDoc, json_error_handler},
         ports::storage::StoragePort,
@@ -52,9 +52,6 @@ pub fn init_app_openapi(
         .service(
             utoipa_actix_web::scope("/api/v1")
                 .configure(groups::configure)
-                .configure(users::configure)
-                .configure(jobs::configure)
-                .configure(roles::configure)
                 .configure(auth::configure)
                 .configure(http::configure),
         );
