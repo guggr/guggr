@@ -18,11 +18,11 @@ TBD
 
 _guggr_ is composed of several specialized components working in sync:
 
-- **Web-Frontend and Backend** 🖥️ (Svelte/Golang): The central hub for users to visualize uptime data and manage monitor configurations.
+- **Web-Frontend and Backend** 🖥️ (Svelte/Rust): The central hub for users to visualize uptime data and manage monitor configurations.
 - **Scheduler** 🗓️ (Rust): The orchestrator that fetches active monitors from the database and distributes them into the execution queue.
 - **Agent** 🕵️ (Rust): Consumes jobs in the queue, performs the actual health checks, and reports job results back for evaluation.
 - **Evaluator** 🧠 (Rust): The logic engine that processes job results against your custom rules to determine if a notification is necessary.
-- **Notifier** 📢 (Golang): Delivers alerts to users via their preferred channels.
+- **Notifier** 📢 (TBD): Delivers alerts to users via their preferred channels.
 
 ```mermaid
 graph TB
