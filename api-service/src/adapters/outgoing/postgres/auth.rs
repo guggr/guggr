@@ -52,19 +52,19 @@ impl AuthOperations for PostgresAuthAdapter {
         Ok(())
     }
 
-    fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError> {
+    fn get_refresh_token(&self, token: &str) -> Result<DisplayRefreshToken, StorageError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let r = refresh_token
-            .filter(dsl::jti.eq(jti))
+            .filter(dsl::token.eq(token))
             .first::<models::RefreshToken>(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(DisplayRefreshToken::from(r))
     }
-    fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError> {
+    fn delete_refresh_token(&self, token: &str) -> Result<(), StorageError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
-        diesel::delete(refresh_token.filter(dsl::jti.eq(jti)))
+        diesel::delete(refresh_token.filter(dsl::token.eq(token)))
             .execute(&mut conn)
             .map_err(PostgresAdapterError::from)?;
         Ok(())

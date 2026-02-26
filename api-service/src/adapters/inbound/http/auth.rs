@@ -6,7 +6,7 @@ use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
     domain::{
-        auth_helper::{JwtSigner, get_unverified_user_id, verify_password},
+        auth_helper::{JwtSigner, invalidate_token, refresh_token, verify_password},
         errors::AuthError,
         openapi_helper::GenericResponsesAuth,
     },
@@ -75,13 +75,11 @@ pub async fn token_refresh(
     body: web::Json<TokenRefreshRequest>,
 ) -> actix_web::Result<impl Responder> {
     let token_response = web::block(move || {
-        let old_token = body.into_inner().refresh_token;
-        let unverified_user = get_unverified_user_id(&old_token)?;
-
-        let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
-        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
-
-        signer.refresh_token(config.get_ref(), api.get_ref(), &old_token)
+        refresh_token(
+            config.get_ref(),
+            api.get_ref(),
+            &body.into_inner().refresh_token,
+        )
     })
     .await
     .map_err(ErrorInternalServerError)??;
@@ -101,18 +99,10 @@ pub async fn token_refresh(
 /// logout endpoint
 pub async fn logout(
     api: web::Data<Arc<dyn StoragePort>>,
-    config: web::Data<ApiServiceConfig>,
     body: web::Json<LogoutRequest>,
 ) -> actix_web::Result<impl Responder> {
-    web::block(move || {
-        let old_token = body.into_inner().refresh_token;
-        let unverified_user = get_unverified_user_id(&old_token)?;
-
-        let user = api.auth().get_user_jwt_secrets(&unverified_user)?;
-        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
-        signer.invalidate_token(api.get_ref(), &old_token)
-    })
-    .await
-    .map_err(ErrorInternalServerError)??;
+    web::block(move || invalidate_token(api.get_ref(), &body.into_inner().refresh_token))
+        .await
+        .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::NoContent().finish())
 }

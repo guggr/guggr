@@ -59,9 +59,9 @@ pub trait AuthOperations {
     /// create a new refresh token record in the database
     fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError>;
     /// get a `DisplayRefreshToken` by a jti claim
-    fn get_refresh_token(&self, jti: &str) -> Result<DisplayRefreshToken, StorageError>;
+    fn get_refresh_token(&self, token: &str) -> Result<DisplayRefreshToken, StorageError>;
     /// delete a refresh token by a jti claim
-    fn delete_refresh_token(&self, jti: &str) -> Result<(), StorageError>;
+    fn delete_refresh_token(&self, token: &str) -> Result<(), StorageError>;
     /// get all `DisplayRole` by a user's id
     fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, StorageError>;
     /// check whether the user has the owner role

@@ -58,7 +58,7 @@ pub struct UserAuthJwt {
 #[derive(Debug, Default)]
 /// sent to the database for creating a new `RefreshToken` record
 pub struct CreateRefreshToken {
-    pub jti: String,
+    pub token: String,
     pub user_id: String,
     pub expires_on: i64,
 }
@@ -77,7 +77,7 @@ impl TryFrom<CreateRefreshToken> for RefreshToken {
             .ok_or(StorageError::TimestampConversion)?
             .naive_utc();
         Ok(Self {
-            jti: value.jti,
+            token: value.token,
             user_id: value.user_id,
             expires_on: exp,
         })

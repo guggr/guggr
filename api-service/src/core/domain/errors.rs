@@ -26,4 +26,6 @@ pub enum AuthError {
     Storage(#[from] StorageError),
     #[error("User not authorized")]
     Unauthorized,
+    #[error("Argon2 error")]
+    Argon2,
 }
