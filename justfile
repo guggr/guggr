@@ -52,7 +52,7 @@ fmt-pnpm:
 [group('rust')]
 [group('format')]
 fmt-rust:
-	cargo +nightly fmt
+	rustfmt-nightly
 
 # Run clippy
 [group('rust')]
