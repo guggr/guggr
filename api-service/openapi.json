@@ -2,12 +2,13 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "api-service",
-		"description": "",
+		"description": "guggr HTTP API Service",
 		"contact": {
-			"name": "Guggr"
+			"name": "guggr"
 		},
 		"license": {
-			"name": ""
+			"name": "GPL-3.0",
+			"identifier": "GPL-3.0"
 		},
 		"version": "0.1.0"
 	},
