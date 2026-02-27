@@ -56,7 +56,7 @@ repos:
         name: run cargo fmt
         types: [rust]
         language: system
-        entry: cargo +nightly fmt --check
+        entry: rustfmt-nightly
         pass_filenames: false
 
       - id: cargo-clippy
