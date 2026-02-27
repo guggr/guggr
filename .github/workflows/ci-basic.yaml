@@ -30,7 +30,6 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       pnpm: ${{ steps.filter.outputs.pnpm }}
       frontend: ${{ steps.filter.outputs.frontend }}
-      go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
     steps:
       - uses: actions/checkout@v6.0.2
