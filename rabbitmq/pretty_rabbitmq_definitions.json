@@ -1,0 +1,18 @@
+{
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_tags",
+      "value": []
+    },
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-_iWPI5PGsoWi5IKKKTMhgA"
+    }
+  ],
+  "policies": [],
+  "queues": [],
+  "exchanges": [],
+  "bindings": []
+}
