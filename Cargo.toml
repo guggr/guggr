@@ -7,7 +7,8 @@ resolver = "3"
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-authors = ["Guggr"]
+authors = ["guggr"]
+license = "GPL-3.0"
 
 [workspace.dependencies]
 prost = "0.14"
@@ -18,7 +19,7 @@ temp-env = "0.3.6"
 urlencoding = "2.1.3"
 proto-types = "0.2.2"
 diesel = "2.3.6"
-chrono = "0.4.43"
+chrono = "0.4.44"
 diesel_migrations = "2.3.1"
 thiserror = "2.0.18"
 async-trait = "0.1.89"

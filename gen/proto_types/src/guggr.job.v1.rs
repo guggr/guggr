@@ -3,7 +3,7 @@
 pub struct Job {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(enumeration = "JobType", tag = "2")]
+    #[prost(enumeration = "super::super::job_types::v1::JobType", tag = "2")]
     pub job_type: i32,
     #[prost(string, tag = "3")]
     pub batch_id: ::prost::alloc::string::String,
@@ -11,33 +11,4 @@ pub struct Job {
     pub http: ::core::option::Option<super::types::v1::HttpJobType>,
     #[prost(message, optional, tag = "17")]
     pub ping: ::core::option::Option<super::types::v1::PingJobType>,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum JobType {
-    Unspecified = 0,
-    Http = 1,
-    Ping = 2,
-}
-impl JobType {
-    /// String value of the enum field names used in the ProtoBuf definition.
-    ///
-    /// The values are not transformed in any way and thus are considered stable
-    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
-    pub fn as_str_name(&self) -> &'static str {
-        match self {
-            Self::Unspecified => "JOB_TYPE_UNSPECIFIED",
-            Self::Http => "JOB_TYPE_HTTP",
-            Self::Ping => "JOB_TYPE_PING",
-        }
-    }
-    /// Creates an enum from field names used in the ProtoBuf definition.
-    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
-        match value {
-            "JOB_TYPE_UNSPECIFIED" => Some(Self::Unspecified),
-            "JOB_TYPE_HTTP" => Some(Self::Http),
-            "JOB_TYPE_PING" => Some(Self::Ping),
-            _ => None,
-        }
-    }
 }

@@ -1,7 +1,10 @@
 use database_client::models as db_models;
-use gen_proto_types::job::{
-    types::v1::{HttpJobType, PingJobType},
-    v1::{Job, JobType},
+use gen_proto_types::{
+    job::{
+        types::v1::{HttpJobType, PingJobType},
+        v1::Job,
+    },
+    job_types::v1::JobType,
 };
 
 /// Trait for converting Database types to protobuf types.
