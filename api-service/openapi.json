@@ -368,6 +368,48 @@
 					}
 				]
 			}
+		},
+		"/api/v1/users": {
+			"post": {
+				"tags": ["users"],
+				"summary": "Create user",
+				"operationId": "create_user",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateUser"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "User successfully created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayUser"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestErrorBody"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
 		}
 	},
 	"components": {
@@ -393,11 +435,46 @@
 					}
 				}
 			},
+			"CreateUser": {
+				"type": "object",
+				"description": "Struct to create a new user",
+				"required": ["email", "password", "name"],
+				"properties": {
+					"email": {
+						"type": "string",
+						"minLength": 1
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1
+					},
+					"password": {
+						"type": "string",
+						"minLength": 1
+					}
+				}
+			},
 			"DisplayGroup": {
 				"type": "object",
 				"description": "returned from the database when displaying a group",
 				"required": ["id", "name"],
 				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayUser": {
+				"type": "object",
+				"description": "Returned user",
+				"required": ["id", "email", "name"],
+				"properties": {
+					"email": {
+						"type": "string"
+					},
 					"id": {
 						"type": "string"
 					},
