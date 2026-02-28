@@ -1,14 +1,10 @@
 use std::sync::Arc;
 
 use actix_web::{HttpResponse, Responder, error::ErrorInternalServerError, post, web};
-use config::ApiServiceConfig;
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
-    domain::{
-        auth_helper::{invalidate_token, refresh_token},
-        openapi_helper,
-    },
+    domain::{auth_helper::invalidate_token, openapi_helper},
     models::auth::{
         AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
     },
@@ -52,30 +48,23 @@ pub async fn login(
     request_body = TokenRefreshRequest,
     operation_id = "auth_refresh_token",
     responses(
-        (status = 200, description = "Access- and refresh-token", body = TokenResponse),
-        openapi_helper::ResUnauthorized,
+        (status = 200, description = "Renewed access and refresh tokens", body = TokenResponse),
         openapi_helper::ResBadRequest,
         openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]
 #[post("/token/refresh")]
-/// token refresh endpoint
+/// Renew access and refresh tokens
 pub async fn token_refresh(
-    api: web::Data<Arc<dyn StoragePort>>,
-    config: web::Data<ApiServiceConfig>,
+    svc: web::Data<Arc<dyn ServicePort>>,
     body: web::Json<TokenRefreshRequest>,
 ) -> actix_web::Result<impl Responder> {
-    let token_response = web::block(move || {
-        refresh_token(
-            config.get_ref(),
-            api.get_ref(),
-            &body.into_inner().refresh_token,
-        )
-    })
-    .await
-    .map_err(ErrorInternalServerError)??;
-    Ok(HttpResponse::Ok().json(token_response))
+    let res = web::block(move || svc.refresh_auth_tokens(body.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??;
+
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[utoipa::path(

@@ -86,7 +86,7 @@
 		"/api/v1/auth/token/refresh": {
 			"post": {
 				"tags": ["auth"],
-				"summary": "token refresh endpoint",
+				"summary": "Renew access and refresh tokens",
 				"operationId": "auth_refresh_token",
 				"requestBody": {
 					"content": {
@@ -100,7 +100,7 @@
 				},
 				"responses": {
 					"200": {
-						"description": "Access- and refresh-token",
+						"description": "Renewed access and refresh tokens",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -118,9 +118,6 @@
 								}
 							}
 						}
-					},
-					"401": {
-						"description": "Unauthorized"
 					},
 					"500": {
 						"description": "Internal Server Error"

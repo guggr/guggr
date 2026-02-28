@@ -1,7 +1,7 @@
 use crate::core::{
     domain::errors::DomainError,
     models::{
-        auth::{AuthenticatedResponse, LoginRequest, UserId},
+        auth::{AuthenticatedResponse, LoginRequest, TokenRefreshRequest, TokenResponse, UserId},
         user::{CreateUser, DisplayUser},
     },
 };
@@ -21,4 +21,10 @@ pub trait ServiceAuthPort: Send + Sync {
     /// Validates the access token and returns the user ID if successful.
     fn validate_access_token(&self, token: &str) -> Result<String, DomainError>;
     fn login(&self, login_req: LoginRequest) -> Result<AuthenticatedResponse, DomainError>;
+
+    /// Renews refresh and access tokens.
+    fn refresh_auth_tokens(
+        &self,
+        refresh_req: TokenRefreshRequest,
+    ) -> Result<TokenResponse, DomainError>;
 }

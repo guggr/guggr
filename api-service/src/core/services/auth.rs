@@ -1,17 +1,15 @@
-use std::ops::Add;
-
-use chrono::{Duration, Utc};
-use database_client::models::RefreshToken;
+use chrono::Utc;
 use frunk::labelled::Transmogrifier;
 
 use crate::core::{
     domain::{
         auth_helper::{
-            JwtSigner, check_password, get_unverified_user_id, hash_and_encode_refresh_token,
+            JwtSigner, check_password, generate_refresh_token, get_unverified_user_id,
+            hash_refresh_token,
         },
         errors::DomainError,
     },
-    models::auth::{AuthenticatedResponse, LoginRequest, TokenResponse},
+    models::auth::{AuthenticatedResponse, LoginRequest, TokenRefreshRequest, TokenResponse},
     ports::service::ServiceAuthPort,
     services::Service,
 };
@@ -45,24 +43,54 @@ impl ServiceAuthPort for Service {
         let signer = JwtSigner::new(&self.config.auth_secret(), &user.jwt_secret);
         let access_token = signer.create_token(&user.id, self.config.auth_ttl())?;
 
-        let refresh_token = nanoid::nanoid!(32);
+        let refresh_tokens = generate_refresh_token(&user.id, self.config.auth_refresh_ttl());
 
-        let refresh_token_db = RefreshToken {
-            token: hash_and_encode_refresh_token(&refresh_token),
-            user_id: user.id.clone(),
-            expires_on: Utc::now()
-                .naive_utc()
-                .add(Duration::seconds(self.config.auth_refresh_ttl())),
-        };
-
-        self.db.create_refresh_token(refresh_token_db)?;
+        self.db.create_refresh_token(refresh_tokens.1)?;
 
         Ok(AuthenticatedResponse {
             auth: TokenResponse {
                 access_token,
-                refresh_token,
+                refresh_token: refresh_tokens.0,
             },
             user: user.transmogrify(),
+        })
+    }
+
+    fn refresh_auth_tokens(
+        &self,
+        refresh_req: TokenRefreshRequest,
+    ) -> Result<TokenResponse, DomainError> {
+        let hashed_old_token = &hash_refresh_token(&refresh_req.refresh_token);
+
+        let old_token = self
+            .db
+            .get_refresh_token(hashed_old_token)
+            .map_err(|_| DomainError::BadRequest)?;
+
+        if Utc::now().naive_utc() >= old_token.expires_on {
+            return Err(DomainError::BadRequest);
+        }
+
+        let user_id = old_token.user_id;
+        let user = self
+            .db
+            .get_user(&user_id)
+            .map_err(|_| DomainError::BadRequest)?;
+
+        let signer = JwtSigner::new(&self.config.auth_secret(), &user.jwt_secret);
+        let access_token = signer.create_token(&user.id, self.config.auth_ttl())?;
+
+        let refresh_tokens = generate_refresh_token(&user_id, self.config.auth_refresh_ttl());
+        self.db.create_refresh_token(refresh_tokens.1)?;
+
+        // delete old token
+        self.db
+            .delete_refresh_token(hashed_old_token)
+            .map_err(|_| DomainError::BadRequest)?;
+
+        Ok(TokenResponse {
+            access_token,
+            refresh_token: refresh_tokens.0,
         })
     }
 }

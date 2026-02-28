@@ -1,12 +1,12 @@
-use std::sync::Arc;
+use std::{ops::Add, sync::Arc};
 
 use argon2::{
     Argon2,
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
 };
 use base64::{Engine, engine::general_purpose};
-use chrono::Utc;
-use config::ApiServiceConfig;
+use chrono::{Duration, Utc};
+use database_client::models::RefreshToken;
 use jsonwebtoken::{
     Algorithm, DecodingKey, EncodingKey, Header, Validation, dangerous::insecure_decode, decode,
     encode,
@@ -16,7 +16,6 @@ use sha3::Digest;
 
 use crate::core::{
     domain::errors::{AuthError, DomainError},
-    models::auth::TokenResponse,
     ports::storage::StoragePort,
 };
 
@@ -70,12 +69,27 @@ impl Claims {
 }
 
 /// Hashes and base64 encodes the supplied token.
-pub fn hash_and_encode_refresh_token(token: &str) -> String {
+pub fn hash_refresh_token(token: &str) -> String {
     let mut hasher = sha3::Sha3_256::new();
     hasher.update(token);
 
     let token_hash = hasher.finalize();
     general_purpose::STANDARD.encode(token_hash)
+}
+
+/// Generates a refresh token and the corresponding DB entry.
+///
+/// Note: The DB entry is **NOT** inserted into the repository.
+pub fn generate_refresh_token(user_id: &str, refresh_ttl: i64) -> (String, RefreshToken) {
+    let refresh_token = nanoid::nanoid!(32);
+
+    let refresh_token_db = RefreshToken {
+        token: hash_refresh_token(&refresh_token),
+        user_id: user_id.to_string(),
+        expires_on: Utc::now().naive_utc().add(Duration::seconds(refresh_ttl)),
+    };
+
+    (refresh_token, refresh_token_db)
 }
 
 /// Returns the **unverified** user ID. The JWT's validity is **NOT** verified
@@ -138,32 +152,8 @@ impl JwtSigner {
 pub fn invalidate_token(storage: &Arc<dyn StoragePort>, old_token: &str) -> Result<(), AuthError> {
     storage
         .auth()
-        .delete_refresh_token(&hash_and_encode_refresh_token(old_token))?;
+        .delete_refresh_token(&hash_refresh_token(old_token))?;
     Ok(())
-}
-
-/// Get a new Access and Refresh token from an old Refresh token
-pub fn refresh_token(
-    _config: &ApiServiceConfig,
-    _storage: &Arc<dyn StoragePort>,
-    _old_token: &str,
-) -> Result<TokenResponse, AuthError> {
-    // let old_record = storage
-    //     .auth()
-    //     .get_refresh_token(&hash_and_encode_refresh_token(old_token))?;
-    // if old_record.expires_on >= Utc::now().timestamp() {
-    //     invalidate_token(storage, old_token)?;
-    //     return Err(AuthError::Unauthorized);
-    // }
-    // let old_user = old_record.user_id.clone();
-    // let jwt_secret = storage.auth().get_user_jwt_secrets(&old_user)?;
-    // let signer = JwtSigner::new(&config.auth_secret(), &jwt_secret.jwt_secret);
-    // let new_token = signer.create_token(&old_user, config, storage)?;
-    // invalidate_token(storage, old_token)?;
-    // Ok(new_token)
-
-    // TODO
-    Err(AuthError::Unauthorized)
 }
 
 #[cfg(test)]
@@ -173,6 +163,7 @@ mod tests {
         PasswordHasher,
         password_hash::{SaltString, rand_core::OsRng},
     };
+    use config::ApiServiceConfig;
     use jsonwebtoken::errors::ErrorKind;
 
     use super::*;
