@@ -1,8 +1,8 @@
-pub mod auth;
 pub mod users;
 
-use crate::core::ports::{service::ServicePort, storage::StoragePort};
 use std::sync::Arc;
+
+use crate::core::ports::{service::ServicePort, storage::StoragePort};
 
 pub struct Service {
     pub db: Arc<dyn StoragePort>,
