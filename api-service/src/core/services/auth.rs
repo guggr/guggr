@@ -1,12 +1,17 @@
-use chrono::Utc;
+use std::ops::Add;
+
+use chrono::{Duration, Utc};
+use database_client::models::RefreshToken;
 use frunk::labelled::Transmogrifier;
 
 use crate::core::{
     domain::{
-        auth_helper::{JwtSigner, RefreshToken, check_password, get_unverified_user_id},
+        auth_helper::{
+            JwtSigner, check_password, get_unverified_user_id, hash_and_encode_refresh_token,
+        },
         errors::DomainError,
     },
-    models::auth::{AuthenticatedResponse, CreateRefreshToken, LoginRequest, TokenResponse},
+    models::auth::{AuthenticatedResponse, LoginRequest, TokenResponse},
     ports::service::ServiceAuthPort,
     services::Service,
 };
@@ -40,19 +45,22 @@ impl ServiceAuthPort for Service {
         let signer = JwtSigner::new(&self.config.auth_secret(), &user.jwt_secret);
         let access_token = signer.create_token(&user.id, self.config.auth_ttl())?;
 
-        let refresh_token = RefreshToken::new();
-        let _new_refresh_token = CreateRefreshToken {
-            token: refresh_token.hash,
+        let refresh_token = nanoid::nanoid!(32);
+
+        let refresh_token_db = RefreshToken {
+            token: hash_and_encode_refresh_token(&refresh_token),
             user_id: user.id.clone(),
-            expires_on: Utc::now().timestamp() + self.config.auth_refresh_ttl(),
+            expires_on: Utc::now()
+                .naive_utc()
+                .add(Duration::seconds(self.config.auth_refresh_ttl())),
         };
 
-        // TODO persist new_refresh_token
+        self.db.create_refresh_token(refresh_token_db)?;
 
         Ok(AuthenticatedResponse {
             auth: TokenResponse {
                 access_token,
-                refresh_token: refresh_token.token,
+                refresh_token,
             },
             user: user.transmogrify(),
         })

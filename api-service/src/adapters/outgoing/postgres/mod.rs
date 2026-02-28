@@ -1,3 +1,4 @@
+pub mod refresh_tokens;
 pub mod users;
 
 use database_client::{DbError, create_connection_pool};

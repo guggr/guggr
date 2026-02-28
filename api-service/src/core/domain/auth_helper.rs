@@ -69,32 +69,8 @@ impl Claims {
     }
 }
 
-/// Internal Structure containing the token and its hash
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RefreshToken {
-    pub token: String,
-    pub hash: String,
-}
-
-impl Default for RefreshToken {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl RefreshToken {
-    pub fn new() -> Self {
-        let token = nanoid::nanoid!(32);
-
-        Self {
-            token: token.clone(),
-            hash: hash_and_encode_refresh_token(&token),
-        }
-    }
-}
-
 /// Hashes and base64 encodes the supplied token.
-fn hash_and_encode_refresh_token(token: &str) -> String {
+pub fn hash_and_encode_refresh_token(token: &str) -> String {
     let mut hasher = sha3::Sha3_256::new();
     hasher.update(token);
 
