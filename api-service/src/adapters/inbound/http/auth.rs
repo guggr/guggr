@@ -4,11 +4,11 @@ use actix_web::{HttpResponse, Responder, error::ErrorInternalServerError, post, 
 use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
-    domain::{auth_helper::invalidate_token, openapi_helper},
+    domain::openapi_helper,
     models::auth::{
         AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
     },
-    ports::{service::ServicePort, storage::StoragePort},
+    ports::service::ServicePort,
 };
 
 /// Configures all auth endpoints
@@ -68,23 +68,24 @@ pub async fn token_refresh(
 }
 
 #[utoipa::path(
-    request_body = TokenRefreshRequest,
+    request_body = LogoutRequest,
     operation_id = "auth_logout",
     responses(
-        (status = 204, description = "Successful logout"),
-        openapi_helper::ResUnauthorized,
+        (status = 204, description = "Logout successful"),
+        openapi_helper::ResBadRequest,
         openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]
 #[post("/logout")]
-/// logout endpoint
+/// Logout and invalidate the refresh tokens
 pub async fn logout(
-    api: web::Data<Arc<dyn StoragePort>>,
+    svc: web::Data<Arc<dyn ServicePort>>,
     body: web::Json<LogoutRequest>,
 ) -> actix_web::Result<impl Responder> {
-    web::block(move || invalidate_token(api.get_ref(), &body.into_inner().refresh_token))
+    web::block(move || svc.logout(body.into_inner()))
         .await
         .map_err(ErrorInternalServerError)??;
+
     Ok(HttpResponse::NoContent().finish())
 }

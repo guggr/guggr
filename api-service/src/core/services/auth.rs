@@ -9,7 +9,9 @@ use crate::core::{
         },
         errors::DomainError,
     },
-    models::auth::{AuthenticatedResponse, LoginRequest, TokenRefreshRequest, TokenResponse},
+    models::auth::{
+        AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
+    },
     ports::service::ServiceAuthPort,
     services::Service,
 };
@@ -92,5 +94,13 @@ impl ServiceAuthPort for Service {
             access_token,
             refresh_token: refresh_tokens.0,
         })
+    }
+
+    fn logout(&self, logout_req: LogoutRequest) -> Result<(), DomainError> {
+        let hashed_token = &hash_refresh_token(&logout_req.refresh_token);
+
+        self.db.delete_refresh_token(hashed_token)?;
+
+        Ok(())
     }
 }

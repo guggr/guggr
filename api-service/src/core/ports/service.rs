@@ -1,7 +1,10 @@
 use crate::core::{
     domain::errors::DomainError,
     models::{
-        auth::{AuthenticatedResponse, LoginRequest, TokenRefreshRequest, TokenResponse, UserId},
+        auth::{
+            AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
+            UserId,
+        },
         user::{CreateUser, DisplayUser},
     },
 };
@@ -27,4 +30,7 @@ pub trait ServiceAuthPort: Send + Sync {
         &self,
         refresh_req: TokenRefreshRequest,
     ) -> Result<TokenResponse, DomainError>;
+
+    /// Invalidates the given refresh token.
+    fn logout(&self, logout_req: LogoutRequest) -> Result<(), DomainError>;
 }

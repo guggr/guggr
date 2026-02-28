@@ -14,13 +14,13 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
-/// request by the user to logout
+/// Data used to logout.
 pub struct LogoutRequest {
     pub refresh_token: String,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
-/// request by the user to get a new [`TokenResponse`]
+/// Data used to refresh the access and refresh tokens.
 pub struct TokenRefreshRequest {
     pub refresh_token: String,
 }
