@@ -2,15 +2,15 @@ pub mod users;
 
 use std::sync::Arc;
 
-use crate::core::ports::{service::ServicePort, storage::StoragePort};
+use crate::core::ports::{repository::RepositoryPort, service::ServicePort};
 
 pub struct Service {
-    pub db: Arc<dyn StoragePort>,
+    pub db: Arc<dyn RepositoryPort>,
 }
 
 impl Service {
-    pub fn new(storage: Arc<dyn StoragePort>) -> Self {
-        Self { db: storage }
+    pub fn new(repo: Arc<dyn RepositoryPort>) -> Self {
+        Self { db: repo }
     }
 }
 

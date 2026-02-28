@@ -1,26 +1,37 @@
-pub mod auth;
 pub mod users;
 
-use async_trait::async_trait;
 use database_client::{DbError, create_connection_pool};
+use diesel::{
+    PgConnection,
+    r2d2::{ConnectionManager, Pool},
+};
 use thiserror::Error;
 
-use crate::{
-    adapters::outgoing::postgres::{auth::PostgresAuthAdapter, users::PostgresUserAdapter},
-    core::{
-        domain::errors::DomainError,
-        models::user::{CreateUser, DisplayUser, UpdateUser},
-        ports::storage::{AuthOperations, RestrictedCrudOperations, StoragePort},
-    },
-};
-pub struct PostgresAdapter {
-    pub user: PostgresUserAdapter,
-    pub auth: PostgresAuthAdapter,
+use crate::core::{domain::errors::DomainError, ports::repository::RepositoryPort};
+
+pub struct Postgres {
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
-/// Errors for [`PostgresAdapter`]
+impl Postgres {
+    /// Creates a new [`Postgres`] adapter
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PostgresError`] if no connection pool could be
+    /// created from the supplied database URL
+    pub fn new(database_url: &str) -> Result<Self, PostgresError> {
+        let pool = create_connection_pool(database_url)?;
+
+        Ok(Self { pool })
+    }
+}
+
+impl RepositoryPort for Postgres {}
+
+/// Errors for [`Postgres`]
 #[derive(Error, Debug)]
-pub enum PostgresAdapterError {
+pub enum PostgresError {
     /// Raised, when the initial connection to the database failed, or the
     /// migrations could not be run. For more information see [`DbError`]
     #[error("Database connection failed: {0}")]
@@ -37,12 +48,12 @@ pub enum PostgresAdapterError {
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
-impl From<PostgresAdapterError> for DomainError {
-    fn from(value: PostgresAdapterError) -> Self {
+impl From<PostgresError> for DomainError {
+    fn from(value: PostgresError) -> Self {
         match value {
-            PostgresAdapterError::Connection(e) => Self::Unavailable(e.to_string()),
-            PostgresAdapterError::Pool(e) => Self::Unavailable(e.to_string()),
-            PostgresAdapterError::NotFound => Self::NotFound,
+            PostgresError::Connection(e) => Self::Unavailable(e.to_string()),
+            PostgresError::Pool(e) => Self::Unavailable(e.to_string()),
+            PostgresError::NotFound => Self::NotFound,
             other => Self::Internal(other.to_string()),
         }
     }
@@ -57,40 +68,11 @@ impl From<argon2::password_hash::Error> for DomainError {
 
 /// Allows for converting the diesel-specific errors to domain errors
 /// used instead of #[from] for more control
-impl From<diesel::result::Error> for PostgresAdapterError {
+impl From<diesel::result::Error> for PostgresError {
     fn from(e: diesel::result::Error) -> Self {
         match e {
             diesel::result::Error::NotFound => Self::NotFound,
             other => Self::Result(other),
         }
-    }
-}
-
-impl PostgresAdapter {
-    /// Creates a new `PostgresAdapter`
-    ///
-    /// # Errors
-    ///
-    /// Will return [`PostgresAdapterError`] if no connection pool could be
-    /// created from the supplied database url
-    pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
-        let pool = create_connection_pool(database_url)?;
-        Ok(Self {
-            user: PostgresUserAdapter::new(pool.clone()),
-            auth: PostgresAuthAdapter::new(pool.clone()),
-        })
-    }
-}
-
-#[async_trait]
-impl StoragePort for PostgresAdapter {
-    fn user(
-        &self,
-    ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
-        &self.user
-    }
-
-    fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
-        &self.auth
     }
 }

@@ -3,9 +3,9 @@ use std::sync::Arc;
 use actix_web::{HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
-    adapters::outgoing::postgres::PostgresAdapter,
+    adapters::outgoing::postgres::Postgres,
     core::{
-        ports::{service::ServicePort, storage::StoragePort},
+        ports::{repository::RepositoryPort, service::ServicePort},
         services::Service,
     },
     init_app,
@@ -23,8 +23,8 @@ async fn main() -> Result<()> {
     let bind_address = config.bind_address();
 
     debug!("initializing postgres adapter and running pending migrations on the database");
-    let postgres: Arc<dyn StoragePort> =
-        Arc::from(PostgresAdapter::new(&postgres_config.connection_url())?);
+    let postgres: Arc<dyn RepositoryPort> =
+        Arc::from(Postgres::new(&postgres_config.connection_url())?);
 
     let svc: Arc<dyn ServicePort> = Arc::from(Service::new(postgres));
 

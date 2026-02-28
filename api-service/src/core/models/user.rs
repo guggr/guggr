@@ -1,11 +1,9 @@
-use database_client::{models::User, schema::user};
+use database_client::schema::user;
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-
-use crate::core::domain::auth_helper::{generate_user_jwt_secret, hash_password};
 
 #[derive(
     Debug,
@@ -64,16 +62,4 @@ pub struct DisplayUser {
     pub id: String,
     pub email: String,
     pub name: String,
-}
-
-impl From<CreateUser> for User {
-    fn from(value: CreateUser) -> Self {
-        Self {
-            id: nanoid::nanoid!(),
-            email: value.email,
-            password: hash_password(&value.password),
-            name: value.name,
-            jwt_secret: generate_user_jwt_secret(),
-        }
-    }
 }
