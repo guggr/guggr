@@ -24,8 +24,8 @@ async fn main() -> Result<()> {
     let api = Data::new(postgres);
     let dconfig = Data::new(config);
 
-    // TODO disable this dynamically in production
-    let enable_openapi_endpoints = true;
+    // enable OpenAPI endpoints in debug
+    let enable_openapi_endpoints = cfg!(debug_assertions);
 
     HttpServer::new(move || {
         init_app(
