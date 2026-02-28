@@ -1,5 +1,4 @@
 pub mod auth;
-pub mod groups;
 pub mod middleware;
 pub mod users;
 

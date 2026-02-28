@@ -2,7 +2,6 @@ use crate::core::{
     domain::errors::DomainError,
     models::{
         auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
-        group::{CreateGroup, DisplayGroup, UpdateGroup},
         role::DisplayRole,
         user::{CreateUser, DisplayUser, UpdateUser},
     },
@@ -75,9 +74,6 @@ pub trait StoragePort: Send + Sync {
     fn user(
         &self,
     ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
-    fn group(
-        &self,
-    ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
     fn auth(&self) -> &(dyn AuthOperations + Send + Sync);
 }
 
@@ -90,11 +86,9 @@ pub mod tests {
 
     pub struct MockStore {
         pub user: MockStoreUser,
-        pub group: MockStoreGroup,
         pub auth: MockStoreAuth,
     }
     pub struct MockStoreUser;
-    pub struct MockStoreGroup;
     pub struct MockStoreAuth;
 
     impl Default for MockStore {
@@ -107,7 +101,6 @@ pub mod tests {
         pub fn new() -> Self {
             Self {
                 user: MockStoreUser,
-                group: MockStoreGroup,
                 auth: MockStoreAuth,
             }
         }
@@ -119,13 +112,6 @@ pub mod tests {
         ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync)
         {
             &self.user
-        }
-
-        fn group(
-            &self,
-        ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync)
-        {
-            &self.group
         }
 
         fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
@@ -174,49 +160,6 @@ pub mod tests {
             limit: i64,
         ) -> Result<Vec<DisplayUser>, DomainError> {
             Ok(vec![DisplayUser::default(); limit as usize])
-        }
-    }
-
-    impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for MockStoreGroup {
-        fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, DomainError> {
-            let user = DisplayGroup {
-                name: new_value.name,
-                ..Default::default()
-            };
-            Ok(user)
-        }
-        fn update(
-            &self,
-            _user_id: Option<&str>,
-            id: &str,
-            update_value: UpdateGroup,
-        ) -> Result<DisplayGroup, DomainError> {
-            let group = DisplayGroup {
-                id: id.to_string(),
-                name: update_value.name.unwrap_or_default(),
-            };
-            Ok(group)
-        }
-        fn get_by_id(
-            &self,
-            _user_id: Option<&str>,
-            id: &str,
-        ) -> Result<Option<DisplayGroup>, DomainError> {
-            let group = DisplayGroup {
-                id: id.to_string(),
-                ..Default::default()
-            };
-            Ok(Some(group))
-        }
-        fn delete(&self, _user_id: Option<&str>, _id: &str) -> Result<(), DomainError> {
-            Ok(())
-        }
-        fn list(
-            &self,
-            _user_id: Option<&str>,
-            limit: i64,
-        ) -> Result<Vec<DisplayGroup>, DomainError> {
-            Ok(vec![DisplayGroup::default(); limit as usize])
         }
     }
 
