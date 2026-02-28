@@ -8,7 +8,7 @@ use crate::core::{
     domain::{
         auth_helper::{JwtSigner, invalidate_token, refresh_token, verify_password},
         errors::AuthError,
-        openapi_helper::GenericResponsesAuth,
+        openapi_helper,
     },
     models::auth::{LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
     ports::storage::StoragePort,
@@ -28,8 +28,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     request_body = LoginRequest,
     operation_id = "auth_login",
     responses(
-        (status = 200, description = "Access- and refresh-token", body = TokenResponse),
-        GenericResponsesAuth
+        (status = 200, description = "Login successful", body = TokenResponse),
+        openapi_helper::ResBadRequest,
+        openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]
@@ -63,7 +64,9 @@ pub async fn login(
     operation_id = "auth_refresh_token",
     responses(
         (status = 200, description = "Access- and refresh-token", body = TokenResponse),
-        GenericResponsesAuth
+        openapi_helper::ResUnauthorized,
+        openapi_helper::ResBadRequest,
+        openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]
@@ -91,7 +94,8 @@ pub async fn token_refresh(
     operation_id = "auth_logout",
     responses(
         (status = 204, description = "Successful logout"),
-        GenericResponsesAuth
+        openapi_helper::ResUnauthorized,
+        openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]

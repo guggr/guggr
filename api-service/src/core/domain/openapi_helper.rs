@@ -54,51 +54,6 @@ pub fn json_error_handler(
     InternalError::from_response(err, resp).into()
 }
 
-#[derive(utoipa::IntoResponses)]
-#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
-/// Generic Responses used for list, get, delete
-pub enum GenericResponses {
-    #[response(status = 401)]
-    Unauthorized(#[to_response] Unauthorized),
-
-    #[response(status = 404)]
-    NotFound(#[to_response] NotFound),
-
-    #[response(status = 500)]
-    InternalServerError(#[to_response] InternalServerError),
-}
-
-#[derive(utoipa::IntoResponses)]
-#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
-/// Generic Responses used for create, update
-pub enum GenericResponsesCU {
-    #[response(status = 400)]
-    Validation(#[to_response] BadRequest),
-
-    #[response(status = 401)]
-    Unauthorized(#[to_response] Unauthorized),
-
-    #[response(status = 404)]
-    NotFound(#[to_response] NotFound),
-
-    #[response(status = 500)]
-    InternalServerError(#[to_response] InternalServerError),
-}
-
-#[derive(utoipa::IntoResponses)]
-#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
-/// Generic Responses used for auth endpoints
-pub enum GenericResponsesAuth {
-    #[response(status = 400)]
-    Validation(#[to_response] BadRequest),
-
-    #[response(status = 401)]
-    Unauthorized(#[to_response] Unauthorized),
-
-    #[response(status = 500)]
-    InternalServerError(#[to_response] InternalServerError),
-}
-
 #[derive(utoipa::ToResponse)]
 #[response(description = "Bad Request")]
 pub struct BadRequest(pub BadRequestErrorBody);
