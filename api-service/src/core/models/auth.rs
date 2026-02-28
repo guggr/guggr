@@ -4,7 +4,7 @@ use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::core::domain::errors::StorageError;
+use crate::core::domain::errors::DomainError;
 
 #[derive(Debug, Deserialize, ToSchema)]
 /// request by the user to login
@@ -71,10 +71,10 @@ pub struct DisplayRefreshToken {
 }
 
 impl TryFrom<CreateRefreshToken> for RefreshToken {
-    type Error = StorageError;
+    type Error = DomainError;
     fn try_from(value: CreateRefreshToken) -> Result<Self, Self::Error> {
         let exp = DateTime::<Utc>::from_timestamp_secs(value.expires_on)
-            .ok_or(StorageError::TimestampConversion)?
+            .ok_or(DomainError::TimestampConversion)?
             .naive_utc();
         Ok(Self {
             token: value.token,

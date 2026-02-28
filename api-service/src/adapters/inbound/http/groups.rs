@@ -11,7 +11,7 @@ use crate::{
     adapters::inbound::http::middleware::auth::Auth,
     core::{
         domain::{
-            errors::{AuthError, StorageError},
+            errors::{AuthError, DomainError},
             openapi_helper::{GenericResponses, GenericResponsesCU},
         },
         models::{
@@ -61,7 +61,7 @@ pub async fn create(
         if api.auth().is_owner(&req_userid.0)? {
             return api.group().create(body.into_inner());
         }
-        Err(StorageError::Unauthorized)
+        Err(DomainError::Unauthorized)
     })
     .await
     .map_err(ErrorInternalServerError)??;

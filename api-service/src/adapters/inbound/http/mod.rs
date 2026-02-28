@@ -4,9 +4,9 @@ pub mod middleware;
 
 use actix_web::{HttpResponse, ResponseError, http::StatusCode};
 
-use crate::core::domain::errors::{AuthError, StorageError};
+use crate::core::domain::errors::{AuthError, DomainError};
 
-impl ResponseError for StorageError {
+impl ResponseError for DomainError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::NotFound => StatusCode::NOT_FOUND,

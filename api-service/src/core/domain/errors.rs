@@ -1,16 +1,20 @@
 use thiserror::Error;
 
-/// Errors for `StoragePort`
+/// Application Errors
 #[derive(Debug, Error, PartialEq, Eq)]
-pub enum StorageError {
+pub enum DomainError {
     #[error("Storage is currently unavailable: {0}")]
     Unavailable(String),
+
     #[error("Internal error: {0}")]
     Internal(String),
+
     #[error("No Record found")]
     NotFound,
+
     #[error("Timestamp conversion error")]
     TimestampConversion,
+
     #[error("User not authorized")]
     Unauthorized,
 }
@@ -23,7 +27,7 @@ pub enum AuthError {
     #[error("Error while handling JWT: {0}")]
     JwtError(#[from] jsonwebtoken::errors::Error),
     #[error("Storage: {0}")]
-    Storage(#[from] StorageError),
+    Storage(#[from] DomainError),
     #[error("User not authorized")]
     Unauthorized,
     #[error("Argon2 error")]

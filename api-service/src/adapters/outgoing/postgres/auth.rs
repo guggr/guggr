@@ -11,7 +11,7 @@ use frunk::labelled::Transmogrifier;
 use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
-        domain::errors::StorageError,
+        domain::errors::DomainError,
         models::{
             auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
             role::DisplayRole,
@@ -33,7 +33,7 @@ impl PostgresAuthAdapter {
 }
 
 impl AuthOperations for PostgresAuthAdapter {
-    fn get_user_by_email(&self, email: &str) -> Result<UserAuth, StorageError> {
+    fn get_user_by_email(&self, email: &str) -> Result<UserAuth, DomainError> {
         use database_client::schema::user::dsl::{self, user};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let u = user
@@ -43,7 +43,7 @@ impl AuthOperations for PostgresAuthAdapter {
         Ok(u.transmogrify())
     }
 
-    fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), StorageError> {
+    fn create_refresh_token(&self, token: CreateRefreshToken) -> Result<(), DomainError> {
         use database_client::schema::refresh_token::dsl::refresh_token;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::insert_into(refresh_token)
@@ -53,7 +53,7 @@ impl AuthOperations for PostgresAuthAdapter {
         Ok(())
     }
 
-    fn get_refresh_token(&self, token: &str) -> Result<DisplayRefreshToken, StorageError> {
+    fn get_refresh_token(&self, token: &str) -> Result<DisplayRefreshToken, DomainError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let r = refresh_token
@@ -62,7 +62,7 @@ impl AuthOperations for PostgresAuthAdapter {
             .map_err(PostgresAdapterError::from)?;
         Ok(DisplayRefreshToken::from(r))
     }
-    fn delete_refresh_token(&self, token: &str) -> Result<(), StorageError> {
+    fn delete_refresh_token(&self, token: &str) -> Result<(), DomainError> {
         use database_client::schema::refresh_token::dsl::{self, refresh_token};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         diesel::delete(refresh_token.filter(dsl::token.eq(token)))
@@ -75,7 +75,7 @@ impl AuthOperations for PostgresAuthAdapter {
             .map_err(PostgresAdapterError::from)?;
         Ok(())
     }
-    fn get_user_jwt_secrets(&self, id: &str) -> Result<UserAuthJwt, StorageError> {
+    fn get_user_jwt_secrets(&self, id: &str) -> Result<UserAuthJwt, DomainError> {
         use database_client::schema::user::dsl::{self, user};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let u = user
@@ -84,7 +84,7 @@ impl AuthOperations for PostgresAuthAdapter {
             .map_err(PostgresAdapterError::from)?;
         Ok(u.transmogrify())
     }
-    fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, StorageError> {
+    fn get_roles_by_user(&self, id: &str) -> Result<Vec<DisplayRole>, DomainError> {
         use database_client::schema::{role, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let roles: Vec<Role> = user_group_mapping::table
@@ -96,7 +96,7 @@ impl AuthOperations for PostgresAuthAdapter {
 
         Ok(roles.iter().map(|f| f.clone().transmogrify()).collect())
     }
-    fn is_owner(&self, id: &str) -> Result<bool, StorageError> {
+    fn is_owner(&self, id: &str) -> Result<bool, DomainError> {
         use database_client::schema::{role, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let owner: bool = diesel::select(exists(

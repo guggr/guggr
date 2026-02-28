@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::{
     adapters::outgoing::postgres::{auth::PostgresAuthAdapter, group::PostgresGroupAdapter},
     core::{
-        domain::errors::StorageError,
+        domain::errors::DomainError,
         models::group::{CreateGroup, DisplayGroup, UpdateGroup},
         ports::storage::{AuthOperations, RestrictedCrudOperations, StoragePort},
     },
@@ -36,7 +36,7 @@ pub enum PostgresAdapterError {
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
-impl From<PostgresAdapterError> for StorageError {
+impl From<PostgresAdapterError> for DomainError {
     fn from(value: PostgresAdapterError) -> Self {
         match value {
             PostgresAdapterError::Connection(e) => Self::Unavailable(e.to_string()),
@@ -48,7 +48,7 @@ impl From<PostgresAdapterError> for StorageError {
 }
 
 /// Allows for converting the argon2-specific errors to domain errors
-impl From<argon2::password_hash::Error> for StorageError {
+impl From<argon2::password_hash::Error> for DomainError {
     fn from(value: argon2::password_hash::Error) -> Self {
         Self::Internal(value.to_string())
     }
