@@ -114,3 +114,31 @@ pub struct NotFound;
 #[derive(utoipa::ToResponse)]
 #[response(description = "Internal Server Error")]
 pub struct InternalServerError;
+
+#[derive(utoipa::IntoResponses)]
+/// Response: 400 Bad Request
+pub enum ResBadRequest {
+    #[response(status = 400)]
+    BadRequest(#[to_response] BadRequest),
+}
+
+#[derive(utoipa::IntoResponses)]
+/// Response: 401 Unauthorized
+pub enum ResUnauthorized {
+    #[response(status = 401)]
+    Unauthorized(#[to_response] Unauthorized),
+}
+
+#[derive(utoipa::IntoResponses)]
+/// Response: 404 Not Found
+pub enum ResNotFound {
+    #[response(status = 404)]
+    NotFound(#[to_response] NotFound),
+}
+
+#[derive(utoipa::IntoResponses)]
+/// Response: 500 Internal Server Error
+pub enum ResInternalServerError {
+    #[response(status = 500)]
+    InternalServerError(#[to_response] InternalServerError),
+}
