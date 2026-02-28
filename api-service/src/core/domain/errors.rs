@@ -9,6 +9,9 @@ pub enum DomainError {
     #[error("Internal error: {0}")]
     Internal(String),
 
+    #[error("Bad request data")]
+    BadRequest,
+
     #[error("No Record found")]
     NotFound,
 

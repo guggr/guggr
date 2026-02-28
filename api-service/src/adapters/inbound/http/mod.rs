@@ -9,6 +9,7 @@ use crate::core::domain::errors::{AuthError, DomainError};
 impl ResponseError for DomainError {
     fn status_code(&self) -> StatusCode {
         match self {
+            Self::BadRequest => StatusCode::BAD_REQUEST,
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
@@ -19,6 +20,7 @@ impl ResponseError for DomainError {
 
     fn error_response(&self) -> HttpResponse {
         match self {
+            Self::BadRequest => HttpResponse::BadRequest().finish(),
             Self::NotFound => HttpResponse::NotFound().finish(),
             Self::Unauthorized => HttpResponse::Unauthorized().finish(),
             Self::Internal(_) | Self::Unavailable(_) | Self::TimestampConversion => {
