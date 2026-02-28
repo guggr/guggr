@@ -6,30 +6,30 @@ use tokio_util::{sync::CancellationToken, task::TaskTracker};
 use tracing::{debug, info};
 
 use crate::core::{
-    domain::errors::JobSchedulerError, ports::ticker::Ticker,
-    service::schedulerservice::SchedulerService,
+    domain::errors::JobSchedulerError,
+    ports::{periodic_task::PeriodicTask, ticker::Ticker},
 };
 
 /// Struct for Ticker adapter. Holds its own task tracker for implementing
 /// graceful shutdown.
 pub struct SchedulerTicker {
-    service: Arc<SchedulerService>,
+    task: Arc<dyn PeriodicTask>,
     interval: Interval,
     task_tracker: TaskTracker,
     shutdown_token: CancellationToken,
 }
 
 impl SchedulerTicker {
-    /// Creates a new [`SchedulerTicker`] for running the service. Requires a
-    /// shutdown token for graceful shutdown.
+    /// Creates a new [`SchedulerTicker`] for running a periodic task. Requires
+    /// a shutdown token for graceful shutdown.
     #[must_use]
     pub fn new(
-        service: Arc<SchedulerService>,
+        task: Arc<dyn PeriodicTask>,
         run_every: Duration,
         shutdown_token: CancellationToken,
     ) -> Self {
         Self {
-            service,
+            task,
             interval: tokio::time::interval(run_every),
             task_tracker: TaskTracker::new(),
             shutdown_token,
@@ -41,7 +41,7 @@ impl SchedulerTicker {
 impl Ticker for SchedulerTicker {
     /// Starts the ticker with the defined interval.
     ///
-    /// - Spawns a new tokio task for running the service in the task pool for
+    /// - Spawns a new tokio task for running the task in the task pool for
     ///   each tick.
     /// - Handles graceful shutdown via the passed [`CancellationToken`].
     #[allow(clippy::ignored_unit_patterns)]
@@ -52,12 +52,12 @@ impl Ticker for SchedulerTicker {
         loop {
             tokio::select! {
                 _ = interval.tick() => {
-                    let service = Arc::clone(&self.service);
+                    let task = Arc::clone(&self.task);
 
-                    debug!("triggered service run in own task");
+                    debug!("triggered task run in own task");
                     self.task_tracker.spawn(async move {
-                        match service.run().await {
-                            Ok(()) => tracing::debug!("Batch processed successfully."),
+                        match task.run().await {
+                            Ok(()) => tracing::debug!("Task completed successfully."),
 
                             Err(JobSchedulerError::DatabaseUnavailable(e)) => {
                                 // We use WARN here because it's a transient infra issue
@@ -70,7 +70,7 @@ impl Ticker for SchedulerTicker {
                             }
 
                             Err(e) => {
-                                tracing::error!("Critical/Unknown error in service: {e}");
+                                tracing::error!("Critical/Unknown error in task: {e}");
                             }
                         }
                     });
@@ -85,9 +85,9 @@ impl Ticker for SchedulerTicker {
 
         self.task_tracker.close();
 
-        info!("Waiting for in-flight jobs to complete...");
+        info!("Waiting for in-flight tasks to complete...");
         self.task_tracker.wait().await;
 
-        info!("all jobs finished");
+        info!("all tasks finished");
     }
 }
