@@ -9,7 +9,7 @@ use utoipa::{
 #[derive(utoipa::OpenApi)]
 #[openapi(
     modifiers(&JwtSecurityScheme),
-    components(schemas(ValidationErrorBody))
+    components(schemas(BadRequestErrorBody))
 )]
 pub struct ApiDoc;
 
@@ -33,8 +33,8 @@ impl Modify for JwtSecurityScheme {
 }
 
 #[derive(Debug, Serialize, ToSchema)]
-/// returned Error body for Validation Errors
-pub struct ValidationErrorBody {
+/// Bad request errors
+pub struct BadRequestErrorBody {
     pub message: String,
 }
 
@@ -47,7 +47,7 @@ pub fn json_error_handler(
 
     let resp = HttpResponse::build(status)
         .insert_header(ContentType::json())
-        .json(ValidationErrorBody {
+        .json(BadRequestErrorBody {
             message: err.to_string(),
         });
 
@@ -73,7 +73,7 @@ pub enum GenericResponses {
 /// Generic Responses used for create, update
 pub enum GenericResponsesCU {
     #[response(status = 400)]
-    Validation(#[to_response] Validation),
+    Validation(#[to_response] BadRequest),
 
     #[response(status = 401)]
     Unauthorized(#[to_response] Unauthorized),
@@ -90,7 +90,7 @@ pub enum GenericResponsesCU {
 /// Generic Responses used for auth endpoints
 pub enum GenericResponsesAuth {
     #[response(status = 400)]
-    Validation(#[to_response] Validation),
+    Validation(#[to_response] BadRequest),
 
     #[response(status = 401)]
     Unauthorized(#[to_response] Unauthorized),
@@ -100,17 +100,17 @@ pub enum GenericResponsesAuth {
 }
 
 #[derive(utoipa::ToResponse)]
-#[response(description = "Internal Server Error")]
-pub struct InternalServerError;
+#[response(description = "Bad Request")]
+pub struct BadRequest(pub BadRequestErrorBody);
+
+#[derive(utoipa::ToResponse)]
+#[response(description = "Unauthorized")]
+pub struct Unauthorized;
 
 #[derive(utoipa::ToResponse)]
 #[response(description = "Not Found")]
 pub struct NotFound;
 
 #[derive(utoipa::ToResponse)]
-#[response(description = "User is not Authorized / Authenticated")]
-pub struct Unauthorized;
-
-#[derive(utoipa::ToResponse)]
-#[response(description = "Validation / Deserializing failed")]
-pub struct Validation(pub ValidationErrorBody);
+#[response(description = "Internal Server Error")]
+pub struct InternalServerError;
