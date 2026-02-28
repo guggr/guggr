@@ -40,17 +40,17 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed",
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ValidationErrorBody"
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"500": {
 						"description": "Internal Server Error"
@@ -78,17 +78,17 @@
 						"description": "Successful logout"
 					},
 					"400": {
-						"description": "Validation / Deserializing failed",
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ValidationErrorBody"
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"500": {
 						"description": "Internal Server Error"
@@ -123,17 +123,17 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed",
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ValidationErrorBody"
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"500": {
 						"description": "Internal Server Error"
@@ -161,7 +161,7 @@
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"404": {
 						"description": "Not Found"
@@ -202,17 +202,17 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed",
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ValidationErrorBody"
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"404": {
 						"description": "Not Found"
@@ -256,7 +256,7 @@
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"404": {
 						"description": "Not Found"
@@ -291,7 +291,7 @@
 						"description": "Deleted"
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"404": {
 						"description": "Not Found"
@@ -343,17 +343,17 @@
 						}
 					},
 					"400": {
-						"description": "Validation / Deserializing failed",
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ValidationErrorBody"
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
 					},
 					"401": {
-						"description": "User is not Authorized / Authenticated"
+						"description": "Unauthorized"
 					},
 					"404": {
 						"description": "Not Found"
@@ -368,42 +368,20 @@
 					}
 				]
 			}
-		},
-		"/api/v1/openapi.json": {
-			"get": {
-				"tags": ["docs"],
-				"operationId": "openapi_json_redirect",
-				"responses": {
-					"307": {
-						"description": "Temporary redirect to /api/openapi.json"
-					}
-				}
-			}
-		},
-		"/api/v1/ping": {
-			"get": {
-				"operationId": "ping",
-				"responses": {
-					"200": {
-						"description": "pong"
-					}
-				}
-			}
-		},
-		"/api/v1/swagger-ui/{arg0}": {
-			"get": {
-				"tags": ["docs"],
-				"operationId": "swagger_ui_redirect",
-				"responses": {
-					"307": {
-						"description": "Temporary redirect to /api/swagger-ui/"
-					}
-				}
-			}
 		}
 	},
 	"components": {
 		"schemas": {
+			"BadRequestErrorBody": {
+				"type": "object",
+				"description": "Bad request errors",
+				"required": ["message"],
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				}
+			},
 			"CreateGroup": {
 				"type": "object",
 				"description": "sent to the database for creating a new group",
@@ -471,16 +449,6 @@
 					"name": {
 						"type": ["string", "null"],
 						"minLength": 1
-					}
-				}
-			},
-			"ValidationErrorBody": {
-				"type": "object",
-				"description": "returned Error body for Validation Errors",
-				"required": ["message"],
-				"properties": {
-					"message": {
-						"type": "string"
 					}
 				}
 			}
