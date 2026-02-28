@@ -10,7 +10,7 @@ use frunk::labelled::Transmogrifier;
 use crate::{
     adapters::outgoing::postgres::PostgresAdapterError,
     core::{
-        domain::errors::StorageError,
+        domain::errors::DomainError,
         models::group::{CreateGroup, DisplayGroup, UpdateGroup},
         ports::storage::RestrictedCrudOperations,
     },
@@ -29,7 +29,7 @@ impl PostgresGroupAdapter {
 }
 
 impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for PostgresGroupAdapter {
-    fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, StorageError> {
+    fn create(&self, new_value: CreateGroup) -> Result<DisplayGroup, DomainError> {
         use database_client::schema::group::dsl::group;
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let result: models::Group = diesel::insert_into(group)
@@ -44,7 +44,7 @@ impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for Postgr
         user_id: Option<&str>,
         id: &str,
         update_value: UpdateGroup,
-    ) -> Result<DisplayGroup, StorageError> {
+    ) -> Result<DisplayGroup, DomainError> {
         use database_client::schema::{group, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
 
@@ -82,7 +82,7 @@ impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for Postgr
         &self,
         user_id: Option<&str>,
         id: &str,
-    ) -> Result<Option<DisplayGroup>, StorageError> {
+    ) -> Result<Option<DisplayGroup>, DomainError> {
         use database_client::schema::{group, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         if let Some(u_id) = user_id {
@@ -108,7 +108,7 @@ impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for Postgr
         }
     }
 
-    fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), StorageError> {
+    fn delete(&self, user_id: Option<&str>, id: &str) -> Result<(), DomainError> {
         use database_client::schema::{group, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         if let Some(u_id) = user_id {
@@ -133,7 +133,7 @@ impl RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> for Postgr
         Ok(())
     }
 
-    fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<DisplayGroup>, StorageError> {
+    fn list(&self, user_id: Option<&str>, limit: i64) -> Result<Vec<DisplayGroup>, DomainError> {
         use database_client::schema::{group, user_group_mapping};
         let mut conn = self.pool.get().map_err(PostgresAdapterError::from)?;
         let groups = if let Some(u_id) = user_id {

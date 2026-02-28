@@ -4,6 +4,7 @@ use crate::core::{
         auth::{CreateRefreshToken, DisplayRefreshToken, UserAuth, UserAuthJwt},
         group::{CreateGroup, DisplayGroup, UpdateGroup},
         role::DisplayRole,
+        user::{CreateUser, DisplayUser, UpdateUser},
     },
 };
 
@@ -71,6 +72,9 @@ pub trait AuthOperations {
 /// Combines the [`RestrictedCrudOperations`], [`CrudOperations`],
 /// [`AuthOperations`] and [`JobCrudOperations`] traits into a single trait
 pub trait StoragePort: Send + Sync {
+    fn user(
+        &self,
+    ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync);
     fn group(
         &self,
     ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync);
@@ -85,9 +89,11 @@ pub mod tests {
     use super::*;
 
     pub struct MockStore {
+        pub user: MockStoreUser,
         pub group: MockStoreGroup,
         pub auth: MockStoreAuth,
     }
+    pub struct MockStoreUser;
     pub struct MockStoreGroup;
     pub struct MockStoreAuth;
 
@@ -100,6 +106,7 @@ pub mod tests {
     impl MockStore {
         pub fn new() -> Self {
             Self {
+                user: MockStoreUser,
                 group: MockStoreGroup,
                 auth: MockStoreAuth,
             }
@@ -107,6 +114,13 @@ pub mod tests {
     }
 
     impl StoragePort for MockStore {
+        fn user(
+            &self,
+        ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync)
+        {
+            &self.user
+        }
+
         fn group(
             &self,
         ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync)
@@ -116,6 +130,50 @@ pub mod tests {
 
         fn auth(&self) -> &(dyn AuthOperations + Send + Sync) {
             &self.auth
+        }
+    }
+
+    impl RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> for MockStoreUser {
+        fn create(&self, new_value: CreateUser) -> Result<DisplayUser, DomainError> {
+            let user = DisplayUser {
+                name: new_value.name,
+                ..Default::default()
+            };
+            Ok(user)
+        }
+        fn update(
+            &self,
+            _user_id: Option<&str>,
+            id: &str,
+            update_value: UpdateUser,
+        ) -> Result<DisplayUser, DomainError> {
+            let user = DisplayUser {
+                id: id.to_string(),
+                email: "email".to_owned(),
+                name: update_value.name.unwrap_or_default(),
+            };
+            Ok(user)
+        }
+        fn get_by_id(
+            &self,
+            _user_id: Option<&str>,
+            id: &str,
+        ) -> Result<Option<DisplayUser>, DomainError> {
+            let user = DisplayUser {
+                id: id.to_string(),
+                ..Default::default()
+            };
+            Ok(Some(user))
+        }
+        fn delete(&self, _user_id: Option<&str>, _id: &str) -> Result<(), DomainError> {
+            Ok(())
+        }
+        fn list(
+            &self,
+            _user_id: Option<&str>,
+            limit: i64,
+        ) -> Result<Vec<DisplayUser>, DomainError> {
+            Ok(vec![DisplayUser::default(); limit as usize])
         }
     }
 

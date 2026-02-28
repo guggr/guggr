@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use argon2::{
+    Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
+};
 use base64::{Engine, engine::general_purpose};
 use chrono::Utc;
 use config::ApiServiceConfig;
@@ -16,6 +19,23 @@ use crate::core::{
     models::auth::{CreateRefreshToken, TokenResponse},
     ports::storage::StoragePort,
 };
+
+/// Hashes the supplied password and returns the Argon2id PHC string.
+pub fn hash_password(password: &str) -> String {
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+
+    argon2
+        .hash_password(password.as_bytes(), &salt)
+        .unwrap()
+        .to_string()
+}
+
+/// Generates the 16 byte JWT user secret with a CSPRNG.
+pub fn generate_user_jwt_secret() -> Vec<u8> {
+    // TODO implement CSPRNG usage
+    vec![]
+}
 
 /// JWT Claims for the access token
 #[derive(Serialize, Deserialize, Debug)]

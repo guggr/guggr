@@ -1,18 +1,26 @@
 pub mod auth;
 pub mod group;
+pub mod users;
+
 use async_trait::async_trait;
 use database_client::{DbError, create_connection_pool};
 use thiserror::Error;
 
 use crate::{
-    adapters::outgoing::postgres::{auth::PostgresAuthAdapter, group::PostgresGroupAdapter},
+    adapters::outgoing::postgres::{
+        auth::PostgresAuthAdapter, group::PostgresGroupAdapter, users::PostgresUserAdapter,
+    },
     core::{
         domain::errors::DomainError,
-        models::group::{CreateGroup, DisplayGroup, UpdateGroup},
+        models::{
+            group::{CreateGroup, DisplayGroup, UpdateGroup},
+            user::{CreateUser, DisplayUser, UpdateUser},
+        },
         ports::storage::{AuthOperations, RestrictedCrudOperations, StoragePort},
     },
 };
 pub struct PostgresAdapter {
+    pub user: PostgresUserAdapter,
     pub group: PostgresGroupAdapter,
     pub auth: PostgresAuthAdapter,
 }
@@ -75,6 +83,7 @@ impl PostgresAdapter {
     pub fn new(database_url: &str) -> Result<Self, PostgresAdapterError> {
         let pool = create_connection_pool(database_url)?;
         Ok(Self {
+            user: PostgresUserAdapter::new(pool.clone()),
             group: PostgresGroupAdapter::new(pool.clone()),
             auth: PostgresAuthAdapter::new(pool.clone()),
         })
@@ -83,6 +92,12 @@ impl PostgresAdapter {
 
 #[async_trait]
 impl StoragePort for PostgresAdapter {
+    fn user(
+        &self,
+    ) -> &(dyn RestrictedCrudOperations<CreateUser, UpdateUser, DisplayUser> + Send + Sync) {
+        &self.user
+    }
+
     fn group(
         &self,
     ) -> &(dyn RestrictedCrudOperations<CreateGroup, UpdateGroup, DisplayGroup> + Send + Sync) {

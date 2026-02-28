@@ -15,7 +15,7 @@ use crate::{
     adapters::inbound::http,
     core::{
         domain::openapi_helper::{ApiDoc, json_error_handler},
-        ports::storage::StoragePort,
+        ports::service::ServicePort,
     },
 };
 
@@ -27,7 +27,7 @@ use crate::{
 /// specification will be available at `/api/swagger-ui/`.
 #[allow(clippy::type_complexity)]
 pub fn init_app(
-    api: Option<Data<Arc<dyn StoragePort>>>,
+    svc: Option<Data<Arc<dyn ServicePort>>>,
     dconfig: Option<Data<ApiServiceConfig>>,
     enable_openapi_endpoints: Option<bool>,
 ) -> (
@@ -51,12 +51,13 @@ pub fn init_app(
         .app_data(garde_actix_web::web::JsonConfig::default().error_handler(json_error_handler))
         .service(
             utoipa_actix_web::scope("/api/v1")
+                .configure(http::users::configure)
                 .configure(http::groups::configure)
                 .configure(http::auth::configure),
         );
 
-    if let Some(api) = api {
-        app = app.app_data(api.clone());
+    if let Some(svc) = svc {
+        app = app.app_data(svc.clone());
     }
     if let Some(dconfig) = dconfig {
         app = app.app_data(dconfig.clone());
