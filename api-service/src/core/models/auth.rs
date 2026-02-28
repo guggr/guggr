@@ -4,10 +4,10 @@ use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::core::domain::errors::DomainError;
+use crate::core::{domain::errors::DomainError, models::user::DisplayUser};
 
 #[derive(Debug, Deserialize, ToSchema)]
-/// request by the user to login
+/// Data used to authenticate.
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
@@ -23,6 +23,13 @@ pub struct LogoutRequest {
 /// request by the user to get a new [`TokenResponse`]
 pub struct TokenRefreshRequest {
     pub refresh_token: String,
+}
+
+#[derive(Debug, Serialize, ToSchema, LabelledGeneric)]
+/// Data sent upon login.
+pub struct AuthenticatedResponse {
+    pub user: DisplayUser,
+    pub auth: TokenResponse,
 }
 
 #[derive(Debug, Serialize, ToSchema, LabelledGeneric)]

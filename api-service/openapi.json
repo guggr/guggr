@@ -16,7 +16,7 @@
 		"/api/v1/auth/login": {
 			"post": {
 				"tags": ["auth"],
-				"summary": "login endpoint",
+				"summary": "Login",
 				"operationId": "auth_login",
 				"requestBody": {
 					"content": {
@@ -34,7 +34,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/TokenResponse"
+									"$ref": "#/components/schemas/AuthenticatedResponse"
 								}
 							}
 						}
@@ -173,6 +173,19 @@
 	},
 	"components": {
 		"schemas": {
+			"AuthenticatedResponse": {
+				"type": "object",
+				"description": "Data sent upon login.",
+				"required": ["user", "auth"],
+				"properties": {
+					"auth": {
+						"$ref": "#/components/schemas/TokenResponse"
+					},
+					"user": {
+						"$ref": "#/components/schemas/DisplayUser"
+					}
+				}
+			},
 			"BadRequestErrorBody": {
 				"type": "object",
 				"description": "Bad request errors",
@@ -220,7 +233,7 @@
 			},
 			"LoginRequest": {
 				"type": "object",
-				"description": "request by the user to login",
+				"description": "Data used to authenticate.",
 				"required": ["email", "password"],
 				"properties": {
 					"email": {

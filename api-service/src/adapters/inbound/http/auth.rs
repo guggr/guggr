@@ -6,15 +6,16 @@ use utoipa_actix_web::service_config::ServiceConfig;
 
 use crate::core::{
     domain::{
-        auth_helper::{JwtSigner, invalidate_token, refresh_token, verify_password},
-        errors::AuthError,
+        auth_helper::{invalidate_token, refresh_token},
         openapi_helper,
     },
-    models::auth::{LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse},
-    ports::storage::StoragePort,
+    models::auth::{
+        AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
+    },
+    ports::{service::ServicePort, storage::StoragePort},
 };
 
-/// configures all paths under the subpath `/auth`
+/// Configures all auth endpoints
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/auth")
         .service(login)
@@ -28,35 +29,23 @@ pub fn configure(cfg: &mut ServiceConfig) {
     request_body = LoginRequest,
     operation_id = "auth_login",
     responses(
-        (status = 200, description = "Login successful", body = TokenResponse),
+        (status = 200, description = "Login successful", body = AuthenticatedResponse),
         openapi_helper::ResBadRequest,
         openapi_helper::ResInternalServerError,
     ),
     tag = "auth"
 )]
 #[post("/login")]
-/// login endpoint
+/// Login
 pub async fn login(
-    api: web::Data<Arc<dyn StoragePort>>,
-    config: web::Data<ApiServiceConfig>,
+    svc: web::Data<Arc<dyn ServicePort>>,
     body: web::Json<LoginRequest>,
 ) -> actix_web::Result<impl Responder> {
-    let login_req = body.into_inner();
-    let token_response = web::block(move || {
-        let Ok(user) = api.auth().get_user_by_email(&login_req.email) else {
-            return Err(AuthError::Unauthorized);
-        };
-        let ok = verify_password(&login_req.password, &user.password).unwrap_or(false);
-        if !ok {
-            return Err(AuthError::Unauthorized);
-        }
-        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
+    let res = web::block(move || svc.login(body.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??;
 
-        signer.create_token(&user.id, config.get_ref(), api.get_ref())
-    })
-    .await
-    .map_err(ErrorInternalServerError)??;
-    Ok(HttpResponse::Ok().json(token_response))
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[utoipa::path(

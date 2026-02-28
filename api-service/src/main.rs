@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
     let postgres: Arc<dyn RepositoryPort> =
         Arc::from(Postgres::new(&postgres_config.connection_url())?);
 
-    let svc: Arc<dyn ServicePort> = Arc::from(Service::new(postgres));
+    let svc: Arc<dyn ServicePort> = Arc::from(Service::new(postgres, config.clone()));
 
     let dsvc = Data::new(svc);
     let dconfig = Data::new(config);
