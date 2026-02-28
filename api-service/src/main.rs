@@ -3,8 +3,8 @@ use std::sync::Arc;
 use actix_web::{HttpServer, web::Data};
 use anyhow::Result;
 use api_service::{
-    adapters::outgoing::postgres::PostgresAdapter, core::ports::storage::StoragePort,
-    init_app_openapi, telemetry::init_tracing,
+    adapters::outgoing::postgres::PostgresAdapter, core::ports::storage::StoragePort, init_app,
+    telemetry::init_tracing,
 };
 use config::{ApiServiceConfig, PostgresConfig};
 use tracing::debug;
@@ -24,10 +24,20 @@ async fn main() -> Result<()> {
     let api = Data::new(postgres);
     let dconfig = Data::new(config);
 
-    HttpServer::new(move || init_app_openapi(Some(api.clone()), Some(dconfig.clone()), true).0)
-        .bind(bind_address)?
-        .run()
-        .await?;
+    // TODO disable this dynamically in production
+    let enable_openapi_endpoints = true;
+
+    HttpServer::new(move || {
+        init_app(
+            Some(api.clone()),
+            Some(dconfig.clone()),
+            Some(enable_openapi_endpoints),
+        )
+        .0
+    })
+    .bind(bind_address)?
+    .run()
+    .await?;
 
     Ok(())
 }

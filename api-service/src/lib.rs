@@ -12,7 +12,7 @@ use utoipa_actix_web::AppExt;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
-    adapters::inbound::http::{self, auth, groups},
+    adapters::inbound::http,
     core::{
         domain::openapi_helper::{ApiDoc, json_error_handler},
         ports::storage::StoragePort,
@@ -23,13 +23,13 @@ use crate::{
 /// [`utoipa::OpenApi`] specification.
 ///
 /// If `api` and `dconfig` options are set, they will be propagated as app data.
-/// If `enable_swagger_ui` bool is set to `true`, a Swagger UI endpoint will be
-/// available at `/api/swagger-ui/`.
+/// If `enable_openapi_endpoints` is set, the Swagger UI and the OpenAPI
+/// specification will be available at `/api/swagger-ui/`.
 #[allow(clippy::type_complexity)]
-pub fn init_app_openapi(
+pub fn init_app(
     api: Option<Data<Arc<dyn StoragePort>>>,
     dconfig: Option<Data<ApiServiceConfig>>,
-    enable_swagger_ui: bool,
+    enable_openapi_endpoints: Option<bool>,
 ) -> (
     App<
         impl ServiceFactory<
@@ -51,8 +51,8 @@ pub fn init_app_openapi(
         .app_data(garde_actix_web::web::JsonConfig::default().error_handler(json_error_handler))
         .service(
             utoipa_actix_web::scope("/api/v1")
-                .configure(groups::configure)
-                .configure(auth::configure)
+                .configure(http::groups::configure)
+                .configure(http::auth::configure)
                 .configure(http::configure),
         );
 
@@ -62,7 +62,8 @@ pub fn init_app_openapi(
     if let Some(dconfig) = dconfig {
         app = app.app_data(dconfig.clone());
     }
-    if enable_swagger_ui {
+
+    if enable_openapi_endpoints.unwrap_or(false) {
         app = app.openapi_service(|api| {
             SwaggerUi::new("/api/swagger-ui/{_:.*}").url("/api/openapi.json", api)
         })
