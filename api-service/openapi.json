@@ -269,7 +269,7 @@
 			}
 		},
 		"securitySchemes": {
-			"bearerAuth": {
+			"token": {
 				"type": "http",
 				"scheme": "bearer",
 				"bearerFormat": "JWT"
