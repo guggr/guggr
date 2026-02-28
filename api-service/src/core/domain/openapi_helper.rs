@@ -55,6 +55,7 @@ pub fn json_error_handler(
 }
 
 #[derive(utoipa::IntoResponses)]
+#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
 /// Generic Responses used for list, get, delete
 pub enum GenericResponses {
     #[response(status = 401)]
@@ -68,6 +69,7 @@ pub enum GenericResponses {
 }
 
 #[derive(utoipa::IntoResponses)]
+#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
 /// Generic Responses used for create, update
 pub enum GenericResponsesCU {
     #[response(status = 400)]
@@ -84,6 +86,7 @@ pub enum GenericResponsesCU {
 }
 
 #[derive(utoipa::IntoResponses)]
+#[deprecated = "Generic responses don't work effectively as some similar endpoints expose different responses"]
 /// Generic Responses used for auth endpoints
 pub enum GenericResponsesAuth {
     #[response(status = 400)]
