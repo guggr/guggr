@@ -102,12 +102,14 @@ fn hash_and_encode_refresh_token(token: &str) -> String {
     general_purpose::STANDARD.encode(token_hash)
 }
 
-/// gets the **unverified** user id. The JWT is **NOT** verified at this point
+/// Returns the **unverified** user ID. The JWT's validity is **NOT** verified
+/// at this point!
 ///
 /// # Errors
 /// [`AuthError::JwtError`] if the supplied token can't be decoded
 pub fn get_unverified_user_id(token: &str) -> Result<String, AuthError> {
     let unverified_claims = insecure_decode::<Claims>(token)?;
+
     Ok(unverified_claims.claims.sub)
 }
 
@@ -148,7 +150,7 @@ impl JwtSigner {
         encode(&header, &access_claims, &ek).map_err(|e| DomainError::Internal(e.to_string()))
     }
 
-    /// Verify an access token
+    /// Verifies the JWT access token.
     pub fn verify_access_token(&self, token: &str) -> Result<(), AuthError> {
         let dk = self.get_decoding_key();
         decode::<Claims>(&token, &dk, &self.get_validation())?;

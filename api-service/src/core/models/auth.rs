@@ -33,15 +33,14 @@ pub struct AuthenticatedResponse {
 }
 
 #[derive(Debug, Serialize, ToSchema, LabelledGeneric)]
-/// returned to the user on login / token refresh
+/// Authentication tokens as received after successful authentication.
 pub struct TokenResponse {
     pub access_token: String,
     pub refresh_token: String,
 }
 
 #[derive(Debug, Serialize, ToSchema, LabelledGeneric, Clone)]
-/// used for handing down the `user_id` from the middleware to the requested
-/// path
+/// Passing `user_id` from the middleware to endpoint handlers path
 pub struct UserId(pub String);
 
 // DB DTO models below

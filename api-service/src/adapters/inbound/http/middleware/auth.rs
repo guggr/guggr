@@ -10,16 +10,12 @@ use actix_web::{
     http::header,
     web,
 };
-use config::ApiServiceConfig;
 use futures_util::future::{self, LocalBoxFuture};
 use tracing::error;
 
-use crate::core::{
-    domain::auth_helper::{JwtSigner, get_unverified_user_id},
-    models::auth::UserId,
-    ports::storage::StoragePort,
-};
-/// return a 401 response with the `www-authenticate` header having the value
+use crate::core::{models::auth::UserId, ports::service::ServicePort};
+
+/// Returns a 401 response with `www-authenticate` header containing the value
 /// `Bearer`
 fn unauthorized_with_bearer() -> actix_web::Error {
     let resp = HttpResponse::Unauthorized()
@@ -49,7 +45,7 @@ where
     }
 }
 
-/// Checks the supplied JWT token and allows or denies access
+/// Authentication middleware which checks the supplied JWT access token.
 pub struct AuthMiddleware<S> {
     service: S,
 }
@@ -67,18 +63,10 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let storage = if let Some(s) = req.app_data::<web::Data<Arc<dyn StoragePort>>>() {
+        let svc = if let Some(s) = req.app_data::<web::Data<Arc<dyn ServicePort>>>() {
             s.get_ref()
         } else {
-            error!("Storage is not configured");
-            return Box::pin(future::err::<ServiceResponse<B>, _>(
-                error::ErrorInternalServerError(""),
-            ));
-        };
-        let config = if let Some(s) = req.app_data::<web::Data<ApiServiceConfig>>() {
-            s.get_ref()
-        } else {
-            error!("Config is not configured");
+            error!("Service is not configured");
             return Box::pin(future::err::<ServiceResponse<B>, _>(
                 error::ErrorInternalServerError(""),
             ));
@@ -93,24 +81,14 @@ where
             Some(t) if !t.is_empty() => t,
             _ => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
-        let unverified_user = match get_unverified_user_id(token) {
+
+        let verified_user_id = match svc.validate_access_token(token) {
             Ok(u) => u,
             Err(_) => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
         };
 
-        let user = match storage.auth().get_user_jwt_secrets(&unverified_user) {
-            Ok(u) => u,
-            Err(_) => return Box::pin(futures_util::future::err(unauthorized_with_bearer())),
-        };
-        let signer = JwtSigner::new(&config.auth_secret(), &user.jwt_secret);
-        if signer.verify_access_token(token).is_err() {
-            return Box::pin(futures_util::future::err(unauthorized_with_bearer()));
-        }
-
-        // at this point the unverified user id is actually verified
-        // here we just add it to the request that is passed down to the handlers so we
-        // don't need to verify the token a second time to get its user
-        let u = UserId(unverified_user);
+        // Pass the user ID to the endpoint handlers.
+        let u = UserId(verified_user_id);
         req.extensions_mut().insert(u);
 
         let fut = self.service.call(req);

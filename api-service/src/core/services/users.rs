@@ -6,7 +6,10 @@ use crate::core::{
         auth_helper::{generate_user_jwt_secret, hash_password},
         errors::DomainError,
     },
-    models::user::{CreateUser, DisplayUser},
+    models::{
+        auth::UserId,
+        user::{CreateUser, DisplayUser},
+    },
     ports::service::ServiceUserPort,
     services::Service,
 };
@@ -26,5 +29,15 @@ impl ServiceUserPort for Service {
         let db_user = self.db.create_user(user)?;
 
         Ok(db_user.transmogrify())
+    }
+
+    fn get_user(&self, auth_user: UserId, id: &str) -> Result<DisplayUser, DomainError> {
+        let user = self.db.get_user(id)?;
+
+        if auth_user.0 != user.id {
+            return Err(DomainError::NotFound);
+        }
+
+        Ok(user.transmogrify())
     }
 }
