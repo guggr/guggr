@@ -2,26 +2,9 @@ pub mod auth;
 pub mod groups;
 pub mod middleware;
 
-use actix_web::{HttpResponse, Responder, ResponseError, get, http::StatusCode};
-use utoipa_actix_web::{self, service_config::ServiceConfig};
+use actix_web::{HttpResponse, ResponseError, http::StatusCode};
 
 use crate::core::domain::errors::{AuthError, StorageError};
-
-pub fn configure(cfg: &mut ServiceConfig) {
-    let scope = utoipa_actix_web::scope("").service(ping);
-
-    cfg.service(scope);
-}
-
-#[utoipa::path(
-    responses(
-        (status = 200, description = "pong"),
-    ),
-)]
-#[get("/ping")]
-async fn ping() -> impl Responder {
-    HttpResponse::Ok().body("pong")
-}
 
 impl ResponseError for StorageError {
     fn status_code(&self) -> StatusCode {

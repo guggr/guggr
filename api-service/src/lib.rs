@@ -52,8 +52,7 @@ pub fn init_app(
         .service(
             utoipa_actix_web::scope("/api/v1")
                 .configure(http::groups::configure)
-                .configure(http::auth::configure)
-                .configure(http::configure),
+                .configure(http::auth::configure),
         );
 
     if let Some(api) = api {
