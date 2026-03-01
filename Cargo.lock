@@ -371,6 +371,7 @@ dependencies = [
  "garde-actix-web",
  "jsonwebtoken",
  "nanoid",
+ "rand 0.10.0",
  "serde",
  "sha3",
  "temp-env",

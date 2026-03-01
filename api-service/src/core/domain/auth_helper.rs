@@ -11,6 +11,7 @@ use jsonwebtoken::{
     Algorithm, DecodingKey, EncodingKey, Header, Validation, dangerous::insecure_decode, decode,
     encode,
 };
+use rand::{Rng, rngs::StdRng};
 use serde::{Deserialize, Serialize};
 use sha3::Digest;
 
@@ -29,8 +30,10 @@ pub fn hash_password(password: &str) -> String {
 
 /// Generates the 16 byte JWT user secret with a CSPRNG.
 pub fn generate_user_jwt_secret() -> Vec<u8> {
-    // TODO implement CSPRNG usage
-    vec![]
+    let mut rng: StdRng = rand::make_rng();
+    let mut out = vec![0u8; 16];
+    rng.fill_bytes(&mut out);
+    out
 }
 
 /// Compares the supplied password with the supplied Argon2 PHC string.
