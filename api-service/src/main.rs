@@ -29,22 +29,14 @@ async fn main() -> Result<()> {
     let svc: Arc<dyn ServicePort> = Arc::from(Service::new(postgres, config.clone()));
 
     let dsvc = Data::new(svc);
-    let dconfig = Data::new(config);
 
     // enable OpenAPI endpoints in debug
     let enable_openapi_endpoints = cfg!(debug_assertions);
 
-    HttpServer::new(move || {
-        init_app(
-            Some(dsvc.clone()),
-            Some(dconfig.clone()),
-            Some(enable_openapi_endpoints),
-        )
-        .0
-    })
-    .bind(bind_address)?
-    .run()
-    .await?;
+    HttpServer::new(move || init_app(Some(dsvc.clone()), Some(enable_openapi_endpoints)).0)
+        .bind(bind_address)?
+        .run()
+        .await?;
 
     Ok(())
 }

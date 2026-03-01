@@ -5,7 +5,6 @@ pub mod telemetry;
 use std::sync::Arc;
 
 use actix_web::{App, dev::ServiceFactory, web::Data};
-use config::ApiServiceConfig;
 use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;
 use utoipa_actix_web::AppExt;
@@ -28,7 +27,6 @@ use crate::{
 #[allow(clippy::type_complexity)]
 pub fn init_app(
     svc: Option<Data<Arc<dyn ServicePort>>>,
-    dconfig: Option<Data<ApiServiceConfig>>,
     enable_openapi_endpoints: Option<bool>,
 ) -> (
     App<
@@ -57,9 +55,6 @@ pub fn init_app(
 
     if let Some(svc) = svc {
         app = app.app_data(svc.clone());
-    }
-    if let Some(dconfig) = dconfig {
-        app = app.app_data(dconfig.clone());
     }
 
     if enable_openapi_endpoints.unwrap_or(false) {
