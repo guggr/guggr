@@ -1,5 +1,6 @@
 *               @guggr/guggr-dev
 
+assets/         @tametsi
 frontend/		@tametsi
 package.json	@tametsi
 pnpm-lock.yaml	@tametsi
