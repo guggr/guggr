@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: ['agent', 'scheduler', 'evaluator', 'frontend']
+        service: ['agent', 'scheduler', 'evaluator', 'api-service', 'frontend']
         include:
           - service: agent
             dockerfile: Dockerfile.rust
@@ -75,6 +75,9 @@ jobs:
           - service: evaluator
             dockerfile: Dockerfile.rust
             image: evaluator
+          - service: api-service
+            dockerfile: Dockerfile.rust
+            image: api-service
           - service: frontend
             dockerfile: Dockerfile.frontend
             image: frontend
