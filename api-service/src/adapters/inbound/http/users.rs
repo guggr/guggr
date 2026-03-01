@@ -23,8 +23,7 @@ use crate::{
 pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/users")
         .service(create)
-        .wrap(Auth)
-        .service(get);
+        .service(utoipa_actix_web::scope("").wrap(Auth).service(get));
 
     cfg.service(scope);
 }
