@@ -1,4 +1,4 @@
-use std::{ops::Add, sync::Arc};
+use std::ops::Add;
 
 use argon2::{
     Argon2,
@@ -14,10 +14,7 @@ use jsonwebtoken::{
 use serde::{Deserialize, Serialize};
 use sha3::Digest;
 
-use crate::core::{
-    domain::errors::{AuthError, DomainError},
-    ports::storage::StoragePort,
-};
+use crate::core::domain::errors::{AuthError, DomainError};
 
 /// Hashes the supplied password and returns the Argon2id PHC string.
 pub fn hash_password(password: &str) -> String {
@@ -146,14 +143,6 @@ impl JwtSigner {
         decode::<Claims>(&token, &dk, &self.get_validation())?;
         Ok(())
     }
-}
-
-/// Invalidate an older Refresh token
-pub fn invalidate_token(storage: &Arc<dyn StoragePort>, old_token: &str) -> Result<(), AuthError> {
-    storage
-        .auth()
-        .delete_refresh_token(&hash_refresh_token(old_token))?;
-    Ok(())
 }
 
 #[cfg(test)]
