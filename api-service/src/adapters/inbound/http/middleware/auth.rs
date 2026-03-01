@@ -6,7 +6,7 @@ use std::{
 use actix_web::{
     Error, HttpMessage, HttpResponse,
     dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
-    error::{self},
+    error,
     http::header,
     web,
 };
