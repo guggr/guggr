@@ -18,7 +18,7 @@ services:
       timeout: 1s
       retries: 15
     restart: unless-stopped
-    entrypoint: ["/usr/bin/entrypoint.sh"]
+    entrypoint: ['/usr/bin/entrypoint.sh']
   postgres:
     image: docker.io/postgres:18.1-alpine3.23
     ports:
