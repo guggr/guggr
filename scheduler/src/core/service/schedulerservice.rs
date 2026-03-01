@@ -88,7 +88,7 @@ mod tests {
     use database_client::models::Job;
 
     use super::*;
-    use crate::{core::domain::type_mapper::DatabaseJob, telemetry::init_tracing};
+    use crate::{core::domain::type_mapper::DatabaseJob, logging::init_tracing};
 
     fn mock_job() -> DatabaseJob {
         (

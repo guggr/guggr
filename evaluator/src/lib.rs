@@ -13,7 +13,7 @@ use tracing::{error, info, warn};
 
 pub mod adapters;
 pub mod core;
-pub mod telemetry;
+pub mod logging;
 
 /// Creates a new `RabbitMQ` Connection Pool
 ///
