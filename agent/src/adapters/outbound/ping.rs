@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use gen_proto_types::{
     job::v1::Job,
     job_result::{types::v1::PingJobResult, v1::JobResult},
+    job_types::v1::JobType,
 };
 use protify::proto_types::Timestamp;
 use rand::random;
@@ -70,7 +71,7 @@ impl MonitorPort for PingAdapter {
 
         pinger.timeout(Duration::from_secs(1));
 
-        let job_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
+        let ping_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
             Ok((packet, latency)) => {
                 info!(
                     "received ping {} from {}",
@@ -80,24 +81,14 @@ impl MonitorPort for PingAdapter {
                     },
                     ping_details.host
                 );
-                JobResult {
-                    id: job.id.clone(),
-                    batch_id: job.batch_id.clone(),
-                    run_id,
-                    timestamp: Some(get_timestamp()?),
-                    ping: Some(PingJobResult {
-                        reachable: true,
-                        ip_address: match packet {
-                            IcmpPacket::V4(packet) => {
-                                packet.get_real_dest().octets().to_vec().into()
-                            }
-                            IcmpPacket::V6(packet) => {
-                                packet.get_real_dest().octets().to_vec().into()
-                            }
-                        },
-                        latency: Some(latency.to_proto()),
-                    }),
-                    ..Default::default()
+
+                PingJobResult {
+                    reachable: true,
+                    ip_address: match packet {
+                        IcmpPacket::V4(packet) => packet.get_real_dest().octets().to_vec().into(),
+                        IcmpPacket::V6(packet) => packet.get_real_dest().octets().to_vec().into(),
+                    },
+                    latency: Some(latency.to_proto()),
                 }
             }
             Err(e) => {
@@ -110,22 +101,24 @@ impl MonitorPort for PingAdapter {
                         ));
                     }
                 }
-                JobResult {
-                    id: job.id.clone(),
-                    batch_id: job.batch_id.clone(),
-                    run_id,
-                    timestamp: Some(get_timestamp()?),
-                    ping: Some(PingJobResult {
-                        reachable: false,
-                        ip_address: vec![].into(),
-                        latency: None,
-                    }),
-                    ..Default::default()
+
+                PingJobResult {
+                    reachable: false,
+                    ip_address: vec![].into(),
+                    latency: None,
                 }
             }
         };
 
-        Ok(job_result)
+        Ok(JobResult {
+            id: job.id.clone(),
+            batch_id: job.batch_id.clone(),
+            run_id,
+            job_type: JobType::Ping.into(),
+            timestamp: Some(get_timestamp()?),
+            ping: Some(ping_result),
+            ..Default::default()
+        })
     }
 }
 
@@ -157,7 +150,7 @@ mod tests {
     use std::net::Ipv6Addr;
 
     use agent::init_tracing;
-    use gen_proto_types::job::{types::v1::PingJobType, v1::JobType};
+    use gen_proto_types::{job::types::v1::PingJobType, job_types::v1::JobType};
 
     use super::*;
 
@@ -191,6 +184,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![1, 0, 0, 1].into(),
@@ -233,6 +227,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: true,
                     ip_address: vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1].into(),
@@ -271,6 +266,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 0, 0, 1].into(),
@@ -284,6 +280,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: vec![1, 1, 1, 1].into(),
@@ -299,6 +296,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: first_ipv6_addr.octets().to_vec().into(),
@@ -314,6 +312,7 @@ mod tests {
             run_id: run_id.clone(),
             // Needed since timestamps would be too accurate
             timestamp: res.timestamp,
+            job_type: JobType::Ping.into(),
             ping: Some(PingJobResult {
                 reachable: true,
                 ip_address: second_ipv6_addr.octets().to_vec().into(),
@@ -321,6 +320,9 @@ mod tests {
             }),
             ..Default::default()
         };
+
+        dbg!(&res);
+
         assert!(
             res == expected_result_alt_1
                 || res == expected_result_alt_2
@@ -358,6 +360,7 @@ mod tests {
                 run_id,
                 // Needed since timestamps would be too accurate
                 timestamp: res.timestamp,
+                job_type: JobType::Ping.into(),
                 ping: Some(PingJobResult {
                     reachable: false,
                     ..Default::default()

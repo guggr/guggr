@@ -1,0 +1,10 @@
+---
+import Job from '@/components/jobs/details/Job.svelte';
+import PageLayout from '@/layout/PageLayout.astro';
+---
+
+<PageLayout title="Monitoring Job">
+	<main class="mx-auto w-3xl max-w-11/12">
+		<Job client:load />
+	</main>
+</PageLayout>

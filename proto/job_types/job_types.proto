@@ -1,0 +1,10 @@
+syntax = "proto3";
+package guggr.job_types.v1;
+
+import "buf/validate/validate.proto";
+
+enum JobType {
+    JOB_TYPE_UNSPECIFIED = 0;
+    JOB_TYPE_HTTP = 1;
+    JOB_TYPE_PING = 2;
+}

@@ -56,7 +56,7 @@ repos:
         name: run cargo fmt
         types: [rust]
         language: system
-        entry: cargo +nightly fmt --check
+        entry: rustfmt-nightly
         pass_filenames: false
 
       - id: cargo-clippy
@@ -85,4 +85,11 @@ repos:
         types: [rust]
         language: system
         entry: cargo machete
+        pass_filenames: false
+
+      - id: api-service-check-spec
+        name: check openapi spec
+        files: ^api-service/
+        language: system
+        entry: api-service/openapi-check.sh
         pass_filenames: false

@@ -1,0 +1,43 @@
+---
+import PageLayout from '@/layout/PageLayout.astro';
+import { StarIcon } from '@lucide/svelte';
+---
+
+<PageLayout title="About guggr">
+	<main class="mx-auto w-md max-w-11/12">
+		<h1 class="text-base-content/80 mb-3 text-3xl font-bold">About guggr</h1>
+
+		<p>tag line</p>
+
+		<p class="text-base-content/90 my-4 font-bold">Version vx.x.x</p>
+
+		<section class="py-3">
+			<h2 class="text-base-content/70 my-3 text-xl font-bold">Open Source</h2>
+			<p class="text-base-content/90">
+				guggr's source code is open to everyone!<br />
+				You can find it along with its
+				<a
+					href="https://github.com/guggr/guggr/blob/main/LICENSE"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="link link-hover">GPL-3.0 license</a
+				> on <a
+					href="https://github.com/guggr/guggr"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="link link-hover">GitHub</a
+				>.
+			</p>
+		</section>
+
+		<div class="rounded-box text-base-content/90 my-4 gap-2 bg-yellow-200/10 p-4">
+			<StarIcon class="mr-2 inline-block text-yellow-500 dark:text-yellow-400" />
+			Star us on <a
+				href="https://github.com/guggr/guggr"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="link link-hover">GitHub</a
+			>!
+		</div>
+	</main>
+</PageLayout>

@@ -18,6 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let proto_http_result_type = proto_dir.join("result").join("types").join("http.proto");
     let proto_ping_result_type = proto_dir.join("result").join("types").join("ping.proto");
 
+    let proto_job_types = proto_dir.join("job_types").join("job_types.proto");
+
     let proto_files: Vec<PathBuf> = vec![
         proto_job,
         proto_http_job_type,
@@ -25,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         proto_result,
         proto_http_result_type,
         proto_ping_result_type,
+        proto_job_types,
     ];
 
     let out_dir = "src";

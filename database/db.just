@@ -37,15 +37,14 @@ models:
     diesel_ext --model \
         --import-types "diesel::prelude::*" \
         --import-types "crate::schema::*" \
-        --import-types "serde::{Deserialize, Serialize}" \
         --import-types "chrono::Duration" \
+        --import-types "frunk::LabelledGeneric" \
         --add-table-name \
         --schema-file {{ schema_file }} \
         --map "Interval Duration" \
         > {{ models_file }}
 
-    sed -i 's/Identifiable/Identifiable, Insertable, PartialEq, Eq, Clone,Serialize, Deserialize/' {{ models_file }}
+    sed -i 's/Identifiable/Identifiable, Insertable, PartialEq, Eq, Clone, LabelledGeneric/' {{ models_file }}
     sed -i 's/use ipnetwork::IpNetwork;/use ipnet::IpNet;/' {{ models_file }}
     sed -i 's/IpNetwork/IpNet/' {{ models_file }}
-    sed -i '/pub id: String/i #[serde(default)]' {{ models_file }}
     @just fmt-rust

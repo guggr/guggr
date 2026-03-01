@@ -1,7 +1,13 @@
 ---
 import PageLayout from '@/layout/PageLayout.astro';
+import { ActivityIcon } from '@lucide/svelte';
 ---
 
 <PageLayout>
-	<h1>Hello World</h1>
+	<main class="flex grow items-center justify-center">
+		<a href="/jobs" class="btn btn-primary btn-xl btn-soft">
+			<ActivityIcon class="inline" />
+			My Jobs
+		</a>
+	</main>
 </PageLayout>

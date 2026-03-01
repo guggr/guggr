@@ -30,8 +30,8 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       pnpm: ${{ steps.filter.outputs.pnpm }}
       frontend: ${{ steps.filter.outputs.frontend }}
-      go: ${{ steps.filter.outputs.go }}
       helm: ${{ steps.filter.outputs.helm }}
+      api: ${{ steps.filter.outputs.api }}
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dorny/paths-filter@v3.0.2
@@ -40,6 +40,7 @@ jobs:
           filters: |
             rust:
               - agent/**
+              - api-service/**
               - scheduler/**
               - evaluator/**
               - database/database-client/**
@@ -58,6 +59,7 @@ jobs:
             frontend:
               - frontend/web/**
             helm: charts/**
+            api: api-service/**
 
   pnpm-fmt:
     name: 🐛 formatting - pnpm
@@ -156,6 +158,23 @@ jobs:
         env:
           RUST_BACKTRACE: ${{ inputs.rustBacktrace || '0' }}
 
+  check-openapi-spec:
+    name: 🧐 check - openapi spec
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.2.0
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: Swatinem/rust-cache@v2.8.2
+        with:
+          cache-on-failure: true
+      - name: Check openapi spec
+        run: bash api-service/openapi-check.sh
+
   fetch-depth:
     name: 🧮 calculate fetch depth
     runs-on: ubuntu-24.04
@@ -193,6 +212,6 @@ jobs:
           ref: ${{needs.fetch-depth.outputs.branch}}
           fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@v3.93.3
+        uses: trufflesecurity/trufflehog@v3.93.4
         with:
           extra_args: --results=verified,unknown

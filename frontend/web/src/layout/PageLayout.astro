@@ -1,4 +1,7 @@
 ---
+import Footer from '@/components/shared/Footer.astro';
+import Navbar from '@/components/shared/Navbar.astro';
+import ThemeHandler from '@/components/ThemeHandler.svelte';
 import '@/style.css';
 
 const { title } = Astro.props;
@@ -18,9 +21,15 @@ interface Props {
 		<title>{title ? `${title} | guggr` : 'guggr'}</title>
 	</head>
 
-	<body class="flex min-h-screen flex-col justify-between">
-		<div>
+	<body class="bg-base-200 flex min-h-screen flex-col justify-between">
+		<div class="flex grow flex-col">
+			<Navbar />
+
 			<slot />
 		</div>
+
+		<Footer />
 	</body>
+
+	<ThemeHandler client:only />
 </html>

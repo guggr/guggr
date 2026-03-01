@@ -1,0 +1,57 @@
+---
+import EditAccountForm from '@/components/account/EditAccountForm.svelte';
+import SettingsForm from '@/components/account/SettingsForm.svelte';
+import PageLayout from '@/layout/PageLayout.astro';
+import { KeySquareIcon, UserIcon } from '@lucide/svelte';
+---
+
+<PageLayout title="My Account">
+	<main class="mx-auto w-lg max-w-11/12 *:not-last:mb-8">
+		<section
+			class="flex flex-col items-center justify-between gap-12 sm:flex-row sm:items-start"
+		>
+			<div class="avatar">
+				<div
+					class="mask mask-squircle bg-primary/10 flex size-40 items-center justify-center"
+				>
+					<UserIcon size="112" class="text-primary" />
+				</div>
+			</div>
+
+			<div class="w-xs max-w-full">
+				<h1 class="text-lg font-bold sm:text-xl">My Profile</h1>
+
+				<EditAccountForm client:load />
+			</div>
+		</section>
+
+		<section>
+			<h2 class="text-lg font-bold">Security</h2>
+
+			<ul class="list">
+				<li class="list-row items-baseline">
+					<div class="self-center">
+						<KeySquareIcon class="text-primary/70" />
+					</div>
+
+					<div>Sign in with password</div>
+
+					<div class="list-col-grow">
+						<span class="badge badge-success badge-soft">Enabled</span>
+					</div>
+
+					<a href="/account/password/change" class="btn btn-soft btn-sm">
+						Change password
+					</a>
+				</li>
+			</ul>
+		</section>
+
+		<section>
+			<h2 class="text-lg font-bold">Settings</h2>
+
+			{/* settings involves calls to localStorage, hence client-only */}
+			<SettingsForm client:only />
+		</section>
+	</main>
+</PageLayout>

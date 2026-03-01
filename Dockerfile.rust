@@ -18,11 +18,14 @@ COPY database database
 COPY agent/Cargo.toml agent/Cargo.toml
 COPY evaluator/Cargo.toml evaluator/Cargo.toml
 COPY scheduler/Cargo.toml scheduler/Cargo.toml
+COPY api-service/Cargo.toml api-service/Cargo.toml
 
 # add a dummy main.rs so it can be compiled (&cached)
 RUN mkdir evaluator/src &&  echo 'fn main() { println!("dummy"); }' > evaluator/src/main.rs
 RUN mkdir scheduler/src &&  echo 'fn main() { println!("dummy"); }' > scheduler/src/main.rs
 RUN mkdir agent/src &&  echo 'fn main() { println!("dummy"); }' > agent/src/main.rs
+RUN mkdir api-service/src &&  echo 'fn main() { println!("dummy"); }' > api-service/src/main.rs \
+     &&  echo 'fn main() { println!("dummy"); }' > api-service/src/gen_openapi.rs
 
 # monkey patch so libpq can be statically linked and can be used with the musl target
 RUN echo 'pq-sys = { version = "0.7.5", features = ["bundled"] }' >> Cargo.toml \

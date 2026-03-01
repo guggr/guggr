@@ -1,0 +1,44 @@
+[package]
+name = "api-service"
+description = "guggr HTTP API Service"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
+thiserror = { workspace = true }
+database-client = {workspace = true}
+diesel = { workspace = true, features = ["postgres", "chrono"] }
+tracing  = { workspace = true }
+config = { workspace = true }
+anyhow = { workspace = true }
+actix-web = { workspace = true }
+serde = {workspace = true}
+nanoid = {workspace = true}
+utoipa = { workspace = true , features = ["actix_extras", "chrono"] }
+utoipa-actix-web = { workspace = true }
+utoipa-swagger-ui = { workspace = true , features = ["actix-web", "vendored"] }
+tracing-actix-web = { workspace = true }
+frunk = { workspace = true }
+frunk_core = { workspace = true }
+argon2 = { workspace = true }
+chrono = { workspace = true }
+futures-util = { workspace = true }
+garde-actix-web = { workspace = true }
+garde = { workspace = true , features = ["email"] }
+jsonwebtoken = { workspace = true , features = ["rust_crypto"] }
+sha3 = { workspace = true }
+base64 = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+temp-env = { workspace = true }
+
+[package.metadata.cargo-machete]
+ignored = ["frunk_core"]
+
+[[bin]]
+name = "gen-openapi"
+path = "./src/gen_openapi.rs"

@@ -1,5 +1,5 @@
 [workspace]
-members = ["gen/proto_types", "config", "database/database-client", "agent", "evaluator", "scheduler"]
+members = ["gen/proto_types", "config", "database/database-client", "agent", "evaluator", "scheduler", "api-service"]
 exclude = [".dummy"]
 
 resolver = "3"
@@ -7,7 +7,8 @@ resolver = "3"
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-authors = ["Guggr"]
+authors = ["guggr"]
+license = "GPL-3.0"
 
 [workspace.dependencies]
 prost = "0.14"
@@ -16,9 +17,9 @@ config = { path = "config" }
 prost-build = "0.14"
 temp-env = "0.3.6"
 urlencoding = "2.1.3"
-proto-types = "0.2.0"
+proto-types = "0.2.2"
 diesel = "2.3.6"
-chrono = "0.4.43"
+chrono = "0.4.44"
 diesel_migrations = "2.3.1"
 thiserror = "2.0.18"
 async-trait = "0.1.89"
@@ -32,7 +33,7 @@ validator = { version = "0.20", features = ["derive"] }
 database-client = { path = "database/database-client" }
 tokio = "1.49.0"
 rand = "0.10.0"
-anyhow = "1.0.100"
+anyhow = "1.0.102"
 nanoid = "0.4.0"
 tracing = "0.1.44"
 deadpool-lapin = "0.13.1"
@@ -44,4 +45,19 @@ ipnet = "2.11.0"
 protify = "0.1.2"
 protify-build = "0.1.0"
 tokio-util = "0.7.18"
+actix-web = "4.13.0"
 serde = "1.0.228"
+utoipa = "5.4.0"
+utoipa-actix-web = "0.1.2"
+utoipa-swagger-ui = "9.0.2"
+tracing-actix-web = "0.7.21"
+frunk = "0.4.4"
+frunk_core = "0.4.4"
+o2o = "0.5.4"
+argon2 = "0.5.3"
+garde-actix-web = "0.12.0"
+garde = "0.22.1"
+serde_with = "3.16.1"
+jsonwebtoken = "10.3.0"
+sha3 = "0.10.8"
+base64 = "0.22.1"
