@@ -1,5 +1,7 @@
 # guggr
 
+<p align="center"><img src="./assets/logo.svg" width="200" /></p>
+
 guggr (Swabian for "looker") is a high-availability solution that keeps a constant eye on your workloads so you don't have to.
 
 > [!IMPORTANT]
