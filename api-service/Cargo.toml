@@ -20,7 +20,7 @@ serde = {workspace = true}
 nanoid = {workspace = true}
 utoipa = { workspace = true , features = ["actix_extras", "chrono"] }
 utoipa-actix-web = { workspace = true }
-utoipa-swagger-ui = { workspace = true , features = ["actix-web"] }
+utoipa-swagger-ui = { workspace = true , features = ["actix-web", "vendored"] }
 tracing-actix-web = { workspace = true }
 frunk = { workspace = true }
 frunk_core = { workspace = true }
