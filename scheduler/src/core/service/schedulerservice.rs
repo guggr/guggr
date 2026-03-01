@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use gen_proto_types::{job::v1::Job, job_types::v1::JobType};
 use nanoid::nanoid;
 use tracing::{debug, error};
 
 use crate::core::{
     domain::{errors::JobSchedulerError, type_mapper::JobFromDatabaseJob},
-    ports::{job_fetcher::JobFetcher, publisher::Publisher},
+    ports::{job_fetcher::JobFetcher, periodic_task::PeriodicTask, publisher::Publisher},
 };
 
 /// Service logic for fetching jobs and publishing them.
@@ -72,6 +73,13 @@ impl SchedulerService {
         batch_tracker.wait().await;
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl PeriodicTask for SchedulerService {
+    async fn run(&self) -> Result<(), JobSchedulerError> {
+        SchedulerService::run(self).await
     }
 }
 

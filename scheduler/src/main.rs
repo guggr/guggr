@@ -5,9 +5,15 @@ use config::{PostgresConfig, RabbitMQConfig};
 use scheduler::{
     adapters::{
         inbound::ticker::SchedulerTicker,
-        outbound::{postgres::PostgresFetcher, rabbitmq::RabbitMQPublisher},
+        outbound::{
+            postgres::PostgresFetcher, postgres_token_cleaner::PostgresTokenCleaner,
+            rabbitmq::RabbitMQPublisher,
+        },
     },
-    core::{ports::ticker::Ticker, service::schedulerservice::SchedulerService},
+    core::{
+        ports::ticker::Ticker,
+        service::{cleanupservice::CleanupService, schedulerservice::SchedulerService},
+    },
     telemetry,
 };
 use tokio::signal::unix::SignalKind;
@@ -48,30 +54,54 @@ async fn main() -> Result<()> {
         .await
         .context("while setting up rabbitmq publisher schema")?;
 
-    debug!("initializing service");
-    let service = SchedulerService::new(fetcher, publisher.clone());
+    debug!("initializing scheduler service");
+    let scheduler_service = Arc::from(SchedulerService::new(fetcher, publisher.clone()));
 
-    debug!("initializing ticker");
-    let ticker = SchedulerTicker::new(
-        Arc::from(service),
+    debug!("initializing scheduler ticker");
+    let scheduler_ticker = SchedulerTicker::new(
+        scheduler_service,
         Duration::from_secs(1),
         shutdown_token.clone(),
     );
 
-    info!("adapters and service setup completed");
+    debug!("initializing postgres token cleaner");
+    let token_cleaner = Arc::from(
+        PostgresTokenCleaner::new(&db_config.connection_url())
+            .context("while initializing postgres token cleaner")?,
+    );
 
-    debug!("starting ticker in own task");
-    let mut ticker_handle = tokio::spawn(async move {
-        ticker.start().await;
+    debug!("initializing cleanup service");
+    let cleanup_service = Arc::from(CleanupService::new(token_cleaner));
+
+    debug!("initializing cleanup ticker");
+    let cleanup_ticker = SchedulerTicker::new(
+        cleanup_service,
+        Duration::from_secs(60 * 60),
+        shutdown_token.clone(),
+    );
+
+    info!("adapters and services setup completed");
+
+    debug!("starting scheduler ticker in own task");
+    let mut scheduler_handle = tokio::spawn(async move {
+        scheduler_ticker.start().await;
     });
 
-    info!("ticker started");
+    debug!("starting cleanup ticker in own task");
+    let mut cleanup_handle = tokio::spawn(async move {
+        cleanup_ticker.start().await;
+    });
+
+    info!("tickers started");
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate())?;
 
     tokio::select! {
-        _ = &mut ticker_handle => {
-            warn!("ticker exited prematurely");
+        _ = &mut scheduler_handle => {
+            warn!("scheduler ticker exited prematurely");
+        }
+        _ = &mut cleanup_handle => {
+            warn!("cleanup ticker exited prematurely");
         }
         _ = tokio::signal::ctrl_c() => {
             info!("received ctrl-c. exiting scheduler");
@@ -84,7 +114,8 @@ async fn main() -> Result<()> {
     info!("exiting scheduler");
     shutdown_token.cancel();
 
-    let _ = ticker_handle.await;
+    let _ = scheduler_handle.await;
+    let _ = cleanup_handle.await;
 
     publisher.close();
     // Do not remove. Publisher close requires some millis for closing connections
