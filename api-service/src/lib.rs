@@ -21,7 +21,7 @@ use crate::{
 /// Initializes and returns configured Actix [`App`] and corresponding
 /// [`utoipa::OpenApi`] specification.
 ///
-/// If `api` and `dconfig` options are set, they will be propagated as app data.
+/// If `svc` is set, it will be propagated as app data.
 /// If `enable_openapi_endpoints` is set, the Swagger UI and the OpenAPI
 /// specification will be available at `/api/swagger-ui/`.
 #[allow(clippy::type_complexity)]
