@@ -19,7 +19,7 @@ use utoipa::ToSchema;
 )]
 /// Struct to create a new user
 pub struct CreateUser {
-    #[garde(ascii, length(min = 1))]
+    #[garde(email)]
     #[schema(min_length = 1)]
     pub email: String,
 

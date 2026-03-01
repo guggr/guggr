@@ -16,8 +16,6 @@ use crate::core::{
 
 impl ServiceUserPort for Service {
     fn create_user(&self, new_user: CreateUser) -> Result<DisplayUser, DomainError> {
-        // TODO validate email
-
         let user = User {
             id: nanoid::nanoid!(),
             email: new_user.email,
