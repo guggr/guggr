@@ -66,7 +66,7 @@ mod tests {
     use crate::{
         adapters::outbound::postgres::PostgresAdapterError,
         core::domain::type_mapper::{FromProtobufType, FromProtobufTypeJobResult},
-        telemetry::init_tracing,
+        logging::init_tracing,
     };
 
     struct MockDatabase {

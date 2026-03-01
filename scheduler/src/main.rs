@@ -8,14 +8,14 @@ use scheduler::{
         outbound::{postgres::PostgresFetcher, rabbitmq::RabbitMQPublisher},
     },
     core::{ports::ticker::Ticker, service::schedulerservice::SchedulerService},
-    telemetry,
+    logging,
 };
 use tokio::signal::unix::SignalKind;
 use tracing::{debug, info, warn};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    telemetry::init_tracing();
+    logging::init_tracing();
 
     debug!("Loading rabbitmq config from env");
     let rabbitmq_config = RabbitMQConfig::from_env(&["RABBITMQ_JOBS_QUEUE"])

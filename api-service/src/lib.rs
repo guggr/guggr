@@ -1,6 +1,6 @@
 pub mod adapters;
 pub mod core;
-pub mod telemetry;
+pub mod logging;
 
 use std::sync::Arc;
 

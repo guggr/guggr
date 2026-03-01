@@ -9,7 +9,7 @@ use api_service::{
         services::Service,
     },
     init_app,
-    telemetry::init_tracing,
+    logging::init_tracing,
 };
 use config::{ApiServiceConfig, PostgresConfig};
 use tracing::debug;
