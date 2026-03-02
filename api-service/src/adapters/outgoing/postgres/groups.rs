@@ -2,7 +2,7 @@ use database_client::{
     models::Group,
     schema::{group, user_group_mapping},
 };
-use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
 use crate::{
     adapters::outgoing::postgres::{Postgres, PostgresError},
@@ -31,7 +31,7 @@ impl RepositoryGroupPort for Postgres {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
 
         let groups: Vec<Group> = group::table
-            .inner_join(user_group_mapping::table.on(user_group_mapping::group_id.eq(group::id)))
+            .inner_join(user_group_mapping::table)
             .filter(user_group_mapping::user_id.eq(user_id))
             .select((group::id, group::name))
             .distinct()
