@@ -4,6 +4,7 @@ pub mod logging;
 
 use std::sync::Arc;
 
+use actix_cors::Cors;
 use actix_web::{App, dev::ServiceFactory, web::Data};
 use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;
@@ -33,9 +34,7 @@ pub fn init_app(
         impl ServiceFactory<
             actix_web::dev::ServiceRequest,
             Config = (),
-            Response = actix_web::dev::ServiceResponse<
-                tracing_actix_web::StreamSpan<actix_web::body::BoxBody>,
-            >,
+            Response = actix_web::dev::ServiceResponse<impl actix_web::body::MessageBody>,
             Error = actix_web::Error,
             InitError = (),
         >,
@@ -44,6 +43,7 @@ pub fn init_app(
 ) {
     let mut app = App::new()
         .wrap(TracingLogger::default())
+        .wrap(Cors::permissive())
         .into_utoipa_app()
         .openapi(ApiDoc::openapi())
         .app_data(garde_actix_web::web::JsonConfig::default().error_handler(json_error_handler))
