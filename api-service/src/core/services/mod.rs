@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod groups;
 pub mod users;
 
 use std::sync::Arc;
