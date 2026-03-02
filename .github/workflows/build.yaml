@@ -12,6 +12,7 @@ env:
 jobs:
   build-buildcache:
     runs-on: ubuntu-24.04
+    name: 🏗️ build the buildcache
     permissions:
       contents: read
       packages: write
@@ -56,6 +57,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-24.04
     needs: build-buildcache
+    name: 🚚 build and publish containers
     permissions:
       contents: read
       packages: write
