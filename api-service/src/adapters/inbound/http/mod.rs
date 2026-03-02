@@ -1,7 +1,7 @@
 pub mod auth;
+pub mod group;
 pub mod middleware;
 pub mod users;
-
 use actix_web::{HttpResponse, ResponseError, http::StatusCode};
 
 use crate::core::domain::errors::{AuthError, DomainError};
