@@ -1,4 +1,6 @@
+pub mod groups;
 pub mod refresh_tokens;
+pub mod user_group_mapping;
 pub mod users;
 
 use database_client::{DbError, create_connection_pool};

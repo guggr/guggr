@@ -1,9 +1,15 @@
-use database_client::models::{RefreshToken, User};
+use database_client::models::{Group, RefreshToken, User, UserGroupMapping};
 
 use crate::core::domain::errors::DomainError;
 
 /// RepositoryPort trait which requires all repository port traits.
-pub trait RepositoryPort: RepositoryUserPort + RepositoryRefreshTokenPort {}
+pub trait RepositoryPort:
+    RepositoryUserPort
+    + RepositoryRefreshTokenPort
+    + RepositoryGroupPort
+    + RepositoryUserGroupMappingPort
+{
+}
 
 pub trait RepositoryUserPort: Send + Sync {
     /// Inserts the user into the repository.
@@ -25,4 +31,17 @@ pub trait RepositoryRefreshTokenPort: Send + Sync {
 
     /// Deletes the refresh token from the repository by token.
     fn delete_refresh_token(&self, token: &str) -> Result<(), DomainError>;
+}
+
+pub trait RepositoryGroupPort: Send + Sync {
+    /// Inserts the group into the repository.
+    fn create_group(&self, new_group: Group) -> Result<Group, DomainError>;
+
+    /// Returns the groups from the repository by the user ID.
+    fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
+}
+
+pub trait RepositoryUserGroupMappingPort: Send + Sync {
+    /// Inserts the userGroupMapping into the repository.
+    fn create_user_group_mapping(&self, new_mapping: UserGroupMapping) -> Result<(), DomainError>;
 }
