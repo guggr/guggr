@@ -70,7 +70,7 @@ pub async fn create(
     security(("token" = [])),
     tag = "groups"
 )]
-#[get("/")]
+#[get("")]
 /// List groups visible by the logged in user
 pub async fn list(
     svc: web::Data<Arc<dyn ServicePort>>,

@@ -51,7 +51,7 @@ pub fn init_app(
             utoipa_actix_web::scope("/api/v1")
                 .configure(http::users::configure)
                 .configure(http::auth::configure)
-                .configure(http::group::configure),
+                .configure(http::groups::configure),
         );
 
     if let Some(svc) = svc {

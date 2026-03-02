@@ -133,6 +133,40 @@
 			}
 		},
 		"/api/v1/groups": {
+			"get": {
+				"tags": ["groups"],
+				"summary": "List groups visible by the logged in user",
+				"operationId": "list_groups",
+				"responses": {
+					"200": {
+						"description": "User",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayGroup"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			},
 			"post": {
 				"tags": ["groups"],
 				"summary": "Create group",
@@ -167,42 +201,6 @@
 								}
 							}
 						}
-					},
-					"500": {
-						"description": "Internal Server Error"
-					}
-				},
-				"security": [
-					{
-						"token": []
-					}
-				]
-			}
-		},
-		"/api/v1/groups/": {
-			"get": {
-				"tags": ["groups"],
-				"summary": "List groups visible by the logged in user",
-				"operationId": "list_groups",
-				"responses": {
-					"200": {
-						"description": "User",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/DisplayGroup"
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized"
-					},
-					"404": {
-						"description": "Not Found"
 					},
 					"500": {
 						"description": "Internal Server Error"
