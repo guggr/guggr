@@ -15,6 +15,7 @@ tracing  = { workspace = true }
 config = { workspace = true }
 anyhow = { workspace = true }
 actix-web = { workspace = true }
+actix-cors = { workspace = true }
 serde = {workspace = true}
 nanoid = {workspace = true}
 utoipa = { workspace = true , features = ["actix_extras", "chrono"] }
