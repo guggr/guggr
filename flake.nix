@@ -40,6 +40,9 @@
         system:
         let
           pkgs = nixpkgsFor.${system};
+          rustStableToolchain = pkgs.rust-bin.stable.latest.minimal.override {
+            extensions = [ "rust-src" ];
+          };
           rustNightlyToolchain = pkgs.rust-bin.nightly.latest.minimal.override {
             extensions = [ "rustfmt" ];
           };
@@ -74,7 +77,7 @@
               diesel-cli
               diesel-cli-ext
               libpq
-              rust-bin.stable.latest.default
+              rustStableToolchain
               rustfmt-nightly
               protobuf_33
               podman
