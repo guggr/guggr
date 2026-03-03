@@ -6,12 +6,16 @@ use crate::core::{
             UserId,
         },
         group::{CreateGroup, DisplayGroup},
+        job::run::DisplayJobRun,
         user::{CreateUser, DisplayUser},
     },
 };
 
 /// ServicePort trait which requires all service port traits.
-pub trait ServicePort: ServiceUserPort + ServiceAuthPort + ServiceGroupPort {}
+pub trait ServicePort:
+    ServiceUserPort + ServiceAuthPort + ServiceGroupPort + ServiceJobRunPort
+{
+}
 
 /// Service port including all user interactions.
 pub trait ServiceUserPort: Send + Sync {
@@ -46,4 +50,14 @@ pub trait ServiceGroupPort: Send + Sync {
     ) -> Result<DisplayGroup, DomainError>;
     /// List groups by the supplied user ID
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError>;
+}
+
+/// Service port for job run interactions.
+pub trait ServiceJobRunPort: Send + Sync {
+    // List JobRuns the user is allowed to view
+    fn list_job_runs(
+        &self,
+        user_id: UserId,
+        job_id: &str,
+    ) -> Result<Vec<DisplayJobRun>, DomainError>;
 }

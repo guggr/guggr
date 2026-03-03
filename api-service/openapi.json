@@ -10,7 +10,7 @@
 			"name": "GPL-3.0",
 			"identifier": "GPL-3.0"
 		},
-		"version": "0.1.0"
+		"version": "0.2.0"
 	},
 	"paths": {
 		"/api/v1/auth/login": {
@@ -213,6 +213,53 @@
 				]
 			}
 		},
+		"/api/v1/jobs/{id}/runs": {
+			"get": {
+				"tags": ["jobs"],
+				"summary": "list endpoint for job runs",
+				"operationId": "list_job_runs",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "List jobs runs",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayJobRun"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			}
+		},
 		"/api/v1/users": {
 			"post": {
 				"tags": ["users"],
@@ -367,6 +414,118 @@
 						"type": "string"
 					}
 				}
+			},
+			"DisplayJobResultHttp": {
+				"type": "object",
+				"required": ["id", "ip_address", "status_code", "latency", "payload"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"ip_address": {
+						"type": "string",
+						"format": "cidr",
+						"example": "192.0.2.5/32"
+					},
+					"latency": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"payload": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32",
+							"minimum": 0
+						}
+					},
+					"status_code": {
+						"type": "integer",
+						"format": "int32"
+					}
+				}
+			},
+			"DisplayJobResultPing": {
+				"type": "object",
+				"required": ["id", "ip_address", "latency"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"ip_address": {
+						"type": "string",
+						"format": "cidr",
+						"example": "192.0.2.5/32"
+					},
+					"latency": {
+						"type": "integer",
+						"format": "int32"
+					}
+				}
+			},
+			"DisplayJobRun": {
+				"type": "object",
+				"description": "Returned JobRun",
+				"required": [
+					"id",
+					"job_id",
+					"timestamp",
+					"triggered_notification",
+					"batch_id",
+					"reachable",
+					"details"
+				],
+				"properties": {
+					"batch_id": {
+						"type": "string"
+					},
+					"details": {
+						"$ref": "#/components/schemas/DisplayJobRunDetails"
+					},
+					"id": {
+						"type": "string"
+					},
+					"job_id": {
+						"type": "string"
+					},
+					"reachable": {
+						"type": "boolean"
+					},
+					"timestamp": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"triggered_notification": {
+						"type": "boolean"
+					}
+				}
+			},
+			"DisplayJobRunDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/DisplayJobResultHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/DisplayJobResultPing"
+							}
+						}
+					},
+					{
+						"type": "string",
+						"enum": ["Undefined"]
+					}
+				],
+				"description": "Returned JobRun details"
 			},
 			"DisplayUser": {
 				"type": "object",

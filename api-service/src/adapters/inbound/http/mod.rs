@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod groups;
+pub mod jobs;
 pub mod middleware;
 pub mod users;
 use actix_web::{HttpResponse, ResponseError, http::StatusCode};
