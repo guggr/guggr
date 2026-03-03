@@ -1,11 +1,16 @@
 ---
 import PageLayout from '@/layout/PageLayout.astro';
 import { StarIcon } from '@lucide/svelte';
+import logo from '../../../../assets/logo.svg';
 ---
 
 <PageLayout title="About guggr">
 	<main class="mx-auto w-md max-w-11/12">
 		<h1 class="text-base-content/80 mb-3 text-3xl font-bold">About guggr</h1>
+
+		<div>
+			<img src={logo.src} class="w-52" />
+		</div>
 
 		<p>tag line</p>
 
