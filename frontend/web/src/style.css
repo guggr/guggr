@@ -48,10 +48,10 @@
 	default: false;
 	prefersdark: true;
 	color-scheme: 'dark';
-	--color-base-100: oklch(30.857% 0.023 264.149);
-	--color-base-200: oklch(28.036% 0.019 264.182);
-	--color-base-300: oklch(26.346% 0.018 262.177);
-	--color-base-content: oklch(82.901% 0.031 222.959);
+	--color-base-100: oklch(28.822% 0.022 277.508);
+	--color-base-200: oklch(26.805% 0.02 277.508);
+	--color-base-300: oklch(24.787% 0.019 277.508);
+	--color-base-content: oklch(97.747% 0.007 106.545);
 	--color-primary: oklch(0.7657 0.1422 11.23);
 	--color-primary-content: oklch(24.1% 0.142 11.23);
 	--color-secondary: oklch(0.6951 0.1668 353.97);
