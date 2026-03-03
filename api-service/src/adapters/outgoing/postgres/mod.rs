@@ -1,4 +1,5 @@
 pub mod groups;
+pub mod job;
 pub mod refresh_tokens;
 pub mod user_group_mapping;
 pub mod users;
