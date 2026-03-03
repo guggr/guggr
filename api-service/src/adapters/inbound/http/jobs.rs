@@ -49,8 +49,8 @@ pub async fn list_runs(
         .get::<UserId>()
         .cloned()
         .ok_or(DomainError::Unauthorized)?;
-    let jobs = web::block(move || svc.list_job_runs(auth_user, &path.into_inner()))
+    let runs = web::block(move || svc.list_job_runs(auth_user, &path.into_inner()))
         .await
         .map_err(ErrorInternalServerError)??;
-    Ok(HttpResponse::Ok().json(jobs))
+    Ok(HttpResponse::Ok().json(runs))
 }
