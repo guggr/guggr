@@ -25,6 +25,6 @@ flake.nix	@philxws692
 
 scheduler/	@niri81
 proto/		@niri81
-gen/		@niri81
+/gen/		@niri81
 README		@niri81
 database/   @niri81
