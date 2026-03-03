@@ -1,6 +1,6 @@
 pub mod auth;
 pub mod groups;
-pub mod job;
+pub mod jobs;
 pub mod users;
 
 use std::sync::Arc;
