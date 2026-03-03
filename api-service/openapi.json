@@ -10,7 +10,7 @@
 			"name": "GPL-3.0",
 			"identifier": "GPL-3.0"
 		},
-		"version": "0.1.0"
+		"version": "0.2.0"
 	},
 	"paths": {
 		"/api/v1/auth/login": {
