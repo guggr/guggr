@@ -1,4 +1,5 @@
 ---
+import LocalStorageHandler from '@/components/LocalStorageHandler.svelte';
 import Alerts from '@/components/shared/Alerts.svelte';
 import Footer from '@/components/shared/Footer.astro';
 import Navbar from '@/components/shared/Navbar.astro';
@@ -34,5 +35,6 @@ interface Props {
 
 	<Alerts client:load />
 
-	<ThemeHandler client:only />
+	<ThemeHandler client:load />
+	<LocalStorageHandler client:only />
 </html>

@@ -50,8 +50,7 @@ import { KeySquareIcon, UserIcon } from '@lucide/svelte';
 		<section>
 			<h2 class="text-lg font-bold">Settings</h2>
 
-			{/* settings involves calls to localStorage, hence client-only */}
-			<SettingsForm client:only />
+			<SettingsForm client:load />
 		</section>
 	</main>
 </PageLayout>
