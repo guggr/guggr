@@ -1,17 +1,16 @@
 <script lang="ts">
+	import auth from '@/stores/auth.svelte';
 	import { LogOutIcon, SettingsIcon, UserIcon, UsersIcon } from '@lucide/svelte';
-
-	let isAuthenticated = $state(true);
 </script>
 
-{#if isAuthenticated}
+{#if $auth}
 	<button
 		class="btn btn-ghost"
 		popovertarget="popover-nav-acc"
 		style="anchor-name:--anchor-nav-acc"
 	>
 		<UserIcon size="20" />
-		Username
+		{$auth.user.name}
 	</button>
 	<ul
 		popover

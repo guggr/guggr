@@ -1,11 +1,29 @@
 <script lang="ts">
+	import { AuthApi, config } from '@/api';
 	import FormCard from '@/components/shared/FormCard.svelte';
+	import alerts from '@/stores/alerts.svelte';
+	import auth from '@/stores/auth.svelte';
 
 	let email = $state(''),
 		password = $state('');
 
-	const login = () => {
-		// TODO
+	const login = async () => {
+		const api = new AuthApi(config);
+
+		const loginResponse = await api
+			.authLogin({
+				loginRequest: {
+					email,
+					password,
+				},
+			})
+			.catch(() => alerts.push('Login failed', 'ERROR'));
+
+		if (!loginResponse) return;
+
+		auth.set(loginResponse);
+
+		window.location.replace(`/jobs`);
 	};
 </script>
 
