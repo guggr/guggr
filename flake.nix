@@ -40,7 +40,7 @@
         system:
         let
           pkgs = nixpkgsFor.${system};
-          rustStableToolchain = pkgs.rust-bin.stable.latest.minimal.override {
+          rustStableToolchain = pkgs.rust-bin.stable.latest.default.override {
             extensions = [ "rust-src" ];
           };
           rustNightlyToolchain = pkgs.rust-bin.nightly.latest.minimal.override {
