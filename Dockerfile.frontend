@@ -13,6 +13,7 @@ COPY frontend/web/package.json frontend/web/package.json
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
 
 COPY frontend/web frontend/web
+COPY assets assets
 
 RUN cd frontend/web && pnpm build
 
