@@ -1,6 +1,10 @@
 packages:
   - frontend/web
 
+ignoredBuiltDependencies:
+  - '@nestjs/core'
+
 onlyBuiltDependencies:
+  - '@openapitools/openapi-generator-cli'
   - esbuild
   - sharp

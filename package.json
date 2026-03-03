@@ -6,9 +6,12 @@
 	"packageManager": "pnpm@10.28.0",
 	"scripts": {
 		"check": "prettier --check .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"gen": "pnpm gen:frontend-web-openapi-port",
+		"gen:frontend-web-openapi-port": "openapi-generator-cli generate -i api-service/openapi.json -g typescript-fetch -o frontend/web/src/api/gen && pnpm format"
 	},
 	"devDependencies": {
+		"@openapitools/openapi-generator-cli": "^2.30.0",
 		"prettier": "^3.8.1",
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-sql": "^0.19.2",
