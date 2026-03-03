@@ -16,6 +16,6 @@ impl ServiceJobRunPort for Service {
             return Err(DomainError::NotFound);
         }
         // TODO handle pagination, see #96
-        self.db.list_job_run_results(job_id, 10, 0)
+        self.db.list_job_run_results(job_id, 40, 0)
     }
 }
