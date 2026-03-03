@@ -519,6 +519,10 @@
 								"$ref": "#/components/schemas/DisplayJobResultPing"
 							}
 						}
+					},
+					{
+						"type": "string",
+						"enum": ["Undefined"]
 					}
 				],
 				"description": "Returned JobRun details"

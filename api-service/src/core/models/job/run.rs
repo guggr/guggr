@@ -25,6 +25,7 @@ pub struct DisplayJobRun {
 pub enum DisplayJobRunDetails {
     Http(DisplayJobResultHttp),
     Ping(DisplayJobResultPing),
+    Undefined,
 }
 
 impl From<JobRun> for DisplayJobRun {
@@ -36,7 +37,7 @@ impl From<JobRun> for DisplayJobRun {
             triggered_notification: value.triggered_notification,
             batch_id: value.batch_id,
             reachable: value.reachable,
-            details: DisplayJobRunDetails::Http(DisplayJobResultHttp::default()),
+            details: DisplayJobRunDetails::Undefined,
         }
     }
 }
