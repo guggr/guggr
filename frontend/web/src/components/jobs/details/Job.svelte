@@ -1,6 +1,20 @@
 <script lang="ts">
+	import { config, JobsApi, type DisplayJobRun } from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
 	import { ActivityIcon, PenIcon } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+
+	let id = $state('');
+
+	let jobRunsPromise = $state(new Promise<DisplayJobRun[]>(() => {}));
+
+	onMount(async () => {
+		id = new URLSearchParams(window.location.search).get('id') ?? '';
+
+		const api = new JobsApi(config);
+
+		jobRunsPromise = api.listJobRuns({ id });
+	});
 </script>
 
 <svelte:head>
@@ -31,7 +45,7 @@
 			<div class="card-title text-md text-base-content/90 sm:text-base-content sm:text-2xl">
 				<h2 class="truncate">
 					<span class="sr-only">Job name:</span>
-					Job name
+					Job name ({id})
 				</h2>
 				<span class="badge badge-primary badge-soft badge-sm whitespace-nowrap">
 					HTTP Job
@@ -73,5 +87,5 @@
 <div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
 	<h2 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h2>
 
-	<JobRuns />
+	<JobRuns {jobRunsPromise} />
 </div>
