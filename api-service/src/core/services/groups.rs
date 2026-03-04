@@ -34,7 +34,7 @@ impl ServiceGroupPort for Service {
     }
 
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError> {
-        let groups = self.db.list_group_ids_by_user_id(&user_id.0)?;
+        let groups = self.db.list_groups_by_user_id(&user_id.0)?;
 
         let group_ids: Vec<&str> = groups.iter().map(|g| g.id.as_str()).collect();
 

@@ -29,7 +29,7 @@ impl RepositoryGroupPort for Postgres {
         Ok(result)
     }
 
-    fn list_group_ids_by_user_id(
+    fn list_groups_by_user_id(
         &self,
         user_id: &str,
     ) -> Result<Vec<database_client::models::Group>, DomainError> {

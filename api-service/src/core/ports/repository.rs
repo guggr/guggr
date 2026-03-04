@@ -45,7 +45,7 @@ pub trait RepositoryGroupPort: Send + Sync {
     fn create_group(&self, new_group: Group) -> Result<Group, DomainError>;
 
     /// Returns the groups from the repository by the user ID.
-    fn list_group_ids_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
+    fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
 
     /// Returns group members from the repository by group ids.
     fn get_members_for_multiple_groups(
