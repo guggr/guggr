@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use database_client::models::{Group, RefreshToken, User, UserGroupMapping};
 
-use crate::core::{domain::errors::DomainError, models::group::DisplayGroupMember};
+use crate::core::{
+    domain::errors::DomainError,
+    models::{group::DisplayGroupMember, job::run::DisplayJobRun},
+};
 
 /// RepositoryPort trait which requires all repository port traits.
 pub trait RepositoryPort:
@@ -10,6 +13,8 @@ pub trait RepositoryPort:
     + RepositoryRefreshTokenPort
     + RepositoryGroupPort
     + RepositoryUserGroupMappingPort
+    + RepositoryJobRunPort
+    + RepositoryJobPort
 {
 }
 
@@ -52,4 +57,23 @@ pub trait RepositoryGroupPort: Send + Sync {
 pub trait RepositoryUserGroupMappingPort: Send + Sync {
     /// Inserts the userGroupMapping into the repository.
     fn create_user_group_mapping(&self, new_mapping: UserGroupMapping) -> Result<(), DomainError>;
+}
+
+pub trait RepositoryJobRunPort: Send + Sync {
+    /// Returns the JobRuns from the repository.
+    fn list_job_run_results(
+        &self,
+        job_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<DisplayJobRun>, DomainError>;
+}
+
+pub trait RepositoryJobPort: Send + Sync {
+    /// Check if the user is part of the job's group
+    fn check_user_job_group_membership(
+        &self,
+        user_id: &str,
+        job_id: &str,
+    ) -> Result<bool, DomainError>;
 }
