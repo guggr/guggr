@@ -1,3 +1,149 @@
+use chrono::{Duration, NaiveDateTime};
+use database_client::{models::Job, schema::job};
+use diesel::prelude::AsChangeset;
+use frunk::LabelledGeneric;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+
+use crate::core::models::job::{
+    http::detail::{CreateJobDetailsHttp, DisplayJobDetailsHttp, UpdateJobDetailsHttp},
+    ping::detail::{CreateJobDetailsPing, DisplayJobDetailsPing, UpdateJobDetailsPing},
+};
+
 pub mod http;
 pub mod ping;
 pub mod run;
+#[serde_with::serde_as]
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
+/// Struct to create a new job
+pub struct CreateJob {
+    pub name: String,
+    pub job_type_id: String,
+    pub group_id: String,
+    pub notify_users: bool,
+    pub custom_notification: Option<String>,
+    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    pub run_every: Duration,
+    pub details: CreateJobDetails,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Deserialize)]
+/// Enum to create Job Details
+pub enum CreateJobDetails {
+    Http(CreateJobDetailsHttp),
+    Ping(CreateJobDetailsPing),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema)]
+/// Returned Job
+pub struct DisplayJob {
+    pub id: String,
+    pub name: String,
+    pub job_type_id: String,
+    pub group_id: String,
+    pub notify_users: bool,
+    pub custom_notification: Option<String>,
+    pub run_every: Duration,
+    pub last_scheduled: Option<NaiveDateTime>,
+    pub details: DisplayJobDetails,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
+/// Returned Job Details
+pub enum DisplayJobDetails {
+    Http(DisplayJobDetailsHttp),
+    Ping(DisplayJobDetailsPing),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
+/// Struct to Update a Job
+pub struct UpdateRequestJob {
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub job_type_id: Option<String>,
+    pub group_id: Option<String>,
+    pub notify_users: Option<bool>,
+    pub custom_notification: Option<String>,
+    pub run_every: Option<Duration>,
+    pub last_scheduled: Option<NaiveDateTime>,
+    pub details: Option<UpdateRequestJobDetails>,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
+/// Struct to update a job detail
+pub enum UpdateRequestJobDetails {
+    Http(UpdateJobDetailsHttp),
+    Ping(UpdateJobDetailsPing),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, AsChangeset)]
+#[diesel(table_name = job)]
+/// Struct to Update a Job
+pub struct UpdateJob {
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub job_type_id: Option<String>,
+    pub group_id: Option<String>,
+    pub notify_users: Option<bool>,
+    pub custom_notification: Option<String>,
+    pub run_every: Option<Duration>,
+    pub last_scheduled: Option<NaiveDateTime>,
+}
+
+impl From<CreateJob> for Job {
+    fn from(value: CreateJob) -> Self {
+        Self {
+            id: nanoid::nanoid!(),
+            name: value.name,
+            job_type_id: value.job_type_id,
+            group_id: value.group_id,
+            notify_users: value.notify_users,
+            custom_notification: value.custom_notification,
+            run_every: value.run_every,
+            last_scheduled: None,
+        }
+    }
+}
+
+impl From<Job> for DisplayJob {
+    fn from(value: Job) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            job_type_id: value.job_type_id,
+            group_id: value.group_id,
+            notify_users: value.notify_users,
+            custom_notification: value.custom_notification,
+            run_every: value.run_every,
+            last_scheduled: value.last_scheduled,
+            details: DisplayJobDetails::Http(DisplayJobDetailsHttp::default()),
+        }
+    }
+}
+
+impl From<UpdateRequestJob> for UpdateJob {
+    fn from(value: UpdateRequestJob) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            job_type_id: value.job_type_id,
+            group_id: value.group_id,
+            notify_users: value.notify_users,
+            custom_notification: value.custom_notification,
+            run_every: value.run_every,
+            last_scheduled: value.last_scheduled,
+        }
+    }
+}
+
+impl From<DisplayJobDetailsHttp> for DisplayJobDetails {
+    fn from(value: DisplayJobDetailsHttp) -> Self {
+        Self::Http(value)
+    }
+}
+
+impl From<DisplayJobDetailsPing> for DisplayJobDetails {
+    fn from(value: DisplayJobDetailsPing) -> Self {
+        Self::Ping(value)
+    }
+}

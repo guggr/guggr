@@ -34,6 +34,7 @@ sha3 = { workspace = true }
 base64 = { workspace = true }
 rand = { workspace = true }
 ipnet = { workspace = true }
+serde_with = { workspace = true, features = ["chrono"] }
 
 [dev-dependencies]
 temp-env = { workspace = true }
