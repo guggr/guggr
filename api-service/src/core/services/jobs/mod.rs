@@ -45,6 +45,19 @@ impl ServiceJobPort for Service {
         Ok(display_job)
     }
 
+    fn get_job_by_id(&self, user_id: UserId, job_id: &str) -> Result<DisplayJob, DomainError> {
+        let raw_job = self.db.get_job_by_id(&user_id.0, job_id)?;
+        let (job, http, ping) = raw_job;
+        let details = match (http, ping) {
+            (Some(http), None) => DisplayJobDetails::Http(http.transmogrify()),
+            (None, Some(ping)) => DisplayJobDetails::Ping(ping.transmogrify()),
+            (_, _) => DisplayJobDetails::Undefined,
+        };
+        let mut job = DisplayJob::from(job);
+        job.details = details;
+        Ok(job)
+    }
+
     fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError> {
         let raw_jobs = self.db.list_jobs(&user_id.0, 10, 0)?;
         Ok(raw_jobs
@@ -54,7 +67,7 @@ impl ServiceJobPort for Service {
                 if let Some(detail) = http {
                     display_job.details = DisplayJobDetails::Http(detail.transmogrify());
                 } else if let Some(detail) = ping {
-                    display_job.details = DisplayJobDetails::Ping(detail.transmogrify())
+                    display_job.details = DisplayJobDetails::Ping(detail.transmogrify());
                 };
                 display_job
             })

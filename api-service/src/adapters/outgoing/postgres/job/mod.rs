@@ -79,6 +79,27 @@ impl RepositoryJobPort for Postgres {
             .get_result(&mut conn)
             .map_err(PostgresError::from)?)
     }
+
+    fn get_job_by_id(&self, user_id: &str, job_id: &str) -> Result<JobWithRawDetails, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+        let job: (Job, Option<JobDetailsHttp>, Option<JobDetailsPing>) = job::table
+            .find(job_id)
+            .inner_join(
+                user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
+            )
+            .filter(user_group_mapping::user_id.eq(user_id))
+            .left_join(job_details_http::table)
+            .left_join(job_details_ping::table)
+            .select((
+                job::all_columns,
+                job_details_http::all_columns.nullable(),
+                job_details_ping::all_columns.nullable(),
+            ))
+            .first::<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>(&mut conn)
+            .map_err(PostgresError::from)?;
+        Ok(job)
+    }
+
     fn list_jobs(
         &self,
         user_id: &str,

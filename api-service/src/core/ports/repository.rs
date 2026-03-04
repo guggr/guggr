@@ -85,6 +85,7 @@ pub trait RepositoryJobPort: Send + Sync {
     -> Result<bool, DomainError>;
 
     fn create_job(&self, new_job: Job) -> Result<Job, DomainError>;
+    fn get_job_by_id(&self, user_id: &str, job_id: &str) -> Result<JobWithRawDetails, DomainError>;
     fn list_jobs(
         &self,
         user_id: &str,

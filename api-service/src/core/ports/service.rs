@@ -65,6 +65,7 @@ pub trait ServiceJobRunPort: Send + Sync {
 /// Service port for job interactions.
 pub trait ServiceJobPort: Send + Sync {
     fn create_job(&self, user_id: UserId, new_job: CreateJob) -> Result<DisplayJob, DomainError>;
+    fn get_job_by_id(&self, user_id: UserId, job_id: &str) -> Result<DisplayJob, DomainError>;
     fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError>;
     fn update_job(
         &self,
