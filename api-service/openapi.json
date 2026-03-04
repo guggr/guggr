@@ -213,10 +213,209 @@
 				]
 			}
 		},
+		"/api/v1/jobs": {
+			"get": {
+				"tags": ["jobs"],
+				"summary": "List Jobs",
+				"operationId": "list_job",
+				"responses": {
+					"200": {
+						"description": "Jobs",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayJob"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			},
+			"post": {
+				"tags": ["jobs"],
+				"summary": "Create Job",
+				"operationId": "create_job",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateJob"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Job successfully created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			}
+		},
+		"/api/v1/jobs/{id}": {
+			"get": {
+				"tags": ["jobs"],
+				"summary": "Get Job",
+				"operationId": "get_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Job",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			},
+			"delete": {
+				"tags": ["jobs"],
+				"summary": "Delete Job",
+				"operationId": "delete_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Deleted"
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			},
+			"patch": {
+				"tags": ["jobs"],
+				"summary": "Update Job",
+				"operationId": "update_job",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Job ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRequestJob"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Job successfully updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			}
+		},
 		"/api/v1/jobs/{id}/runs": {
 			"get": {
 				"tags": ["jobs"],
-				"summary": "list endpoint for job runs",
+				"summary": "List Job Runs",
 				"operationId": "list_job_runs",
 				"parameters": [
 					{
@@ -383,6 +582,77 @@
 					}
 				}
 			},
+			"CreateJob": {
+				"type": "object",
+				"description": "Struct to create a new job",
+				"required": ["name", "job_type_id", "group_id", "notify_users", "run_every", "details"],
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"$ref": "#/components/schemas/CreateJobDetails"
+					},
+					"group_id": {
+						"type": "string"
+					},
+					"job_type_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"notify_users": {
+						"type": "boolean"
+					},
+					"run_every": {
+						"type": "string"
+					}
+				}
+			},
+			"CreateJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/CreateJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/CreateJobDetailsPing"
+							}
+						}
+					}
+				],
+				"description": "Enum to create Job Details"
+			},
+			"CreateJobDetailsHttp": {
+				"type": "object",
+				"description": "Struct to create a new Job HTTP Detail",
+				"required": ["url"],
+				"properties": {
+					"url": {
+						"type": "string"
+					}
+				}
+			},
+			"CreateJobDetailsPing": {
+				"type": "object",
+				"description": "Struct to create a new Job Ping Detail",
+				"required": ["host"],
+				"properties": {
+					"host": {
+						"type": "string"
+					}
+				}
+			},
 			"CreateUser": {
 				"type": "object",
 				"description": "Struct to create a new user",
@@ -411,6 +681,102 @@
 						"type": "string"
 					},
 					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJob": {
+				"type": "object",
+				"description": "Returned Job",
+				"required": [
+					"id",
+					"name",
+					"job_type_id",
+					"group_id",
+					"notify_users",
+					"run_every",
+					"details"
+				],
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"$ref": "#/components/schemas/DisplayJobDetails"
+					},
+					"group_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"job_type_id": {
+						"type": "string"
+					},
+					"last_scheduled": {
+						"type": ["string", "null"],
+						"format": "date-time"
+					},
+					"name": {
+						"type": "string"
+					},
+					"notify_users": {
+						"type": "boolean"
+					},
+					"run_every": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/DisplayJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/DisplayJobDetailsPing"
+							}
+						}
+					},
+					{
+						"type": "string",
+						"enum": ["Undefined"]
+					}
+				],
+				"description": "Returned Job Details"
+			},
+			"DisplayJobDetailsHttp": {
+				"type": "object",
+				"description": "Returned Job HTTP Detail",
+				"required": ["id", "url"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"url": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayJobDetailsPing": {
+				"type": "object",
+				"description": "Returned Job Ping Detail",
+				"required": ["id", "host"],
+				"properties": {
+					"host": {
+						"type": "string"
+					},
+					"id": {
 						"type": "string"
 					}
 				}
@@ -588,6 +954,88 @@
 						"type": "string"
 					}
 				}
+			},
+			"UpdateJobDetailsHttp": {
+				"type": "object",
+				"description": "Struct to update a new Job HTTP Detail",
+				"properties": {
+					"url": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateJobDetailsPing": {
+				"type": "object",
+				"description": "Struct to update a new Job Ping Detail",
+				"properties": {
+					"host": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateRequestJob": {
+				"type": "object",
+				"description": "Struct to Update a Job",
+				"properties": {
+					"custom_notification": {
+						"type": ["string", "null"]
+					},
+					"details": {
+						"oneOf": [
+							{
+								"type": "null"
+							},
+							{
+								"$ref": "#/components/schemas/UpdateRequestJobDetails"
+							}
+						]
+					},
+					"group_id": {
+						"type": ["string", "null"]
+					},
+					"id": {
+						"type": ["string", "null"]
+					},
+					"job_type_id": {
+						"type": ["string", "null"]
+					},
+					"last_scheduled": {
+						"type": ["string", "null"],
+						"format": "date-time"
+					},
+					"name": {
+						"type": ["string", "null"]
+					},
+					"notify_users": {
+						"type": ["boolean", "null"]
+					},
+					"run_every": {
+						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateRequestJobDetails": {
+				"oneOf": [
+					{
+						"type": "object",
+						"required": ["Http"],
+						"properties": {
+							"Http": {
+								"$ref": "#/components/schemas/UpdateJobDetailsHttp"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"required": ["Ping"],
+						"properties": {
+							"Ping": {
+								"$ref": "#/components/schemas/UpdateJobDetailsPing"
+							}
+						}
+					}
+				],
+				"description": "Struct to update a job detail"
 			}
 		},
 		"securitySchemes": {
