@@ -6,14 +6,14 @@ use crate::core::{
             UserId,
         },
         group::{CreateGroup, DisplayGroup},
-        job::run::DisplayJobRun,
+        job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
         user::{CreateUser, DisplayUser},
     },
 };
 
 /// ServicePort trait which requires all service port traits.
 pub trait ServicePort:
-    ServiceUserPort + ServiceAuthPort + ServiceGroupPort + ServiceJobRunPort
+    ServiceUserPort + ServiceAuthPort + ServiceGroupPort + ServiceJobRunPort + ServiceJobPort
 {
 }
 
@@ -60,4 +60,17 @@ pub trait ServiceJobRunPort: Send + Sync {
         user_id: UserId,
         job_id: &str,
     ) -> Result<Vec<DisplayJobRun>, DomainError>;
+}
+
+/// Service port for job interactions.
+pub trait ServiceJobPort: Send + Sync {
+    fn create_job(&self, user_id: UserId, new_job: CreateJob) -> Result<DisplayJob, DomainError>;
+    fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError>;
+    fn update_job(
+        &self,
+        user_id: UserId,
+        job_id: &str,
+        updated_job: UpdateRequestJob,
+    ) -> Result<DisplayJob, DomainError>;
+    fn delete_job(&self, user_id: UserId, job_id: &str) -> Result<(), DomainError>;
 }
