@@ -358,12 +358,34 @@
 			"DisplayGroup": {
 				"type": "object",
 				"description": "Returned Group",
-				"required": ["id", "name"],
+				"required": ["id", "name", "members"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"members": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/DisplayGroupMember"
+						}
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+			},
+			"DisplayGroupMember": {
+				"type": "object",
+				"description": "Returned user",
+				"required": ["id", "name", "role"],
 				"properties": {
 					"id": {
 						"type": "string"
 					},
 					"name": {
+						"type": "string"
+					},
+					"role": {
 						"type": "string"
 					}
 				}
