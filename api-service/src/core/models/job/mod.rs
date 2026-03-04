@@ -1,5 +1,8 @@
 use chrono::{Duration, NaiveDateTime};
-use database_client::{models::Job, schema::job};
+use database_client::{
+    models::{Job, JobDetailsHttp, JobDetailsPing},
+    schema::job,
+};
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
@@ -13,6 +16,10 @@ use crate::core::models::job::{
 pub mod http;
 pub mod ping;
 pub mod run;
+
+/// Type returned by list function
+pub type JobWithRawDetails = (Job, Option<JobDetailsHttp>, Option<JobDetailsPing>);
+
 #[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
 /// Struct to create a new job
@@ -53,6 +60,7 @@ pub struct DisplayJob {
 pub enum DisplayJobDetails {
     Http(DisplayJobDetailsHttp),
     Ping(DisplayJobDetailsPing),
+    Undefined,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
@@ -116,22 +124,7 @@ impl From<Job> for DisplayJob {
             custom_notification: value.custom_notification,
             run_every: value.run_every,
             last_scheduled: value.last_scheduled,
-            details: DisplayJobDetails::Http(DisplayJobDetailsHttp::default()),
-        }
-    }
-}
-
-impl From<UpdateRequestJob> for UpdateJob {
-    fn from(value: UpdateRequestJob) -> Self {
-        Self {
-            id: value.id,
-            name: value.name,
-            job_type_id: value.job_type_id,
-            group_id: value.group_id,
-            notify_users: value.notify_users,
-            custom_notification: value.custom_notification,
-            run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            details: DisplayJobDetails::Undefined,
         }
     }
 }

@@ -2,15 +2,19 @@ pub mod detail;
 pub mod run;
 
 use database_client::{
-    models::Job,
-    schema::{job, user_group_mapping},
+    models::{Job, JobDetailsHttp, JobDetailsPing},
+    schema::{job, job_details_http, job_details_ping, user_group_mapping},
 };
-use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, dsl::exists};
+use diesel::{
+    ExpressionMethods, JoinOnDsl, NullableExpressionMethods, QueryDsl, RunQueryDsl, dsl::exists,
+};
 
 use crate::{
     adapters::outgoing::postgres::{Postgres, PostgresError},
     core::{
-        domain::errors::DomainError, models::job::UpdateJob, ports::repository::RepositoryJobPort,
+        domain::errors::DomainError,
+        models::job::{JobWithRawDetails, UpdateJob},
+        ports::repository::RepositoryJobPort,
     },
 };
 
@@ -75,20 +79,30 @@ impl RepositoryJobPort for Postgres {
             .get_result(&mut conn)
             .map_err(PostgresError::from)?)
     }
-    fn list_jobs(&self, user_id: &str, limit: i64, offset: i64) -> Result<Vec<Job>, DomainError> {
+    fn list_jobs(
+        &self,
+        user_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<JobWithRawDetails>, DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
-        let _jobs: Vec<Job> = job::table
+        let jobs: Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)> = job::table
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
             .filter(user_group_mapping::user_id.eq(user_id))
-            .select(job::all_columns)
+            .left_join(job_details_http::table)
+            .left_join(job_details_ping::table)
+            .select((
+                job::all_columns,
+                job_details_http::all_columns.nullable(),
+                job_details_ping::all_columns.nullable(),
+            ))
             .limit(limit)
             .offset(offset)
-            .load::<Job>(&mut conn)
+            .load::<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>(&mut conn)
             .map_err(PostgresError::from)?;
-
-        todo!()
+        Ok(jobs)
     }
 
     fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError> {

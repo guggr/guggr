@@ -39,10 +39,11 @@ pub struct UpdateJobDetailsHttp {
     pub url: Option<String>,
 }
 
-// can't impl `From` as I need the id of the parent job
-pub fn to_job_detail_http(id: &str, j: CreateJobDetailsHttp) -> JobDetailsHttp {
-    JobDetailsHttp {
-        id: id.to_string(),
-        url: j.url,
+impl CreateJobDetailsHttp {
+    pub fn from_create_detail(id: &str, detail: CreateJobDetailsHttp) -> JobDetailsHttp {
+        JobDetailsHttp {
+            id: id.to_string(),
+            url: detail.url,
+        }
     }
 }

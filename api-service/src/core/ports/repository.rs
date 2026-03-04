@@ -5,8 +5,8 @@ use database_client::models::{
 use crate::core::{
     domain::errors::DomainError,
     models::job::{
-        UpdateJob, http::detail::UpdateJobDetailsHttp, ping::detail::UpdateJobDetailsPing,
-        run::DisplayJobRun,
+        JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
+        ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
     },
 };
 
@@ -85,7 +85,12 @@ pub trait RepositoryJobPort: Send + Sync {
     -> Result<bool, DomainError>;
 
     fn create_job(&self, new_job: Job) -> Result<Job, DomainError>;
-    fn list_jobs(&self, user_id: &str, limit: i64, offset: i64) -> Result<Vec<Job>, DomainError>;
+    fn list_jobs(
+        &self,
+        user_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<JobWithRawDetails>, DomainError>;
     fn delete_job(&self, job_id: &str) -> Result<(), DomainError>;
     fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError>;
 }

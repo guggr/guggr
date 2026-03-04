@@ -30,10 +30,11 @@ pub struct UpdateJobDetailsPing {
     pub host: Option<String>,
 }
 
-// can't impl `From` as I need the id of the parent job
-pub fn to_job_detail_ping(id: &str, j: CreateJobDetailsPing) -> JobDetailsPing {
-    JobDetailsPing {
-        id: id.to_string(),
-        host: j.host,
+impl CreateJobDetailsPing {
+    pub fn from_create_detail(id: &str, detail: CreateJobDetailsPing) -> JobDetailsPing {
+        JobDetailsPing {
+            id: id.to_string(),
+            host: detail.host,
+        }
     }
 }

@@ -6,9 +6,9 @@ use crate::core::{
     models::{
         auth::UserId,
         job::{
-            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateJob,
-            UpdateRequestJob, UpdateRequestJobDetails, http::detail::to_job_detail_http,
-            ping::detail::to_job_detail_ping,
+            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateRequestJob,
+            UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
+            ping::detail::CreateJobDetailsPing,
         },
     },
     ports::service::ServiceJobPort,
@@ -30,12 +30,12 @@ impl ServiceJobPort for Service {
         let detail = match new_job.details {
             CreateJobDetails::Http(d) => DisplayJobDetails::Http(
                 self.db
-                    .create_job_detail_http(to_job_detail_http(&job.id, d))?
+                    .create_job_detail_http(CreateJobDetailsHttp::from_create_detail(&job.id, d))?
                     .transmogrify(),
             ),
             CreateJobDetails::Ping(d) => DisplayJobDetails::Ping(
                 self.db
-                    .create_job_detail_ping(to_job_detail_ping(&job.id, d))?
+                    .create_job_detail_ping(CreateJobDetailsPing::from_create_detail(&job.id, d))?
                     .transmogrify(),
             ),
         };
@@ -46,9 +46,19 @@ impl ServiceJobPort for Service {
     }
 
     fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError> {
-        let _jobs = self.db.list_jobs(&user_id.0, 10, 0);
-
-        todo!()
+        let raw_jobs = self.db.list_jobs(&user_id.0, 10, 0)?;
+        Ok(raw_jobs
+            .into_iter()
+            .map(|(job, http, ping)| {
+                let mut display_job = DisplayJob::from(job);
+                if let Some(detail) = http {
+                    display_job.details = DisplayJobDetails::Http(detail.transmogrify());
+                } else if let Some(detail) = ping {
+                    display_job.details = DisplayJobDetails::Ping(detail.transmogrify())
+                };
+                display_job
+            })
+            .collect())
     }
 
     fn update_job(
@@ -66,9 +76,9 @@ impl ServiceJobPort for Service {
 
         let job = self
             .db
-            .update_job(job_id, UpdateJob::from(updated_job.clone()))?;
+            .update_job(job_id, updated_job.clone().transmogrify())?;
 
-        match updated_job.details {
+        let detail = match updated_job.details {
             Some(detail) => match detail {
                 UpdateRequestJobDetails::Http(d) => DisplayJobDetails::Http(
                     self.db.update_job_detail_http(&job.id, d)?.transmogrify(),
@@ -87,8 +97,10 @@ impl ServiceJobPort for Service {
                 _ => return Err(DomainError::NotFound),
             },
         };
+        let mut job = DisplayJob::from(job);
+        job.details = detail;
 
-        todo!()
+        Ok(job)
     }
 
     fn delete_job(&self, user_id: UserId, job_id: &str) -> Result<(), DomainError> {
