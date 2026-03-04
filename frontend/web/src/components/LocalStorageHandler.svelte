@@ -5,6 +5,7 @@
  -->
 
 <script lang="ts">
+	import auth from '@/stores/auth.svelte';
 	import settings from '@/stores/settings.svelte';
 	import { onMount } from 'svelte';
 	import type { Writable } from 'svelte/store';
@@ -13,6 +14,10 @@
 		{
 			key: 'settings',
 			store: settings,
+		},
+		{
+			key: 'auth',
+			store: auth,
 		},
 	];
 

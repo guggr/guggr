@@ -1,12 +1,25 @@
 <script lang="ts">
+	import { config, UsersApi } from '@/api';
 	import FormCard from '@/components/shared/FormCard.svelte';
+	import alerts from '@/stores/alerts.svelte';
 
 	let email = $state(''),
+		name = $state(''),
 		password = $state(''),
 		passwordConfirm = $state('');
 
-	const register = () => {
-		// TODO
+	const register = async () => {
+		if (password !== passwordConfirm) return alerts.push('Passwords are not equal.', 'ERROR');
+
+		const api = new UsersApi(config);
+
+		const user = await api
+			.createUser({ createUser: { email, name, password } })
+			.catch(() => alerts.push('Failed to create user', 'ERROR'));
+
+		if (!user) return;
+
+		window.location.replace(`/login`);
 	};
 </script>
 
@@ -20,6 +33,11 @@
 			class="input validator"
 			placeholder="Email"
 		/>
+	</label>
+
+	<label>
+		<span class="label my-1">Name</span>
+		<input type="text" bind:value={name} required class="input validator" placeholder="Name" />
 	</label>
 
 	<label class="my-1">
