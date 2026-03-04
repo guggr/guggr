@@ -219,7 +219,7 @@ dependencies = [
 
 [[package]]
 name = "agent"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "config",
@@ -368,7 +368,7 @@ checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
 name = "api-service"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "actix-cors",
  "actix-web",
@@ -1136,7 +1136,7 @@ dependencies = [
 
 [[package]]
 name = "config"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "temp-env",
  "thiserror 2.0.18",
@@ -1338,7 +1338,7 @@ checksum = "d7a1e2f27636f116493b8b860f5546edb47c8d8f8ea73e1d2a20be88e28d1fea"
 
 [[package]]
 name = "database-client"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "diesel",
@@ -1686,7 +1686,7 @@ dependencies = [
 
 [[package]]
 name = "evaluator"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2092,7 +2092,7 @@ dependencies = [
 
 [[package]]
 name = "gen-proto-types"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "prost",
  "prost-build",
@@ -4321,7 +4321,7 @@ dependencies = [
 
 [[package]]
 name = "scheduler"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
