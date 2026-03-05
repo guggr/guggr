@@ -82,6 +82,13 @@ impl ServiceJobPort for Service {
     ) -> Result<DisplayJob, DomainError> {
         if !self
             .db
+            .check_user_job_group_membership(&user_id.0, job_id)?
+        {
+            return Err(DomainError::NotFound);
+        }
+
+        if !self
+            .db
             .check_user_job_edit_permissions(&user_id.0, job_id)?
         {
             return Err(DomainError::Unauthorized);
