@@ -42,7 +42,7 @@
 {#await groupsPromise}
 	<Loading />
 {:then groups}
-	<GroupList />
+	<GroupList {groups} />
 {:catch}
 	<Error />
 {/await}
