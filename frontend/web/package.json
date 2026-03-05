@@ -21,7 +21,7 @@
 		"astro": "^5.18.0",
 		"daisyui": "^5.5.19",
 		"svelte": "^5.53.7",
-		"svelte-check": "^4.4.3",
+		"svelte-check": "^4.4.4",
 		"tailwindcss": "^4.2.1",
 		"typescript": "^5.9.3"
 	}
