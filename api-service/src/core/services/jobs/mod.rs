@@ -22,7 +22,7 @@ impl ServiceJobPort for Service {
             .db
             .check_user_can_create_job(&user_id.0, &new_job.group_id)?
         {
-            return Err(DomainError::Unauthorized);
+            return Err(DomainError::BadRequest);
         }
 
         let job = self.db.create_job(Job::from(new_job.clone()))?;
@@ -91,7 +91,7 @@ impl ServiceJobPort for Service {
             .db
             .check_user_job_edit_permissions(&user_id.0, job_id)?
         {
-            return Err(DomainError::Unauthorized);
+            return Err(DomainError::BadRequest);
         }
 
         let job = self
