@@ -1,5 +1,4 @@
 use database_client::models::UserGroupMapping;
-use frunk::labelled::Transmogrifier;
 
 use crate::core::{
     domain::errors::DomainError,
@@ -25,13 +24,30 @@ impl ServiceGroupPort for Service {
         };
         self.db.create_user_group_mapping(mapping)?;
 
-        Ok(group.transmogrify())
+        let group_id = group.id.clone();
+        let members = self.db.get_members_for_multiple_groups(&[&group_id])?;
+
+        Ok(DisplayGroup::from_group(
+            group,
+            members.get(&group_id).cloned().unwrap_or_default(),
+        ))
     }
+
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError> {
         let groups = self.db.list_groups_by_user_id(&user_id.0)?;
-        Ok(groups
+
+        let group_ids: Vec<&str> = groups.iter().map(|g| g.id.as_str()).collect();
+
+        let members_map = self.db.get_members_for_multiple_groups(&group_ids)?;
+
+        let display_groups = groups
             .into_iter()
-            .map(frunk::labelled::Transmogrifier::transmogrify)
-            .collect())
+            .map(|g| {
+                let members = members_map.get(&g.id).cloned().unwrap_or_default();
+                DisplayGroup::from_group(g, members)
+            })
+            .collect();
+
+        Ok(display_groups)
     }
 }

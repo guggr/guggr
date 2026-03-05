@@ -26,10 +26,21 @@ pub struct CreateGroup {
 #[derive(
     Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
 )]
+/// Returned user
+pub struct DisplayGroupMember {
+    pub id: String,
+    pub name: String,
+    pub role: String,
+}
+
+#[derive(
+    Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ToSchema, LabelledGeneric, Default,
+)]
 /// Returned Group
 pub struct DisplayGroup {
     pub id: String,
     pub name: String,
+    pub members: Vec<DisplayGroupMember>,
 }
 
 impl From<CreateGroup> for Group {
@@ -37,6 +48,16 @@ impl From<CreateGroup> for Group {
         Self {
             id: nanoid::nanoid!(),
             name: value.name,
+        }
+    }
+}
+
+impl DisplayGroup {
+    pub fn from_group(value: Group, members: Vec<DisplayGroupMember>) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            members,
         }
     }
 }

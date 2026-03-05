@@ -1,12 +1,17 @@
+use std::collections::HashMap;
+
 use database_client::models::{
     Group, Job, JobDetailsHttp, JobDetailsPing, RefreshToken, User, UserGroupMapping,
 };
 
 use crate::core::{
     domain::errors::DomainError,
-    models::job::{
-        JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
-        ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
+    models::{
+        group::DisplayGroupMember,
+        job::{
+            JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
+            ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
+        },
     },
 };
 
@@ -50,6 +55,12 @@ pub trait RepositoryGroupPort: Send + Sync {
 
     /// Returns the groups from the repository by the user ID.
     fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
+
+    /// Returns group members from the repository by group ids.
+    fn get_members_for_multiple_groups(
+        &self,
+        group_ids: &[&str],
+    ) -> Result<HashMap<String, Vec<DisplayGroupMember>>, DomainError>;
 }
 
 pub trait RepositoryUserGroupMappingPort: Send + Sync {

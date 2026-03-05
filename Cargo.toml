@@ -1,5 +1,13 @@
 [workspace]
-members = ["gen/proto_types", "config", "database/database-client", "agent", "evaluator", "scheduler", "api-service"]
+members = [
+    "gen/proto_types",
+    "config",
+    "database/database-client",
+    "agent",
+    "evaluator",
+    "scheduler",
+    "api-service",
+]
 exclude = [".dummy"]
 
 resolver = "3"
