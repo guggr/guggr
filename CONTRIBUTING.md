@@ -86,7 +86,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be reported via GitHub's ["Report a vulnerability" feature](https://github.com/guggr/guggr/issues/security).
+> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be reported via GitHub's ["Report a vulnerability" feature](https://github.com/guggr/guggr/security).
 
 <!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
 
