@@ -128,7 +128,7 @@ impl ServiceJobPort for Service {
             .db
             .check_user_job_edit_permissions(&user_id.0, job_id)?
         {
-            return Err(DomainError::Unauthorized);
+            return Ok(());
         }
         self.db.delete_job(job_id)
     }
