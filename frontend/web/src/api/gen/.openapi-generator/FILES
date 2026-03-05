@@ -1,5 +1,6 @@
 apis/AuthApi.ts
 apis/GroupsApi.ts
+apis/JobsApi.ts
 apis/UsersApi.ts
 apis/index.ts
 index.ts
@@ -8,6 +9,13 @@ models/BadRequestErrorBody.ts
 models/CreateGroup.ts
 models/CreateUser.ts
 models/DisplayGroup.ts
+models/DisplayGroupMember.ts
+models/DisplayJobResultHttp.ts
+models/DisplayJobResultPing.ts
+models/DisplayJobRun.ts
+models/DisplayJobRunDetails.ts
+models/DisplayJobRunDetailsOneOf.ts
+models/DisplayJobRunDetailsOneOf1.ts
 models/DisplayUser.ts
 models/LoginRequest.ts
 models/LogoutRequest.ts
