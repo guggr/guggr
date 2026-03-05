@@ -1,17 +1,27 @@
 <script lang="ts">
+	import type { DisplayGroup, DisplayGroupMember } from '@/api';
 	import { preventDefault } from '@/lib/event';
 	import { UserIcon, UserXIcon } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+
+	let { group }: { group: DisplayGroup } = $props();
 
 	let name = $state(''),
+		members = $state<DisplayGroupMember[]>([]),
 		newUserId = $state('');
 
 	function edit() {
 		//
 	}
 
-	function reset() {
-		//
-	}
+	const setValues = () => {
+		name = group.name;
+		members = group.members;
+	};
+
+	onMount(() => {
+		setValues();
+	});
 </script>
 
 <form onsubmit={preventDefault(edit)} class="w-md max-w-full">
@@ -28,11 +38,12 @@
 		<legend class=" fieldset-legend">Group Members</legend>
 
 		<ul class="list @container">
-			{@render groupMember()}
-			{@render groupMember()}
+			{#each members as member}
+				{@render groupMember(member)}
+			{/each}
 		</ul>
 
-		{#snippet groupMember()}
+		{#snippet groupMember(member: DisplayGroupMember)}
 			<!-- nesting multiple `.list`s doesn't remove the last childs border-b -->
 			<li
 				class="list-row items-center last:after:hidden @max-xs:grid-cols-[1fr] @max-xs:gap-2"
@@ -44,20 +55,21 @@
 				<div class="min-w-0">
 					<div class="text-base-content/80 truncate text-sm font-semibold">
 						<span class="sr-only">User:</span>
-						Username
+						{member.name}
 					</div>
 				</div>
 
 				<label>
 					<span class="sr-only">Role:</span>
 
-					<select class="select select-ghost select-sm">
-						<option>Owner</option>
-						<option>Member</option>
+					<select bind:value={member.role} class="select select-ghost select-sm">
+						<option value="owner">Owner</option>
+						<option value="admin">Admin</option>
+						<option value="user">Member</option>
 					</select>
 				</label>
 
-				<button class="btn btn-soft btn-error btn-square btn-sm">
+				<button disabled class="btn btn-soft btn-error btn-square btn-sm">
 					<span class="sr-only">Kick user</span>
 					<UserXIcon size="20" />
 				</button>
@@ -75,7 +87,7 @@
 	</fieldset>
 
 	<div class="flex flex-row-reverse gap-2 pt-2">
-		<button type="submit" class="btn btn-primary btn-soft">Save changes</button>
-		<button onclick={reset} class="btn btn-ghost">Reset</button>
+		<button type="submit" disabled class="btn btn-primary btn-soft">Save changes</button>
+		<button onclick={setValues} class="btn btn-ghost">Reset</button>
 	</div>
 </form>

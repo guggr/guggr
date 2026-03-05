@@ -1,17 +1,10 @@
 ---
-import CreateNewButton from '@/components/groups/CreateNewButton.svelte';
-import GroupList from '@/components/groups/GroupList.svelte';
+import GroupsOverview from '@/components/groups/GroupsOverview.svelte';
 import PageLayout from '@/layout/PageLayout.astro';
 ---
 
 <PageLayout title="My Groups">
 	<div class="mx-auto w-3xl max-w-11/12">
-		<div class="flex items-baseline justify-between p-4">
-			<h1 class="text-lg font-bold sm:text-xl">My Groups</h1>
-
-			<CreateNewButton client:load />
-		</div>
-
-		<GroupList client:load />
+		<GroupsOverview client:load />
 	</div>
 </PageLayout>

@@ -1,14 +1,23 @@
 <script lang="ts">
+	import type { DisplayGroup } from '@/api';
 	import EditGroupForm from '@/components/groups/EditGroupForm.svelte';
+	import auth from '@/stores/auth.svelte';
 	import { UsersIcon } from '@lucide/svelte';
+
+	let { groups }: { groups: DisplayGroup[] } = $props();
 </script>
 
 <ul class="list">
-	{@render group()}
-	{@render group()}
+	{#each groups as g}
+		{@render group(g)}
+	{:else}
+		<li class="font-bold text-base-content/70 text-center my-4">
+			No groups available yet. Create your first!
+		</li>
+	{/each}
 </ul>
 
-{#snippet group()}
+{#snippet group(group: DisplayGroup)}
 	<li class="list-row @container gap-2 p-0">
 		<details
 			class="collapse-arrow list-col-grow open:border-base-content/10 collapse border-2 border-transparent"
@@ -20,22 +29,23 @@
 
 					<div class="overflow-hidden">
 						<div class="flex gap-1">
-							<span class="truncate">Group name</span>
+							<span class="truncate">{group.name}</span>
 							<span
-								class="badge badge-primary badge-soft badge-sm text-nowrap @max-xs:hidden"
+								class="badge badge-primary badge-soft badge-sm font-bold text-nowrap uppercase @max-xs:hidden"
 							>
-								Owner
+								{group.members.find(x => x.id === $auth?.user.id)?.role ||
+									'Unknown role'}
 							</span>
 						</div>
 						<div class="truncate text-xs font-semibold uppercase opacity-60">
-							User 1, User 2
+							{group.members.map(x => x.name).join(', ')}
 						</div>
 					</div>
 				</div>
 			</summary>
 
 			<div class="collapse-content">
-				<EditGroupForm />
+				<EditGroupForm {group} />
 			</div>
 		</details>
 	</li>
