@@ -270,6 +270,16 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestErrorBody"
+								}
+							}
+						}
+					},
 					"401": {
 						"description": "Unauthorized"
 					},
@@ -391,6 +401,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/DisplayJob"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}

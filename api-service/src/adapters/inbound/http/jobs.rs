@@ -37,6 +37,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     operation_id = "create_job",
     responses(
         (status = 200, description = "Job successfully created", body = DisplayJob),
+        openapi_helper::ResBadRequest,
         openapi_helper::ResUnauthorized,
         openapi_helper::ResInternalServerError,
     ),
@@ -69,6 +70,7 @@ pub async fn create(
     operation_id = "update_job",
     responses(
         (status = 200, description = "Job successfully updated", body = DisplayJob),
+        openapi_helper::ResBadRequest,
         openapi_helper::ResUnauthorized,
         openapi_helper::ResNotFound,
         openapi_helper::ResInternalServerError,
@@ -195,8 +197,6 @@ pub async fn list_runs(
         (status = 204, description = "Deleted"),
         openapi_helper::ResUnauthorized,
         openapi_helper::ResInternalServerError,
-
-
     ),
     security(("token" = [])),
     tag = "jobs"
@@ -216,5 +216,5 @@ pub async fn delete(
     web::block(move || svc.delete_job(auth_user, &path.into_inner()))
         .await
         .map_err(ErrorInternalServerError)??;
-    Ok(HttpResponse::Ok().json(()))
+    Ok(HttpResponse::NoContent().json(()))
 }
