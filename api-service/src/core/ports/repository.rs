@@ -1,10 +1,18 @@
 use std::collections::HashMap;
 
-use database_client::models::{Group, RefreshToken, User, UserGroupMapping};
+use database_client::models::{
+    Group, Job, JobDetailsHttp, JobDetailsPing, RefreshToken, User, UserGroupMapping,
+};
 
 use crate::core::{
     domain::errors::DomainError,
-    models::{group::DisplayGroupMember, job::run::DisplayJobRun},
+    models::{
+        group::DisplayGroupMember,
+        job::{
+            JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
+            ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
+        },
+    },
 };
 
 /// RepositoryPort trait which requires all repository port traits.
@@ -15,6 +23,7 @@ pub trait RepositoryPort:
     + RepositoryUserGroupMappingPort
     + RepositoryJobRunPort
     + RepositoryJobPort
+    + RepositoryJobDetailPort
 {
 }
 
@@ -76,4 +85,49 @@ pub trait RepositoryJobPort: Send + Sync {
         user_id: &str,
         job_id: &str,
     ) -> Result<bool, DomainError>;
+
+    fn check_user_job_edit_permissions(
+        &self,
+        user_id: &str,
+        job_id: &str,
+    ) -> Result<bool, DomainError>;
+
+    fn check_user_can_create_job(&self, user_id: &str, group_id: &str)
+    -> Result<bool, DomainError>;
+
+    fn create_job(&self, new_job: Job) -> Result<Job, DomainError>;
+    fn get_job_by_id(&self, user_id: &str, job_id: &str) -> Result<JobWithRawDetails, DomainError>;
+    fn list_jobs(
+        &self,
+        user_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<JobWithRawDetails>, DomainError>;
+    fn delete_job(&self, job_id: &str) -> Result<(), DomainError>;
+    fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError>;
+}
+
+pub trait RepositoryJobDetailPort: Send + Sync {
+    fn create_job_detail_http(
+        &self,
+        new_detail: JobDetailsHttp,
+    ) -> Result<JobDetailsHttp, DomainError>;
+    fn create_job_detail_ping(
+        &self,
+        new_detail: JobDetailsPing,
+    ) -> Result<JobDetailsPing, DomainError>;
+
+    fn get_job_detail_http(&self, detail_id: &str) -> Result<JobDetailsHttp, DomainError>;
+    fn get_job_detail_ping(&self, detail_id: &str) -> Result<JobDetailsPing, DomainError>;
+
+    fn update_job_detail_http(
+        &self,
+        detail_id: &str,
+        update_detail: UpdateJobDetailsHttp,
+    ) -> Result<JobDetailsHttp, DomainError>;
+    fn update_job_detail_ping(
+        &self,
+        detail_id: &str,
+        update_detail: UpdateJobDetailsPing,
+    ) -> Result<JobDetailsPing, DomainError>;
 }
