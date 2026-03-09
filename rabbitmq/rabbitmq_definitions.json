@@ -1,0 +1,47 @@
+{
+	"vhosts": [
+		{
+			"name": "/",
+			"description": "Default virtual host",
+			"metadata": {
+				"description": "Default virtual host",
+				"tags": [],
+				"default_queue_type": "classic"
+			},
+			"tags": []
+		}
+	],
+	"policies": [
+		{
+			"vhost": "/",
+			"name": "delivery-limit",
+			"pattern": "(agent|scheduler)\\..+",
+			"apply-to": "queues",
+			"definition": {
+				"delivery-limit": 5
+			},
+			"priority": 1
+		},
+		{
+			"vhost": "/",
+			"name": "dlx-policy",
+			"pattern": "(agent|scheduler)\\..+",
+			"apply-to": "queues",
+			"definition": {
+				"dead-letter-exchange": "dlx"
+			},
+			"priority": 0
+		}
+	],
+	"exchanges": [
+		{
+			"name": "dlx",
+			"vhost": "/",
+			"type": "fanout",
+			"durable": true,
+			"auto_delete": false,
+			"internal": false,
+			"arguments": {}
+		}
+	]
+}
