@@ -23,8 +23,11 @@ pub struct DisplayJobRun {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, Serialize, ToSchema)]
 /// Returned JobRun details
 pub enum DisplayJobRunDetails {
+    #[serde(rename = "http")]
     Http(DisplayJobResultHttp),
+    #[serde(rename = "ping")]
     Ping(DisplayJobResultPing),
+    #[serde(rename = "undefined")]
     Undefined,
 }
 
