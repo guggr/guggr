@@ -3671,9 +3671,9 @@ dependencies = [
 
 [[package]]
 name = "protify-build"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e30ff7bf5095ef840bc24dbe94812fdda91fdbedda995db36dec1ae45252359"
+checksum = "c902b36d967f8d8ff534b0bc77584300c4eb384a51869c547b32b79b2e67fec0"
 dependencies = [
  "document-features",
  "prost-build",
