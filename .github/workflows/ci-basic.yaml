@@ -70,7 +70,8 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
         uses: pnpm/action-setup@v4.3.0
-      #   cache: true - key will be available in next action release
+        with:
+          cache: true
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - name: Check
@@ -85,7 +86,8 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
         uses: pnpm/action-setup@v4.3.0
-      #   cache: true - key will be available in next action release
+        with:
+          cache: true
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - name: Check
@@ -167,6 +169,8 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
         uses: pnpm/action-setup@v4.3.0
+        with:
+          cache: true
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - uses: Swatinem/rust-cache@v2.8.2
