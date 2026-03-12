@@ -51,7 +51,7 @@ pub enum PostgresError {
     #[error("Record not Found")]
     NotFound,
     // Raised, when a database constraint is violated (e.g. unique)
-    #[error("Database constraint was violated")]
+    #[error("Database constraint was violated: {0}")]
     ConstraintViolation(String),
 }
 
