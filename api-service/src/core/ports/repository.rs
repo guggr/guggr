@@ -76,6 +76,9 @@ pub trait RepositoryJobRunPort: Send + Sync {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<DisplayJobRun>, DomainError>;
+
+    /// Returns the total amount of JobRuns from the repository.
+    fn count_job_run_results(&self, job_id: &str) -> Result<i64, DomainError>;
 }
 
 pub trait RepositoryJobPort: Send + Sync {
@@ -105,6 +108,7 @@ pub trait RepositoryJobPort: Send + Sync {
     ) -> Result<Vec<JobWithRawDetails>, DomainError>;
     fn delete_job(&self, job_id: &str) -> Result<(), DomainError>;
     fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError>;
+    fn count_jobs(&self, user_id: &str) -> Result<i64, DomainError>;
 }
 
 pub trait RepositoryJobDetailPort: Send + Sync {
