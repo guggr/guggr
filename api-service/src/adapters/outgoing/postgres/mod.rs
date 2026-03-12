@@ -8,6 +8,7 @@ use database_client::{DbError, create_connection_pool};
 use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool},
+    result::DatabaseErrorKind,
 };
 use thiserror::Error;
 
@@ -49,6 +50,9 @@ pub enum PostgresError {
     /// Raised, when no record was found
     #[error("Record not Found")]
     NotFound,
+    // Raised, when a database constraint is violated (e.g. unique)
+    #[error("Database constraint was violated: {0}")]
+    ConstraintViolation(String),
 }
 
 /// Allows for converting the Postgres-specific errors to domain errors
@@ -58,6 +62,7 @@ impl From<PostgresError> for DomainError {
             PostgresError::Connection(e) => Self::Unavailable(e.to_string()),
             PostgresError::Pool(e) => Self::Unavailable(e.to_string()),
             PostgresError::NotFound => Self::NotFound,
+            PostgresError::ConstraintViolation(_) => Self::BadRequest,
             other => Self::Internal(other.to_string()),
         }
     }
@@ -76,6 +81,17 @@ impl From<diesel::result::Error> for PostgresError {
     fn from(e: diesel::result::Error) -> Self {
         match e {
             diesel::result::Error::NotFound => Self::NotFound,
+            diesel::result::Error::DatabaseError(err, ref info) => match err {
+                DatabaseErrorKind::CheckViolation
+                | DatabaseErrorKind::ExclusionViolation
+                | DatabaseErrorKind::ForeignKeyViolation
+                | DatabaseErrorKind::NotNullViolation
+                | DatabaseErrorKind::RestrictViolation
+                | DatabaseErrorKind::UniqueViolation => {
+                    Self::ConstraintViolation(info.message().to_string())
+                }
+                _ => Self::Result(e),
+            },
             other => Self::Result(other),
         }
     }
