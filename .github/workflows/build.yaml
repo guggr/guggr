@@ -30,7 +30,7 @@ jobs:
         uses: docker/setup-buildx-action@v4.0.0
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@v6.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache
           tags: |
@@ -97,7 +97,7 @@ jobs:
 
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@v6.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/${{ matrix.image }}
           tags: |
