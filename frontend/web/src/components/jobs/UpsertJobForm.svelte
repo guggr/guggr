@@ -1,5 +1,10 @@
 <script lang="ts">
+	import { config, GroupsApi, JobsApi, type CreateJobDetails, type DisplayGroup } from '@/api';
+	import Error from '@/components/shared/Error.svelte';
+	import Loading from '@/components/shared/Loading.svelte';
 	import { preventDefault } from '@/lib/event';
+	import alerts from '@/stores/alerts.svelte';
+	import { onMount } from 'svelte';
 
 	let { edit = false }: { edit?: boolean } = $props();
 
@@ -8,10 +13,48 @@
 		interval = $state(300),
 		group = $state(''),
 		notifications = $state(false),
-		notificationText = $state('');
+		notificationText = $state(''),
+		pingDetails = $state({ host: '' }),
+		httpDetails = $state({ url: '' });
 
-	const upsertJob = () => {
-		// TODO
+	let groupsPromise = $state(new Promise<DisplayGroup[]>(() => {}));
+
+	onMount(() => {
+		const api = new GroupsApi(config);
+
+		groupsPromise = api.listGroups();
+	});
+
+	const upsertJob = async () => {
+		if (edit) return;
+
+		return createJob();
+	};
+
+	const createJob = async () => {
+		const api = new JobsApi(config);
+
+		let details: CreateJobDetails = { ping: pingDetails };
+		if (type === 'http') details = { http: httpDetails };
+
+		const job = await api
+			.createJob({
+				createJob: {
+					name,
+					jobTypeId: type,
+					groupId: group,
+					notifyUsers: notifications,
+					customNotification: notificationText,
+					//@ts-expect-error see #178
+					runEvery: interval,
+					details: details,
+				},
+			})
+			.catch(() => alerts.push('Failed to create job', 'ERROR'));
+
+		if (!job) return;
+
+		window.location.replace(`/jobs/details?id=${job.id}`);
 	};
 </script>
 
@@ -59,20 +102,50 @@
 		</label>
 	</fieldset>
 
+	{#if type === 'ping'}
+		<fieldset class="fieldset bg-base-100 rounded-box p-4">
+			<legend>Ping Job Settings</legend>
+
+			<label class="input">
+				<span class="label">Host</span>
+				<input type="text" bind:value={pingDetails.host} required placeholder="0.0.0.0" />
+			</label>
+		</fieldset>
+	{/if}
+
+	{#if type === 'http'}
+		<fieldset class="fieldset bg-base-100 rounded-box p-4">
+			<legend>HTTP Job Settings</legend>
+
+			<label class="input">
+				<span class="label">URL</span>
+				<input type="text" bind:value={httpDetails.url} required placeholder="gug.gr" />
+			</label>
+		</fieldset>
+	{/if}
+
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
 		<legend>Group</legend>
 
-		<div class="flex flex-wrap gap-2">
-			<input
-				type="radio"
-				name="group"
-				bind:group
-				value="group-id"
-				required
-				aria-label="group name"
-				class="btn btn-outline btn-sm rounded-badge"
-			/>
-		</div>
+		{#await groupsPromise}
+			<Loading />
+		{:then groups}
+			<div class="flex flex-wrap gap-2">
+				{#each groups as g}
+					<input
+						type="radio"
+						name="group"
+						bind:group
+						value={g.id}
+						required
+						aria-label={g.name}
+						class="btn btn-outline btn-sm rounded-badge"
+					/>
+				{/each}
+			</div>
+		{:catch}
+			<Error />
+		{/await}
 	</fieldset>
 
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
