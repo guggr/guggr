@@ -36,16 +36,32 @@
 			{/if}
 
 			<ul class="text-sm">
+				{#if selected.triggeredNotification}
+					<li class="text-base-content/80 italic">Notification sent</li>
+				{/if}
+
 				<li>
 					<span class="text-base-content/80">Time:</span>
 					<b class="font-bold">{dateTime.format(selected.timestamp)}</b>
 				</li>
 
-				<!-- TODO handle additional data -->
-				<li>
-					<span class="text-base-content/80">Latency:</span>
-					<b class="font-bold">TODO</b>
-				</li>
+				{#if typeof selected.details !== 'string' && 'ping' in selected.details}
+					<li>
+						<span class="text-base-content/80">Latency:</span>
+						<b class="font-bold">{selected.details.ping.latency}</b>
+					</li>
+				{/if}
+
+				{#if typeof selected.details !== 'string' && 'http' in selected.details}
+					<li>
+						<span class="text-base-content/80">Latency:</span>
+						<b class="font-bold">{selected.details.http.latency}</b>
+					</li>
+					<li>
+						<span class="text-base-content/80">Response status code:</span>
+						<b class="font-bold">{selected.details.http.statusCode}</b>
+					</li>
+				{/if}
 			</ul>
 		</div>
 	{:else}
