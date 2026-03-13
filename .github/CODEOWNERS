@@ -22,6 +22,7 @@ agent/		@philxws692
 flake.lock	@philxws692
 flake.nix	@philxws692
 .envrc		@philxws692
+rabbitmq/   @philxws692
 
 scheduler/	@niri81
 proto/		@niri81
