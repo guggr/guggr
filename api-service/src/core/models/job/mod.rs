@@ -37,7 +37,9 @@ pub struct CreateJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Deserialize)]
 /// Enum to create Job Details
 pub enum CreateJobDetails {
+    #[serde(rename = "http")]
     Http(CreateJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(CreateJobDetailsPing),
 }
 
@@ -58,8 +60,11 @@ pub struct DisplayJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
 /// Returned Job Details
 pub enum DisplayJobDetails {
+    #[serde(rename = "http")]
     Http(DisplayJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(DisplayJobDetailsPing),
+    #[serde(rename = "undefined")]
     Undefined,
 }
 
@@ -80,7 +85,9 @@ pub struct UpdateRequestJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
 /// Struct to update a job detail
 pub enum UpdateRequestJobDetails {
+    #[serde(rename = "http")]
     Http(UpdateJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(UpdateJobDetailsPing),
 }
 
