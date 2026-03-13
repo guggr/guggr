@@ -10,7 +10,7 @@
 			"name": "GPL-3.0",
 			"identifier": "GPL-3.0"
 		},
-		"version": "0.4.0"
+		"version": "0.5.0"
 	},
 	"paths": {
 		"/api/v1/auth/login": {
@@ -634,18 +634,18 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["Http"],
+						"required": ["http"],
 						"properties": {
-							"Http": {
+							"http": {
 								"$ref": "#/components/schemas/CreateJobDetailsHttp"
 							}
 						}
 					},
 					{
 						"type": "object",
-						"required": ["Ping"],
+						"required": ["ping"],
 						"properties": {
-							"Ping": {
+							"ping": {
 								"$ref": "#/components/schemas/CreateJobDetailsPing"
 							}
 						}
@@ -774,25 +774,25 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["Http"],
+						"required": ["http"],
 						"properties": {
-							"Http": {
+							"http": {
 								"$ref": "#/components/schemas/DisplayJobDetailsHttp"
 							}
 						}
 					},
 					{
 						"type": "object",
-						"required": ["Ping"],
+						"required": ["ping"],
 						"properties": {
-							"Ping": {
+							"ping": {
 								"$ref": "#/components/schemas/DisplayJobDetailsPing"
 							}
 						}
 					},
 					{
 						"type": "string",
-						"enum": ["Undefined"]
+						"enum": ["undefined"]
 					}
 				],
 				"description": "Returned Job Details"
@@ -912,25 +912,25 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["Http"],
+						"required": ["http"],
 						"properties": {
-							"Http": {
+							"http": {
 								"$ref": "#/components/schemas/DisplayJobResultHttp"
 							}
 						}
 					},
 					{
 						"type": "object",
-						"required": ["Ping"],
+						"required": ["ping"],
 						"properties": {
-							"Ping": {
+							"ping": {
 								"$ref": "#/components/schemas/DisplayJobResultPing"
 							}
 						}
 					},
 					{
 						"type": "string",
-						"enum": ["Undefined"]
+						"enum": ["undefined"]
 					}
 				],
 				"description": "Returned JobRun details"
@@ -1060,18 +1060,18 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["Http"],
+						"required": ["http"],
 						"properties": {
-							"Http": {
+							"http": {
 								"$ref": "#/components/schemas/UpdateJobDetailsHttp"
 							}
 						}
 					},
 					{
 						"type": "object",
-						"required": ["Ping"],
+						"required": ["ping"],
 						"properties": {
-							"Ping": {
+							"ping": {
 								"$ref": "#/components/schemas/UpdateJobDetailsPing"
 							}
 						}
