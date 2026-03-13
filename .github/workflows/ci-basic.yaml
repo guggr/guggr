@@ -179,6 +179,10 @@ jobs:
         uses: pnpm/action-setup@v4.3.0
         with:
           cache: true
+      - name: Install node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - uses: Swatinem/rust-cache@v2.8.2
