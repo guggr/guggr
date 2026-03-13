@@ -737,6 +737,7 @@
 					"group_id",
 					"notify_users",
 					"run_every",
+					"reachable",
 					"details"
 				],
 				"properties": {
@@ -763,6 +764,9 @@
 						"type": "string"
 					},
 					"notify_users": {
+						"type": "boolean"
+					},
+					"reachable": {
 						"type": "boolean"
 					},
 					"run_every": {
