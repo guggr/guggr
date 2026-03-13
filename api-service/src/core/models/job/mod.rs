@@ -1,4 +1,4 @@
-use chrono::{Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::job,
@@ -53,7 +53,7 @@ pub struct DisplayJob {
     pub notify_users: bool,
     pub custom_notification: Option<String>,
     pub run_every: Duration,
-    pub last_scheduled: Option<NaiveDateTime>,
+    pub last_scheduled: Option<DateTime<Utc>>,
     pub details: DisplayJobDetails,
 }
 
@@ -78,7 +78,7 @@ pub struct UpdateRequestJob {
     pub notify_users: Option<bool>,
     pub custom_notification: Option<String>,
     pub run_every: Option<Duration>,
-    pub last_scheduled: Option<NaiveDateTime>,
+    pub last_scheduled: Option<DateTime<Utc>>,
     pub details: Option<UpdateRequestJobDetails>,
 }
 
@@ -103,6 +103,21 @@ pub struct UpdateJob {
     pub custom_notification: Option<String>,
     pub run_every: Option<Duration>,
     pub last_scheduled: Option<NaiveDateTime>,
+}
+
+impl From<UpdateRequestJob> for UpdateJob {
+    fn from(value: UpdateRequestJob) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            job_type_id: value.job_type_id,
+            group_id: value.group_id,
+            notify_users: value.notify_users,
+            custom_notification: value.custom_notification,
+            run_every: value.run_every,
+            last_scheduled: value.last_scheduled.map(|dt| dt.naive_utc()),
+        }
+    }
 }
 
 impl From<CreateJob> for Job {
@@ -130,7 +145,7 @@ impl From<Job> for DisplayJob {
             notify_users: value.notify_users,
             custom_notification: value.custom_notification,
             run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            last_scheduled: value.last_scheduled.map(|dt| dt.and_utc()),
             details: DisplayJobDetails::Undefined,
         }
     }

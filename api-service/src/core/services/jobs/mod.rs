@@ -6,7 +6,7 @@ use crate::core::{
     models::{
         auth::UserId,
         job::{
-            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateRequestJob,
+            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateJob, UpdateRequestJob,
             UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
             ping::detail::CreateJobDetailsPing,
         },
@@ -96,7 +96,7 @@ impl ServiceJobPort for Service {
 
         let job = self
             .db
-            .update_job(job_id, updated_job.clone().transmogrify())?;
+            .update_job(job_id, UpdateJob::from(updated_job.clone()))?;
 
         let detail = match updated_job.details {
             Some(detail) => match detail {

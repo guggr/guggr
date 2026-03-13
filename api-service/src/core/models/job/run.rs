@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use database_client::models::JobRun;
 use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use crate::core::models::job::{
 pub struct DisplayJobRun {
     pub id: String,
     pub job_id: String,
-    pub timestamp: NaiveDateTime,
+    pub timestamp: DateTime<Utc>,
     pub triggered_notification: bool,
     pub batch_id: String,
     pub reachable: bool,
@@ -36,7 +36,7 @@ impl From<JobRun> for DisplayJobRun {
         Self {
             id: value.id,
             job_id: value.job_id,
-            timestamp: value.timestamp,
+            timestamp: value.timestamp.and_utc(),
             triggered_notification: value.triggered_notification,
             batch_id: value.batch_id,
             reachable: value.reachable,
