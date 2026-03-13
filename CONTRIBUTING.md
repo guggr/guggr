@@ -62,6 +62,15 @@ Depending on how large the project is, you may want to outsource the questioning
 >
 > When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project licence.
 
+> ### AI-Generated Content & Autonomous Agents <!-- omit in toc -->
+>
+> To maintain transparency and credit, please disclose if Artificial Intelligence was used to generate code or documentation.
+>
+> - **Commits:** Include a note in the commit footer. `Generated with assistance from [Tool Name]`
+> - **Pull Requests:** Mention the use of AI tools in the PR description.
+>
+> Automated agents must follow the same disclosure rules (please use the footer `Generated autonomously by [Tool Name]`). We reserve the right to close pull requests that do not provide this attribution.
+
 ### Reporting Bugs
 
 <!-- omit in toc -->
