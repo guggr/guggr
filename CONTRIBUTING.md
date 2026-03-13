@@ -2,6 +2,9 @@
 
 # Contributing to guggr
 
+> [!IMPORTANT]
+> We currently cannot accept contributions to this repository, since it is part of a graded university project. As soon as this is completed, we will begin to accept pull requests. Stay tuned! 🎉
+
 First off, thanks for taking the time to contribute! ❤️
 
 All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
@@ -20,18 +23,8 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Contributing to guggr](#contributing-to-guggr)
   - [Table of Contents](#table-of-contents)
   - [I Have a Question](#i-have-a-question)
-  - [I Want To Contribute](#i-want-to-contribute)
-    - [Reporting Bugs](#reporting-bugs)
-      - [Before Submitting a Bug Report](#before-submitting-a-bug-report)
-      - [How Do I Submit a Good Bug Report?](#how-do-i-submit-a-good-bug-report)
-    - [Suggesting Enhancements](#suggesting-enhancements)
-      - [Before Submitting an Enhancement](#before-submitting-an-enhancement)
-      - [How Do I Submit a Good Enhancement Suggestion?](#how-do-i-submit-a-good-enhancement-suggestion)
-    - [Your First Code Contribution](#your-first-code-contribution)
-    - [Improving The Documentation](#improving-the-documentation)
-  - [Styleguides](#styleguides)
-    - [Commit Messages and Pull Request Titles](#commit-messages-and-pull-request-titles)
-    - [Pull Requests](#pull-requests)
+  - [I Want To Contribute](#i-want-to-contribute) - [Reporting Bugs](#reporting-bugs) - [Before Submitting a Bug Report](#before-submitting-a-bug-report) - [How Do I Submit a Good Bug Report?](#how-do-i-submit-a-good-bug-report) - [Suggesting Enhancements](#suggesting-enhancements) - [Before Submitting an Enhancement](#before-submitting-an-enhancement) - [How Do I Submit a Good Enhancement Suggestion?](#how-do-i-submit-a-good-enhancement-suggestion) - [Your First Code Contribution](#your-first-code-contribution) - [Improving The Documentation](#improving-the-documentation)
+  - [Styleguides](#styleguides) - [Commit Messages and Pull Request Titles](#commit-messages-and-pull-request-titles) - [Pull Requests](#pull-requests)
   - [Attribution](#attribution)
 
 ## I Have a Question
