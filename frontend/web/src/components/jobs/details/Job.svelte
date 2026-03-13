@@ -45,7 +45,7 @@
 			<div class="card-title text-md text-base-content/90 sm:text-base-content sm:text-2xl">
 				<h2 class="truncate">
 					<span class="sr-only">Job name:</span>
-					Job name ({id})
+					Job name
 				</h2>
 				<span class="badge badge-primary badge-soft badge-sm whitespace-nowrap">
 					HTTP Job
