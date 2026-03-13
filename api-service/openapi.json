@@ -10,7 +10,7 @@
 			"name": "GPL-3.0",
 			"identifier": "GPL-3.0"
 		},
-		"version": "0.5.0"
+		"version": "0.6.0"
 	},
 	"paths": {
 		"/api/v1/auth/login": {
@@ -201,6 +201,50 @@
 								}
 							}
 						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			}
+		},
+		"/api/v1/groups/{id}": {
+			"get": {
+				"tags": ["groups"],
+				"summary": "Get group by ID",
+				"operationId": "get_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Group",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
 					},
 					"500": {
 						"description": "Internal Server Error"
