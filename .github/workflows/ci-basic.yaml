@@ -69,8 +69,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
-      #   cache: true - key will be available in next action release
+        uses: pnpm/action-setup@v4.3.0
+        with:
+          cache: true
+      - name: Install node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - name: Check
@@ -84,8 +89,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
-      #   cache: true - key will be available in next action release
+        uses: pnpm/action-setup@v4.3.0
+        with:
+          cache: true
+      - name: Install node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - name: Check
@@ -149,7 +159,7 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: cargo-bins/cargo-binstall@v1.17.6
+      - uses: cargo-bins/cargo-binstall@v1.17.7
       - run: cargo binstall cargo-nextest
       - uses: Swatinem/rust-cache@v2.8.2
         with:
@@ -166,7 +176,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v4.3.0
+        with:
+          cache: true
+      - name: Install node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
       - uses: Swatinem/rust-cache@v2.8.2
@@ -212,6 +228,6 @@ jobs:
           ref: ${{needs.fetch-depth.outputs.branch}}
           fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@v3.93.7
+        uses: trufflesecurity/trufflehog@v3.93.8
         with:
           extra_args: --results=verified,unknown

@@ -30,6 +30,7 @@ pub struct CreateJob {
     pub notify_users: bool,
     pub custom_notification: Option<String>,
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
     pub details: CreateJobDetails,
 }
@@ -37,10 +38,12 @@ pub struct CreateJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema, Deserialize)]
 /// Enum to create Job Details
 pub enum CreateJobDetails {
+    #[serde(rename = "http")]
     Http(CreateJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(CreateJobDetailsPing),
 }
-
+#[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema)]
 /// Returned Job
 pub struct DisplayJob {
@@ -50,6 +53,8 @@ pub struct DisplayJob {
     pub group_id: String,
     pub notify_users: bool,
     pub custom_notification: Option<String>,
+    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
     pub last_scheduled: Option<NaiveDateTime>,
     pub details: DisplayJobDetails,
@@ -58,11 +63,14 @@ pub struct DisplayJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
 /// Returned Job Details
 pub enum DisplayJobDetails {
+    #[serde(rename = "http")]
     Http(DisplayJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(DisplayJobDetailsPing),
+    #[serde(rename = "undefined")]
     Undefined,
 }
-
+#[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
 /// Struct to Update a Job
 pub struct UpdateRequestJob {
@@ -72,6 +80,8 @@ pub struct UpdateRequestJob {
     pub group_id: Option<String>,
     pub notify_users: Option<bool>,
     pub custom_notification: Option<String>,
+    #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
+    #[schema(value_type = Option<i64>, default = 60)]
     pub run_every: Option<Duration>,
     pub last_scheduled: Option<NaiveDateTime>,
     pub details: Option<UpdateRequestJobDetails>,
@@ -80,11 +90,13 @@ pub struct UpdateRequestJob {
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
 /// Struct to update a job detail
 pub enum UpdateRequestJobDetails {
+    #[serde(rename = "http")]
     Http(UpdateJobDetailsHttp),
+    #[serde(rename = "ping")]
     Ping(UpdateJobDetailsPing),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, AsChangeset)]
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, AsChangeset)]
 #[diesel(table_name = job)]
 /// Struct to Update a Job
 pub struct UpdateJob {

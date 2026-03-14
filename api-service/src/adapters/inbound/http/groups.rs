@@ -24,7 +24,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
     let scope = utoipa_actix_web::scope("/groups")
         .wrap(Auth)
         .service(create)
-        .service(list);
+        .service(list)
+        .service(get);
 
     cfg.service(scope);
 }
@@ -87,4 +88,38 @@ pub async fn list(
         .map_err(ErrorInternalServerError)??;
 
     Ok(HttpResponse::Ok().json(groups))
+}
+
+#[utoipa::path(
+    params(
+        ("id" = String, Path, description = "Group ID")
+    ),
+    operation_id = "get_group",
+    responses(
+        (status = 200, description = "Group", body = DisplayGroup),
+        openapi_helper::ResUnauthorized,
+        openapi_helper::ResNotFound,
+        openapi_helper::ResInternalServerError,
+    ),
+    security(("token" = [])),
+    tag = "groups"
+)]
+#[get("/{id}")]
+/// Get group by ID
+pub async fn get(
+    svc: web::Data<Arc<dyn ServicePort>>,
+    path: web::Path<String>,
+    req: HttpRequest,
+) -> actix_web::Result<impl Responder> {
+    let auth_user = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(DomainError::Unauthorized)?;
+
+    let group = web::block(move || svc.get_group(auth_user, &path.into_inner()))
+        .await
+        .map_err(ErrorInternalServerError)??;
+
+    Ok(HttpResponse::Ok().json(group))
 }

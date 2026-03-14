@@ -49,6 +49,8 @@ pub trait ServiceGroupPort: Send + Sync {
         user_id: UserId,
         new_group: CreateGroup,
     ) -> Result<DisplayGroup, DomainError>;
+    // Gets group by group ID
+    fn get_group(&self, user_id: UserId, id: &str) -> Result<DisplayGroup, DomainError>;
     /// List groups by the supplied user ID
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError>;
 }
