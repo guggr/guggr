@@ -44,7 +44,7 @@
 
 		name = job.name;
 		type = job.jobTypeId;
-		// interval = job.runEvery; // TODO see #178
+		interval = job.runEvery;
 		group = job.groupId;
 		notifications = job.notifyUsers;
 		notificationText = job.customNotification || '';
@@ -77,7 +77,7 @@
 					groupId: group,
 					notifyUsers: notifications,
 					customNotification: notificationText,
-					// runEvery: interval, // TODO see #178
+					runEvery: interval,
 					details: details,
 				},
 			})
@@ -102,7 +102,6 @@
 					groupId: group,
 					notifyUsers: notifications,
 					customNotification: notificationText,
-					//@ts-expect-error see #178
 					runEvery: interval,
 					details: details,
 				},

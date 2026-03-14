@@ -2,7 +2,7 @@
 	import { config, GroupsApi, JobsApi, type DisplayJob } from '@/api';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
-	import { relativeTime } from '@/lib/formatter';
+	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
@@ -65,9 +65,11 @@
 							{/await}
 						</li>
 						<li>
-							<!-- TODO add job execution interval -->
 							<span class="sr-only">Execution interval: </span>
-							every 3 minutes
+							every {duration.format({
+								minutes: Math.floor(j.runEvery / 60),
+								seconds: j.runEvery % 60,
+							})}
 						</li>
 					</ul>
 				</div>
