@@ -173,9 +173,20 @@
 		<fieldset class="fieldset bg-base-100 rounded-box p-4">
 			<legend>HTTP Job Settings</legend>
 
-			<label class="input">
-				<span class="label">URL</span>
-				<input type="text" bind:value={httpDetails.url} required placeholder="gug.gr" />
+			<label>
+				<div class="input validator">
+					<span class="label">URL</span>
+					<input
+						type="text"
+						bind:value={httpDetails.url}
+						required
+						pattern={'https?\:\/\/.+'}
+						placeholder="https://gug.gr"
+					/>
+				</div>
+				<span class="label my-1 items-baseline">
+					Remember to include the protocol <code>https://</code>
+				</span>
 			</label>
 		</fieldset>
 	{/if}
