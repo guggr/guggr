@@ -1,4 +1,4 @@
-use chrono::{Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::job,
@@ -56,7 +56,7 @@ pub struct DisplayJob {
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
     #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
-    pub last_scheduled: Option<NaiveDateTime>,
+    pub last_scheduled: Option<DateTime<Utc>>,
     pub details: DisplayJobDetails,
 }
 
@@ -135,7 +135,7 @@ impl From<Job> for DisplayJob {
             notify_users: value.notify_users,
             custom_notification: value.custom_notification,
             run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            last_scheduled: value.last_scheduled.map(|t| t.and_utc()),
             details: DisplayJobDetails::Undefined,
         }
     }
