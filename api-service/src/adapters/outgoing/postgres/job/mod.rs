@@ -143,4 +143,16 @@ impl RepositoryJobPort for Postgres {
             .map_err(PostgresError::from)?;
         Ok(())
     }
+    fn count_jobs(&self, user_id: &str) -> Result<i64, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+        let count: i64 = job::table
+            .inner_join(
+                user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
+            )
+            .filter(user_group_mapping::user_id.eq(user_id))
+            .count()
+            .get_result(&mut conn)
+            .map_err(PostgresError::from)?;
+        Ok(count)
+    }
 }

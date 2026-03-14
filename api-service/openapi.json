@@ -262,16 +262,41 @@
 				"tags": ["jobs"],
 				"summary": "List Jobs",
 				"operationId": "list_job",
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"description": "Current Page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "Items per page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 40,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Jobs",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/DisplayJob"
-									}
+									"$ref": "#/components/schemas/PaginatedResponse_DisplayJob"
 								}
 							}
 						}
@@ -490,6 +515,32 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "Current Page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "Items per page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 40,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
 					}
 				],
 				"responses": {
@@ -498,10 +549,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/DisplayJobRun"
-									}
+									"$ref": "#/components/schemas/PaginatedResponse_DisplayJobRun"
 								}
 							}
 						}
@@ -1019,6 +1067,141 @@
 				"properties": {
 					"refresh_token": {
 						"type": "string"
+					}
+				}
+			},
+			"PaginatedResponseMetadata": {
+				"type": "object",
+				"description": "Returned paginated metadata",
+				"required": ["page", "per_page", "total", "total_pages"],
+				"properties": {
+					"page": {
+						"type": "integer",
+						"format": "int64",
+						"example": 0
+					},
+					"per_page": {
+						"type": "integer",
+						"format": "int64",
+						"example": 40
+					},
+					"total": {
+						"type": "integer",
+						"format": "int64",
+						"example": 200
+					},
+					"total_pages": {
+						"type": "integer",
+						"format": "int64",
+						"example": 4
+					}
+				}
+			},
+			"PaginatedResponse_DisplayJob": {
+				"type": "object",
+				"description": "Returned paginated response",
+				"required": ["data", "meta"],
+				"properties": {
+					"data": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"description": "Returned Job",
+							"required": [
+								"id",
+								"name",
+								"job_type_id",
+								"group_id",
+								"notify_users",
+								"run_every",
+								"details"
+							],
+							"properties": {
+								"custom_notification": {
+									"type": ["string", "null"]
+								},
+								"details": {
+									"$ref": "#/components/schemas/DisplayJobDetails"
+								},
+								"group_id": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								},
+								"job_type_id": {
+									"type": "string"
+								},
+								"last_scheduled": {
+									"type": ["string", "null"],
+									"format": "date-time"
+								},
+								"name": {
+									"type": "string"
+								},
+								"notify_users": {
+									"type": "boolean"
+								},
+								"run_every": {
+									"type": "integer",
+									"format": "int64",
+									"default": 60
+								}
+							}
+						}
+					},
+					"meta": {
+						"$ref": "#/components/schemas/PaginatedResponseMetadata"
+					}
+				}
+			},
+			"PaginatedResponse_DisplayJobRun": {
+				"type": "object",
+				"description": "Returned paginated response",
+				"required": ["data", "meta"],
+				"properties": {
+					"data": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"description": "Returned JobRun",
+							"required": [
+								"id",
+								"job_id",
+								"timestamp",
+								"triggered_notification",
+								"batch_id",
+								"reachable",
+								"details"
+							],
+							"properties": {
+								"batch_id": {
+									"type": "string"
+								},
+								"details": {
+									"$ref": "#/components/schemas/DisplayJobRunDetails"
+								},
+								"id": {
+									"type": "string"
+								},
+								"job_id": {
+									"type": "string"
+								},
+								"reachable": {
+									"type": "boolean"
+								},
+								"timestamp": {
+									"type": "string",
+									"format": "date-time"
+								},
+								"triggered_notification": {
+									"type": "boolean"
+								}
+							}
+						}
+					},
+					"meta": {
+						"$ref": "#/components/schemas/PaginatedResponseMetadata"
 					}
 				}
 			},

@@ -70,4 +70,14 @@ impl RepositoryJobRunPort for Postgres {
             _ => Err(DomainError::NotFound),
         }
     }
+
+    fn count_job_run_results(&self, job_id: &str) -> Result<i64, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+        let count: i64 = job_runs::table
+            .filter(job_runs::job_id.eq(job_id))
+            .count()
+            .get_result(&mut conn)
+            .map_err(PostgresError::from)?;
+        Ok(count)
+    }
 }
