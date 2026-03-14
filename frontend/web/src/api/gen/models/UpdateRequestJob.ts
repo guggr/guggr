@@ -77,10 +77,10 @@ export interface UpdateRequestJob {
 	notifyUsers?: boolean | null;
 	/**
 	 *
-	 * @type {string}
+	 * @type {number}
 	 * @memberof UpdateRequestJob
 	 */
-	runEvery?: string | null;
+	runEvery?: number | null;
 }
 
 /**

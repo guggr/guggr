@@ -65,10 +65,10 @@ export interface CreateJob {
 	notifyUsers: boolean;
 	/**
 	 *
-	 * @type {string}
+	 * @type {number}
 	 * @memberof CreateJob
 	 */
-	runEvery: string;
+	runEvery: number;
 }
 
 /**

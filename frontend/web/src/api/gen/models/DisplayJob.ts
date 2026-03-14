@@ -77,10 +77,10 @@ export interface DisplayJob {
 	notifyUsers: boolean;
 	/**
 	 *
-	 * @type {string}
+	 * @type {number}
 	 * @memberof DisplayJob
 	 */
-	runEvery: string;
+	runEvery: number;
 }
 
 /**
