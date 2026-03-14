@@ -670,7 +670,9 @@
 						"type": "boolean"
 					},
 					"run_every": {
-						"type": "string"
+						"type": "integer",
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},
@@ -810,7 +812,9 @@
 						"type": "boolean"
 					},
 					"run_every": {
-						"type": "string"
+						"type": "integer",
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},
@@ -1096,7 +1100,9 @@
 						"type": ["boolean", "null"]
 					},
 					"run_every": {
-						"type": ["string", "null"]
+						"type": ["integer", "null"],
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},
