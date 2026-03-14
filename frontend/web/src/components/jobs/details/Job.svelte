@@ -35,7 +35,7 @@
 		<menu>
 			<li><a href="/">Home</a></li>
 			<li><a href="/jobs">Jobs</a></li>
-			<li><a href={`/jobs/details?id=${id}`}>Job Name</a></li>
+			<li><a href={`/jobs/details?id=${id}`}>{jobName || 'Job'}</a></li>
 		</menu>
 	</div>
 
