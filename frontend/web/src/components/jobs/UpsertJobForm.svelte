@@ -8,6 +8,8 @@
 
 	let { edit = false }: { edit?: boolean } = $props();
 
+	let id = $state('');
+
 	let name = $state(''),
 		type = $state(''),
 		interval = $state(300),
@@ -20,15 +22,70 @@
 	let groupsPromise = $state(new Promise<DisplayGroup[]>(() => {}));
 
 	onMount(() => {
+		id = new URLSearchParams(window.location.search).get('id') ?? '';
+
+		if (edit) loadEditJob();
+
 		const api = new GroupsApi(config);
 
 		groupsPromise = api.listGroups();
 	});
 
+	const loadEditJob = async () => {
+		if (!id) return alerts.push('Job ID missing', 'ERROR');
+
+		const api = new JobsApi(config);
+
+		const job = await api
+			.getJob({ id })
+			.catch(() => alerts.push('Failed to fetch job', 'ERROR'));
+
+		if (!job) return;
+
+		name = job.name;
+		type = job.jobTypeId;
+		// interval = job.runEvery; // TODO see #178
+		group = job.groupId;
+		notifications = job.notifyUsers;
+		notificationText = job.customNotification || '';
+
+		if (job.jobTypeId === 'ping' && typeof job.details !== 'string' && 'ping' in job.details)
+			pingDetails = job.details.ping;
+
+		if (job.jobTypeId === 'http' && typeof job.details !== 'string' && 'http' in job.details)
+			httpDetails = job.details.http;
+	};
+
 	const upsertJob = async () => {
-		if (edit) return;
+		if (edit) return editJob();
 
 		return createJob();
+	};
+
+	const editJob = async () => {
+		const api = new JobsApi(config);
+
+		let details: CreateJobDetails = { ping: pingDetails };
+		if (type === 'http') details = { http: httpDetails };
+
+		const job = await api
+			.updateJob({
+				id,
+				updateRequestJob: {
+					name,
+					jobTypeId: type,
+					groupId: group,
+					notifyUsers: notifications,
+					customNotification: notificationText,
+					// runEvery: interval, // TODO see #178
+					details: details,
+				},
+			})
+			.catch(() => alerts.push('Failed to update job', 'ERROR'));
+
+		if (!job) return;
+
+		window.location.replace(`/jobs/details?id=${job.id}`);
 	};
 
 	const createJob = async () => {
@@ -165,13 +222,7 @@
 				>Custom notification text
 				<span class="badge badge-xs badge-soft">Optional</span>
 			</span>
-			<input
-				type="text"
-				bind:value={notificationText}
-				required
-				class="input validator"
-				placeholder="Name"
-			/>
+			<input type="text" bind:value={notificationText} class="input" placeholder="Name" />
 			<span class="label my-1">Only takes effect if notifications are enabled</span>
 		</label>
 	</fieldset>

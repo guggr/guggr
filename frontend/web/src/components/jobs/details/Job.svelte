@@ -51,7 +51,7 @@
 	</div>
 
 	<div class="flex flex-row-reverse gap-2">
-		<a href="/jobs/edit" class="btn btn-soft btn-sm">
+		<a href={`/jobs/edit?id=${id}`} class="btn btn-soft btn-sm">
 			<PenIcon size="16" /> <span class="@max-md:sr-only">Edit job</span>
 		</a>
 
