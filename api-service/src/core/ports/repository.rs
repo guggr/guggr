@@ -53,6 +53,9 @@ pub trait RepositoryGroupPort: Send + Sync {
     /// Inserts the group into the repository.
     fn create_group(&self, new_group: Group) -> Result<Group, DomainError>;
 
+    /// Returns the group from the repository by ID.
+    fn get_group(&self, id: &str) -> Result<Group, DomainError>;
+
     /// Returns the groups from the repository by the user ID.
     fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
 

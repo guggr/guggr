@@ -29,6 +29,17 @@ impl RepositoryGroupPort for Postgres {
         Ok(result)
     }
 
+    fn get_group(&self, id: &str) -> Result<Group, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+
+        let group = group::dsl::group
+            .find(id)
+            .first(&mut conn)
+            .map_err(PostgresError::from)?;
+
+        Ok(group)
+    }
+
     fn list_groups_by_user_id(
         &self,
         user_id: &str,
