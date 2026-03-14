@@ -13,11 +13,13 @@
 	import { relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import alerts from '@/stores/alerts.svelte';
+	import auth from '@/stores/auth.svelte';
 	import { ActivityIcon, PenIcon, Trash2Icon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let id = $state(''),
-		jobName = $state('');
+		jobName = $state(''),
+		hasJobWritePermissions = $state(false);
 
 	let jobPromise = $state(new Promise<DisplayJob>(() => {})),
 		jobRunsPromise = $state(new Promise<DisplayJobRun[]>(() => {})),
@@ -35,6 +37,9 @@
 		jobName = (await jobPromise).name;
 
 		groupPromise = groupsApi.getGroup({ id: (await jobPromise).groupId });
+
+		const member = (await groupPromise).members.find(x => x.id === $auth?.user.id);
+		if (['owner', 'admin'].includes(member?.role ?? '')) hasJobWritePermissions = true;
 	});
 
 	const deleteJob = async () => {
@@ -61,15 +66,17 @@
 		</menu>
 	</div>
 
-	<div class="flex flex-row-reverse gap-2">
-		<a href={`/jobs/edit?id=${id}`} class="btn btn-soft btn-sm">
-			<PenIcon size="16" /> <span class="@max-md:sr-only">Edit job</span>
-		</a>
+	{#if hasJobWritePermissions}
+		<div class="flex flex-row-reverse gap-2">
+			<a href={`/jobs/edit?id=${id}`} class="btn btn-soft btn-sm">
+				<PenIcon size="16" /> <span class="@max-md:sr-only">Edit job</span>
+			</a>
 
-		<button onclick={deleteJob} class="btn btn-soft btn-error btn-sm">
-			<Trash2Icon size="16" /> <span class="@max-md:sr-only">Delete job</span>
-		</button>
-	</div>
+			<button onclick={deleteJob} class="btn btn-soft btn-error btn-sm">
+				<Trash2Icon size="16" /> <span class="@max-md:sr-only">Delete job</span>
+			</button>
+		</div>
+	{/if}
 </div>
 
 <div class="card card-side bg-base-100 shadow-md">
