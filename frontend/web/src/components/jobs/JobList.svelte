@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { config, JobsApi, type DisplayJob } from '@/api';
+	import { config, GroupsApi, JobsApi, type DisplayJob } from '@/api';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import { relativeTime } from '@/lib/formatter';
@@ -8,6 +8,8 @@
 	import { onMount } from 'svelte';
 
 	let jobsPromise = $state(new Promise<DisplayJob[]>(() => {}));
+
+	const groupsApi = new GroupsApi(config);
 
 	onMount(() => {
 		const api = new JobsApi(config);
@@ -54,8 +56,13 @@
 					>
 						<li>
 							<span class="sr-only">Group: </span>
-							<!-- TODO add group name -->
-							<a href="/groups" class="link link-hover">{j.groupId}</a>
+							{#await groupsApi.getGroup({ id: j.groupId })}
+								<a href="/groups" class="link link-hover">{j.groupId}</a>
+							{:then group}
+								<a href="/groups" class="link link-hover">{group.name}</a>
+							{:catch}
+								<a href="/groups" class="link link-hover">{j.groupId}</a>
+							{/await}
 						</li>
 						<li>
 							<!-- TODO add job execution interval -->

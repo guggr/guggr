@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { config, JobsApi, type DisplayJob, type DisplayJobRun } from '@/api';
+	import {
+		config,
+		GroupsApi,
+		JobsApi,
+		type DisplayGroup,
+		type DisplayJob,
+		type DisplayJobRun,
+	} from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
@@ -13,17 +20,21 @@
 		jobName = $state('');
 
 	let jobPromise = $state(new Promise<DisplayJob>(() => {})),
-		jobRunsPromise = $state(new Promise<DisplayJobRun[]>(() => {}));
+		jobRunsPromise = $state(new Promise<DisplayJobRun[]>(() => {})),
+		groupPromise = $state(new Promise<DisplayGroup>(() => {}));
 
 	onMount(async () => {
 		id = new URLSearchParams(window.location.search).get('id') ?? '';
 
-		const api = new JobsApi(config);
+		const api = new JobsApi(config),
+			groupsApi = new GroupsApi(config);
 
 		jobPromise = api.getJob({ id });
 		jobRunsPromise = api.listJobRuns({ id });
 
 		jobName = (await jobPromise).name;
+
+		groupPromise = groupsApi.getGroup({ id: (await jobPromise).groupId });
 	});
 
 	const deleteJob = async () => {
@@ -85,8 +96,13 @@
 
 				<div class="text-base-content/80">
 					<span class="sr-only">Group: </span>
-					<!-- TODO group name -->
-					<a href="/groups" class="link link-hover">{job.groupId}</a>
+					{#await groupPromise}
+						<a href="/groups" class="link link-hover">{job.groupId}</a>
+					{:then group}
+						<a href="/groups" class="link link-hover">{group.name}</a>
+					{:catch}
+						<a href="/groups" class="link link-hover">{job.groupId}</a>
+					{/await}
 				</div>
 			</div>
 
