@@ -5,7 +5,8 @@
 	import Loading from '@/components/shared/Loading.svelte';
 	import { relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
-	import { ActivityIcon, PenIcon } from '@lucide/svelte';
+	import alerts from '@/stores/alerts.svelte';
+	import { ActivityIcon, PenIcon, Trash2Icon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let id = $state(''),
@@ -24,14 +25,24 @@
 
 		jobName = (await jobPromise).name;
 	});
+
+	const deleteJob = async () => {
+		if (!confirm(`Do you really want to delete the Job "${jobName}"?`)) return;
+
+		const api = new JobsApi(config);
+
+		api.deleteJob({ id })
+			.then(() => window.location.replace('/jobs'))
+			.catch(() => alerts.push('Failed to delete the job', 'ERROR'));
+	};
 </script>
 
 <svelte:head>
 	<title>Job {jobName} Details | guggr</title>
 </svelte:head>
 
-<div class="mb-4 flex items-baseline justify-between gap-2">
-	<div class="breadcrumbs text-sm">
+<div class="@container mb-4 flex items-baseline justify-between gap-2">
+	<div class="breadcrumbs px-2 text-sm">
 		<menu>
 			<li><a href="/">Home</a></li>
 			<li><a href="/jobs">Jobs</a></li>
@@ -39,9 +50,15 @@
 		</menu>
 	</div>
 
-	<a href="/jobs/edit" class="btn btn-soft btn-sm">
-		<PenIcon size="16" /> Edit job
-	</a>
+	<div class="flex flex-row-reverse gap-2">
+		<a href="/jobs/edit" class="btn btn-soft btn-sm">
+			<PenIcon size="16" /> <span class="@max-md:sr-only">Edit job</span>
+		</a>
+
+		<button onclick={deleteJob} class="btn btn-soft btn-error btn-sm">
+			<Trash2Icon size="16" /> <span class="@max-md:sr-only">Delete job</span>
+		</button>
+	</div>
 </div>
 
 <div class="card card-side bg-base-100 shadow-md">
