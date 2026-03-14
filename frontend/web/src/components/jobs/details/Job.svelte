@@ -109,7 +109,11 @@
 			Online
 		</div>
 		<div class="stat-desc">
-			Last checked {relativeTime.format(-lastScheduledDiffMinutes, 'minutes')}
+			{#if job.lastScheduled}
+				Last checked {relativeTime.format(-lastScheduledDiffMinutes, 'minutes')}
+			{:else}
+				The job hasn't been run yet
+			{/if}
 		</div>
 	</div>
 {/snippet}
