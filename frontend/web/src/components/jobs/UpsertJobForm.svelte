@@ -114,11 +114,11 @@
 	};
 </script>
 
-<form onsubmit={preventDefault(upsertJob)} class="mx-auto w-xl max-w-full *:not-last:mb-4">
+<form onsubmit={preventDefault(upsertJob)} class="mx-auto w-xl max-w-full px-2 *:not-last:mb-4">
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
 		<legend>Job Details</legend>
 
-		<div class="flex justify-between">
+		<div class="flex flex-wrap justify-between gap-2">
 			<label class="input">
 				<span class="label">Job name</span>
 				<input type="text" bind:value={name} required placeholder="Name" />
@@ -227,12 +227,17 @@
 			/>
 		</label>
 
-		<label class="mt-4 w-xs max-w-full">
-			<span class="label my-1"
-				>Custom notification text
+		<label class="mt-4">
+			<span class="label my-1">
+				Custom notification text
 				<span class="badge badge-xs badge-soft">Optional</span>
 			</span>
-			<input type="text" bind:value={notificationText} class="input" placeholder="Name" />
+			<input
+				type="text"
+				bind:value={notificationText}
+				class="input block"
+				placeholder="Name"
+			/>
 			<span class="label my-1">Only takes effect if notifications are enabled</span>
 		</label>
 	</fieldset>
