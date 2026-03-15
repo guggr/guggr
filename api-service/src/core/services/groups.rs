@@ -33,6 +33,20 @@ impl ServiceGroupPort for Service {
         ))
     }
 
+    fn get_group(&self, user_id: UserId, id: &str) -> Result<DisplayGroup, DomainError> {
+        let group = self.db.get_group(id)?;
+        let members = self.db.get_members_for_multiple_groups(&[id])?;
+
+        let group = DisplayGroup::from_group(group, members.get(id).cloned().unwrap_or_default());
+
+        // Return not found if user is not part of group
+        if !group.members.iter().any(|member| member.id == user_id.0) {
+            return Err(DomainError::NotFound);
+        }
+
+        Ok(group)
+    }
+
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError> {
         let groups = self.db.list_groups_by_user_id(&user_id.0)?;
 

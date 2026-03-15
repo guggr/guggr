@@ -213,6 +213,50 @@
 				]
 			}
 		},
+		"/api/v1/groups/{id}": {
+			"get": {
+				"tags": ["groups"],
+				"summary": "Get group by ID",
+				"operationId": "get_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Group",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			}
+		},
 		"/api/v1/jobs": {
 			"get": {
 				"tags": ["jobs"],
@@ -626,7 +670,9 @@
 						"type": "boolean"
 					},
 					"run_every": {
-						"type": "string"
+						"type": "integer",
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},
@@ -770,7 +816,9 @@
 						"type": "boolean"
 					},
 					"run_every": {
-						"type": "string"
+						"type": "integer",
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},
@@ -1056,7 +1104,9 @@
 						"type": ["boolean", "null"]
 					},
 					"run_every": {
-						"type": ["string", "null"]
+						"type": ["integer", "null"],
+						"format": "int64",
+						"default": 60
 					}
 				}
 			},

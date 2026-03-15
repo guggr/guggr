@@ -1,4 +1,4 @@
-use chrono::{Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::job,
@@ -35,6 +35,7 @@ pub struct CreateJob {
     pub notify_users: bool,
     pub custom_notification: Option<String>,
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
     pub details: CreateJobDetails,
 }
@@ -47,7 +48,7 @@ pub enum CreateJobDetails {
     #[serde(rename = "ping")]
     Ping(CreateJobDetailsPing),
 }
-
+#[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Serialize, ToSchema)]
 /// Returned Job
 pub struct DisplayJob {
@@ -57,8 +58,10 @@ pub struct DisplayJob {
     pub group_id: String,
     pub notify_users: bool,
     pub custom_notification: Option<String>,
+    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
-    pub last_scheduled: Option<NaiveDateTime>,
+    pub last_scheduled: Option<DateTime<Utc>>,
     pub reachable: bool,
     pub details: DisplayJobDetails,
 }
@@ -73,7 +76,7 @@ pub enum DisplayJobDetails {
     #[serde(rename = "undefined")]
     Undefined,
 }
-
+#[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
 /// Struct to Update a Job
 pub struct UpdateRequestJob {
@@ -83,6 +86,8 @@ pub struct UpdateRequestJob {
     pub group_id: Option<String>,
     pub notify_users: Option<bool>,
     pub custom_notification: Option<String>,
+    #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
+    #[schema(value_type = Option<i64>, default = 60)]
     pub run_every: Option<Duration>,
     pub last_scheduled: Option<NaiveDateTime>,
     pub details: Option<UpdateRequestJobDetails>,
@@ -97,7 +102,7 @@ pub enum UpdateRequestJobDetails {
     Ping(UpdateJobDetailsPing),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, AsChangeset)]
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, AsChangeset)]
 #[diesel(table_name = job)]
 /// Struct to Update a Job
 pub struct UpdateJob {
@@ -136,7 +141,7 @@ impl DisplayJob {
             notify_users: value.notify_users,
             custom_notification: value.custom_notification,
             run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            last_scheduled: value.last_scheduled.map(|t| t.and_utc()),
             reachable,
             details: DisplayJobDetails::Undefined,
         }
