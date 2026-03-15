@@ -76,8 +76,9 @@ pub enum DisplayJobDetails {
     #[serde(rename = "undefined")]
     Undefined,
 }
+
 #[serde_with::serde_as]
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, Default)]
 /// Struct to Update a Job
 pub struct UpdateRequestJob {
     pub id: Option<String>,

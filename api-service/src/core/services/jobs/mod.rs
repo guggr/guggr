@@ -94,6 +94,10 @@ impl ServiceJobPort for Service {
             return Err(DomainError::BadRequest);
         }
 
+        if updated_job == UpdateRequestJob::default() {
+            return self.get_job_by_id(user_id, job_id);
+        }
+
         let (job, reachable) = self
             .db
             .update_job(job_id, updated_job.clone().transmogrify())?;
