@@ -18,7 +18,12 @@ pub mod ping;
 pub mod run;
 
 /// Type returned by list function
-pub type JobWithRawDetails = (Job, Option<JobDetailsHttp>, Option<JobDetailsPing>);
+pub type JobWithRawDetails = (
+    Job,
+    Option<bool>,
+    Option<JobDetailsHttp>,
+    Option<JobDetailsPing>,
+);
 
 #[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
@@ -57,6 +62,7 @@ pub struct DisplayJob {
     #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
     pub last_scheduled: Option<DateTime<Utc>>,
+    pub reachable: bool,
     pub details: DisplayJobDetails,
 }
 
@@ -125,8 +131,8 @@ impl From<CreateJob> for Job {
     }
 }
 
-impl From<Job> for DisplayJob {
-    fn from(value: Job) -> Self {
+impl DisplayJob {
+    pub fn from_job(value: Job, reachable: bool) -> Self {
         Self {
             id: value.id,
             name: value.name,
@@ -136,6 +142,7 @@ impl From<Job> for DisplayJob {
             custom_notification: value.custom_notification,
             run_every: value.run_every,
             last_scheduled: value.last_scheduled.map(|t| t.and_utc()),
+            reachable,
             details: DisplayJobDetails::Undefined,
         }
     }
