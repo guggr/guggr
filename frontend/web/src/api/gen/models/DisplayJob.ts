@@ -77,6 +77,12 @@ export interface DisplayJob {
 	notifyUsers: boolean;
 	/**
 	 *
+	 * @type {boolean}
+	 * @memberof DisplayJob
+	 */
+	reachable: boolean;
+	/**
+	 *
 	 * @type {number}
 	 * @memberof DisplayJob
 	 */
@@ -93,6 +99,7 @@ export function instanceOfDisplayJob(value: object): value is DisplayJob {
 	if (!('jobTypeId' in value) || value['jobTypeId'] === undefined) return false;
 	if (!('name' in value) || value['name'] === undefined) return false;
 	if (!('notifyUsers' in value) || value['notifyUsers'] === undefined) return false;
+	if (!('reachable' in value) || value['reachable'] === undefined) return false;
 	if (!('runEvery' in value) || value['runEvery'] === undefined) return false;
 	return true;
 }
@@ -116,6 +123,7 @@ export function DisplayJobFromJSONTyped(json: any, ignoreDiscriminator: boolean)
 			json['last_scheduled'] == null ? undefined : new Date(json['last_scheduled']),
 		name: json['name'],
 		notifyUsers: json['notify_users'],
+		reachable: json['reachable'],
 		runEvery: json['run_every'],
 	};
 }
@@ -144,6 +152,7 @@ export function DisplayJobToJSONTyped(
 				: value['lastScheduled'].toISOString(),
 		name: value['name'],
 		notify_users: value['notifyUsers'],
+		reachable: value['reachable'],
 		run_every: value['runEvery'],
 	};
 }
