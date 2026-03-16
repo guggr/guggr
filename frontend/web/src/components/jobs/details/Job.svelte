@@ -8,6 +8,7 @@
 		type DisplayJobRun,
 	} from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
+	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import { relativeTime } from '@/lib/formatter';
@@ -139,14 +140,8 @@
 
 	<div class="stat py-0">
 		<div class="stat-title">Current Status</div>
-		<div class="stat-value text-success flex items-center gap-2 text-3xl">
-			<div class="inline-grid *:[grid-area:1/1]">
-				<div
-					class="status status-success status-xl animate-ping motion-reduce:hidden"
-				></div>
-				<div class="status status-success status-xl"></div>
-			</div>
-			Online
+		<div class="stat-value flex items-center gap-2 text-3xl">
+			<JobStatus online={job.reachable} />
 		</div>
 		<div class="stat-desc">
 			{#if job.lastScheduled}

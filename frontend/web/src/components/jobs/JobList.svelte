@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { config, GroupsApi, JobsApi, type DisplayJob } from '@/api';
+	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import { duration, relativeTime } from '@/lib/formatter';
@@ -78,14 +79,8 @@
 					<div class="stats">
 						<div class="stat px-2 py-0 sm:px-6">
 							<div class="stat-title hidden sm:block">Current Status</div>
-							<div class="stat-value text-success flex items-center gap-2 text-3xl">
-								<div class="inline-grid *:[grid-area:1/1]">
-									<div
-										class="status status-success status-xl animate-ping motion-reduce:hidden"
-									></div>
-									<div class="status status-success status-xl"></div>
-								</div>
-								Online
+							<div class="stat-value flex items-center gap-2 text-3xl">
+								<JobStatus online={j.reachable} />
 							</div>
 							<div class="stat-desc hidden sm:block">
 								{#if j.lastScheduled}
