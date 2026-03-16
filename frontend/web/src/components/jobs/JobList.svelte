@@ -88,7 +88,7 @@
 
 				<div>
 					<div class="stats">
-						<div class="stat px-2 py-0 sm:px-6">
+						<div class="stat px-2 py-0 sm:min-w-56 sm:px-6">
 							<div class="stat-title hidden sm:block">Current Status</div>
 							<div class="stat-value flex items-center gap-2 text-3xl">
 								<JobStatus online={j.reachable} />
