@@ -1,4 +1,4 @@
-use chrono::{Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::job,
@@ -18,7 +18,12 @@ pub mod ping;
 pub mod run;
 
 /// Type returned by list function
-pub type JobWithRawDetails = (Job, Option<JobDetailsHttp>, Option<JobDetailsPing>);
+pub type JobWithRawDetails = (
+    Job,
+    Option<bool>,
+    Option<JobDetailsHttp>,
+    Option<JobDetailsPing>,
+);
 
 #[serde_with::serde_as]
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema)]
@@ -56,7 +61,8 @@ pub struct DisplayJob {
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
     #[schema(value_type = i64, default = 60)]
     pub run_every: Duration,
-    pub last_scheduled: Option<NaiveDateTime>,
+    pub last_scheduled: Option<DateTime<Utc>>,
+    pub reachable: bool,
     pub details: DisplayJobDetails,
 }
 
@@ -70,8 +76,9 @@ pub enum DisplayJobDetails {
     #[serde(rename = "undefined")]
     Undefined,
 }
+
 #[serde_with::serde_as]
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema)]
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, Default)]
 /// Struct to Update a Job
 pub struct UpdateRequestJob {
     pub id: Option<String>,
@@ -125,8 +132,8 @@ impl From<CreateJob> for Job {
     }
 }
 
-impl From<Job> for DisplayJob {
-    fn from(value: Job) -> Self {
+impl DisplayJob {
+    pub fn from_job(value: Job, reachable: bool) -> Self {
         Self {
             id: value.id,
             name: value.name,
@@ -135,7 +142,8 @@ impl From<Job> for DisplayJob {
             notify_users: value.notify_users,
             custom_notification: value.custom_notification,
             run_every: value.run_every,
-            last_scheduled: value.last_scheduled,
+            last_scheduled: value.last_scheduled.map(|t| t.and_utc()),
+            reachable,
             details: DisplayJobDetails::Undefined,
         }
     }
