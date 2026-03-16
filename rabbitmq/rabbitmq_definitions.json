@@ -42,6 +42,24 @@
 			"durable": true,
 			"auto_delete": false,
 			"arguments": {}
+		},
+		{
+			"name": "scheduler.jobs",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false,
+			"arguments": {
+				"x-queue-type": "quorum"
+			}
+		},
+		{
+			"name": "agent.job_results",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false,
+			"arguments": {
+				"x-queue-type": "quorum"
+			}
 		}
 	],
 	"bindings": [
