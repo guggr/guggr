@@ -14,23 +14,14 @@
 	"policies": [
 		{
 			"vhost": "/",
-			"name": "delivery-limit",
+			"name": "guggr-policy",
 			"pattern": "(agent|scheduler)\\..+",
 			"apply-to": "queues",
 			"definition": {
-				"delivery-limit": 5
-			},
-			"priority": 1
-		},
-		{
-			"vhost": "/",
-			"name": "dlx-policy",
-			"pattern": "(agent|scheduler)\\..+",
-			"apply-to": "queues",
-			"definition": {
+				"delivery-limit": 5,
 				"dead-letter-exchange": "dlx"
 			},
-			"priority": 0
+			"priority": 10
 		}
 	],
 	"exchanges": [
@@ -41,6 +32,25 @@
 			"durable": true,
 			"auto_delete": false,
 			"internal": false,
+			"arguments": {}
+		}
+	],
+	"queues": [
+		{
+			"name": "dlx.queue",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false,
+			"arguments": {}
+		}
+	],
+	"bindings": [
+		{
+			"source": "dlx",
+			"vhost": "/",
+			"destination": "dlx.queue",
+			"destination_type": "queue",
+			"routing_key": "dead-lettered",
 			"arguments": {}
 		}
 	]
