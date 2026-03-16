@@ -14,7 +14,7 @@
 	"policies": [
 		{
 			"vhost": "/",
-			"name": "guggr-policy",
+			"name": "default",
 			"pattern": "(agent|scheduler)\\..+",
 			"apply-to": "queues",
 			"definition": {
