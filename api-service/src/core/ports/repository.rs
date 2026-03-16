@@ -107,7 +107,7 @@ pub trait RepositoryJobPort: Send + Sync {
         offset: i64,
     ) -> Result<Vec<JobWithRawDetails>, DomainError>;
     fn delete_job(&self, job_id: &str) -> Result<(), DomainError>;
-    fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError>;
+    fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<(Job, bool), DomainError>;
 }
 
 pub trait RepositoryJobDetailPort: Send + Sync {

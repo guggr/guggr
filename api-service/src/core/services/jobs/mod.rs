@@ -40,20 +40,20 @@ impl ServiceJobPort for Service {
             ),
         };
 
-        let mut display_job = DisplayJob::from(job);
+        let mut display_job = DisplayJob::from_job(job, false);
         display_job.details = detail;
         Ok(display_job)
     }
 
     fn get_job_by_id(&self, user_id: UserId, job_id: &str) -> Result<DisplayJob, DomainError> {
         let raw_job = self.db.get_job_by_id(&user_id.0, job_id)?;
-        let (job, http, ping) = raw_job;
+        let (job, reachable, http, ping) = raw_job;
         let details = match (http, ping) {
             (Some(http), None) => DisplayJobDetails::Http(http.transmogrify()),
             (None, Some(ping)) => DisplayJobDetails::Ping(ping.transmogrify()),
             (_, _) => DisplayJobDetails::Undefined,
         };
-        let mut job = DisplayJob::from(job);
+        let mut job = DisplayJob::from_job(job, reachable.unwrap_or_default());
         job.details = details;
         Ok(job)
     }
@@ -62,8 +62,8 @@ impl ServiceJobPort for Service {
         let raw_jobs = self.db.list_jobs(&user_id.0, 10, 0)?;
         Ok(raw_jobs
             .into_iter()
-            .map(|(job, http, ping)| {
-                let mut display_job = DisplayJob::from(job);
+            .map(|(job, reachable, http, ping)| {
+                let mut display_job = DisplayJob::from_job(job, reachable.unwrap_or_default());
                 if let Some(detail) = http {
                     display_job.details = DisplayJobDetails::Http(detail.transmogrify());
                 } else if let Some(detail) = ping {
@@ -94,7 +94,11 @@ impl ServiceJobPort for Service {
             return Err(DomainError::BadRequest);
         }
 
-        let job = self
+        if updated_job == UpdateRequestJob::default() {
+            return self.get_job_by_id(user_id, job_id);
+        }
+
+        let (job, reachable) = self
             .db
             .update_job(job_id, updated_job.clone().transmogrify())?;
 
@@ -117,7 +121,7 @@ impl ServiceJobPort for Service {
                 _ => return Err(DomainError::NotFound),
             },
         };
-        let mut job = DisplayJob::from(job);
+        let mut job = DisplayJob::from_job(job, reachable);
         job.details = detail;
 
         Ok(job)

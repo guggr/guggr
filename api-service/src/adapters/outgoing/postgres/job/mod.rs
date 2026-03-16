@@ -3,7 +3,7 @@ pub mod run;
 
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
-    schema::{job, job_details_http, job_details_ping, user_group_mapping},
+    schema::{job, job_details_http, job_details_ping, job_runs, user_group_mapping},
 };
 use diesel::{
     ExpressionMethods, JoinOnDsl, NullableExpressionMethods, QueryDsl, RunQueryDsl, dsl::exists,
@@ -82,7 +82,20 @@ impl RepositoryJobPort for Postgres {
 
     fn get_job_by_id(&self, user_id: &str, job_id: &str) -> Result<JobWithRawDetails, DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
-        let job: (Job, Option<JobDetailsHttp>, Option<JobDetailsPing>) = job::table
+
+        let is_reachable_subselect = job_runs::table
+            .filter(job_runs::job_id.eq(job::id))
+            .select(job_runs::reachable)
+            // Select latest reachable only
+            .order(job_runs::timestamp.desc())
+            .single_value();
+
+        let job: (
+            Job,
+            Option<bool>,
+            Option<JobDetailsHttp>,
+            Option<JobDetailsPing>,
+        ) = job::table
             .find(job_id)
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
@@ -92,11 +105,18 @@ impl RepositoryJobPort for Postgres {
             .left_join(job_details_ping::table)
             .select((
                 job::all_columns,
+                is_reachable_subselect,
                 job_details_http::all_columns.nullable(),
                 job_details_ping::all_columns.nullable(),
             ))
-            .first::<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>(&mut conn)
+            .first::<(
+                Job,
+                Option<bool>,
+                Option<JobDetailsHttp>,
+                Option<JobDetailsPing>,
+            )>(&mut conn)
             .map_err(PostgresError::from)?;
+
         Ok(job)
     }
 
@@ -106,8 +126,23 @@ impl RepositoryJobPort for Postgres {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<JobWithRawDetails>, DomainError> {
+        type JobListDatabaseType = (
+            Job,
+            Option<bool>,
+            Option<JobDetailsHttp>,
+            Option<JobDetailsPing>,
+        );
+
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
-        let jobs: Vec<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)> = job::table
+
+        let is_reachable_subselect = job_runs::table
+            .filter(job_runs::job_id.eq(job::id))
+            .select(job_runs::reachable)
+            // Select latest reachable only
+            .order(job_runs::timestamp.desc())
+            .single_value();
+
+        let jobs: Vec<JobListDatabaseType> = job::table
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
@@ -116,23 +151,37 @@ impl RepositoryJobPort for Postgres {
             .left_join(job_details_ping::table)
             .select((
                 job::all_columns,
+                is_reachable_subselect,
                 job_details_http::all_columns.nullable(),
                 job_details_ping::all_columns.nullable(),
             ))
             .limit(limit)
             .offset(offset)
-            .load::<(Job, Option<JobDetailsHttp>, Option<JobDetailsPing>)>(&mut conn)
+            .load::<JobListDatabaseType>(&mut conn)
             .map_err(PostgresError::from)?;
         Ok(jobs)
     }
 
-    fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<Job, DomainError> {
+    /// Returns the updated job details and if it was reachable with the latest
+    /// check
+    fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<(Job, bool), DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
         let updated_job: Job = diesel::update(job::dsl::job.find(job_id))
             .set(updated_job)
             .get_result(&mut conn)
             .map_err(PostgresError::from)?;
-        Ok(updated_job)
+
+        let is_reachable = job_runs::table
+            .filter(job_runs::job_id.eq(job_id))
+            .select(job_runs::reachable)
+            .order(job_runs::timestamp.desc())
+            .load::<bool>(&mut conn)
+            .map_err(PostgresError::from)?;
+
+        Ok((
+            updated_job,
+            is_reachable.first().copied().unwrap_or_default(),
+        ))
     }
 
     fn delete_job(&self, job_id: &str) -> Result<(), DomainError> {
