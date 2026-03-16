@@ -42,8 +42,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         rabbit_mq_config.queue_name(1).unwrap(),
     ));
 
-    rabbitmq_publisher.setup_queue().await?;
-
     let mut processing_adapter: HashMap<JobType, Arc<dyn MonitorPort + Send + Sync>> =
         HashMap::new();
     processing_adapter.insert(JobType::Http, http_adapter);
@@ -58,7 +56,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         rabbit_mq_config.queue_name(0).unwrap(),
         job_service,
     );
-    rabbitmq_driver.setup_queues().await?;
 
     info!("Agent is starting...");
 
