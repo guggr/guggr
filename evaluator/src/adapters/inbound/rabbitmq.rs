@@ -4,11 +4,8 @@ use futures_lite::StreamExt;
 use gen_proto_types::job_result::v1::JobResult;
 use lapin::{
     message::Delivery,
-    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, QueueDeclareOptions},
-    types::{
-        AMQPValue::{LongInt, LongString},
-        FieldTable,
-    },
+    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions},
+    types::FieldTable,
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
@@ -61,44 +58,6 @@ impl RabbitMQDriver {
         }
     }
 
-    /// Declares the used queue
-    ///
-    /// # Errors
-    ///
-    /// Will return [`RabbitMQDriverError`] if:
-    /// - no connection could be retrieved from the pool
-    /// - the channel could not be created
-    /// - the queue could not be declared
-    pub async fn setup_schema(&self) -> Result<(), RabbitMQDriverError> {
-        let connection = self.pool.get().await?;
-
-        let channel = connection.create_channel().await?;
-
-        channel
-            .queue_declare(
-                &self.queue_name,
-                QueueDeclareOptions {
-                    durable: true,
-                    ..Default::default()
-                },
-                Self::queue_args(),
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    fn queue_args() -> FieldTable {
-        let mut args = FieldTable::default();
-        // set queue type to quorum
-        args.insert("x-queue-type".into(), LongString("quorum".into()));
-        // set maximum delivery limit until messages get pushed into dead letter
-        // exchange
-        args.insert("x-delivery-limit".into(), LongInt(5));
-        // TODO: specify dead letter exchange in setup schema
-
-        args
-    }
     /// Starts the `RabbitMQ` consumption and evaluation of retrieved jobs
     ///
     /// # Errors
@@ -179,10 +138,7 @@ async fn nack_delivery(delivery: &Delivery, requeue: bool) -> Result<bool, Rabbi
 #[async_trait]
 impl MessageConsumerPort for RabbitMQDriver {
     async fn setup(&self) -> Result<(), JobEvaluatorError> {
-        self.setup_schema().await.map_err(|err| {
-            error!("RabbitMQDriver Error: {:?}", err);
-            JobEvaluatorError::from(err)
-        })
+        Ok(())
     }
     async fn start(&self) -> Result<(), JobEvaluatorError> {
         self.start().await.map_err(|err| {

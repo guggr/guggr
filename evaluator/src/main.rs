@@ -41,7 +41,6 @@ async fn main() -> Result<()> {
         rabbitmq_pool.clone(),
         rabbitmq_config.queue_name(0).unwrap(),
     );
-    rabbitmq_driver.setup_schema().await?;
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate())?;
 
