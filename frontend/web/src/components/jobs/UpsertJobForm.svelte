@@ -115,6 +115,18 @@
 </script>
 
 <form onsubmit={preventDefault(upsertJob)} class="mx-auto w-xl max-w-full px-2 *:not-last:mb-4">
+	<div class="breadcrumbs px-2 text-sm">
+		<menu>
+			<li><a href="/">Home</a></li>
+			{#if id}
+				<li><a href="/jobs/details?id={id}">{name}</a></li>
+			{:else}
+				<li><a href="/jobs">Jobs</a></li>
+			{/if}
+			<li>{edit ? 'Edit job' : 'Create job'}</li>
+		</menu>
+	</div>
+
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
 		<legend>Job Details</legend>
 
