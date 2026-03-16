@@ -10,6 +10,8 @@
 
 	let jobsPromise = $state(new Promise<DisplayJob[]>(() => {}));
 
+	let filterOfflineOnly = $state(false);
+
 	const groupsApi = new GroupsApi(config);
 
 	onMount(() => {
@@ -19,11 +21,20 @@
 	});
 </script>
 
+<div class="mb-8 flex flex-row-reverse items-baseline justify-between gap-2">
+	<a href="/jobs/create" class="btn btn-primary btn-soft">Create new job</a>
+
+	<label class="label text-sm select-none">
+		<input type="checkbox" bind:checked={filterOfflineOnly} class="toggle toggle-primary" />
+		Offline jobs only
+	</label>
+</div>
+
 {#await jobsPromise}
 	<Loading />
 {:then jobs}
 	<ul class="*:not-last:mb-6">
-		{#each jobs as j}
+		{#each jobs.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j}
 			{@render job(j)}
 		{/each}
 	</ul>
