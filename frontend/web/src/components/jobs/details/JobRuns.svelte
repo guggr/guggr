@@ -45,14 +45,14 @@
 					<b class="font-bold">{dateTime.format(selected.timestamp)}</b>
 				</li>
 
-				{#if typeof selected.details !== 'string' && 'ping' in selected.details}
+				{#if selected.details && 'ping' in selected.details}
 					<li>
 						<span class="text-base-content/80">Latency:</span>
 						<b class="font-bold">{selected.details.ping.latency}</b>
 					</li>
 				{/if}
 
-				{#if typeof selected.details !== 'string' && 'http' in selected.details}
+				{#if selected.details && 'http' in selected.details}
 					<li>
 						<span class="text-base-content/80">Latency:</span>
 						<b class="font-bold">{selected.details.http.latency}</b>

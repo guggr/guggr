@@ -32,7 +32,7 @@ import {
  * Returned JobRun details
  * @export
  */
-export type DisplayJobRunDetails = DisplayJobRunDetailsOneOf | DisplayJobRunDetailsOneOf1 | string;
+export type DisplayJobRunDetails = DisplayJobRunDetailsOneOf | DisplayJobRunDetailsOneOf1;
 
 export function DisplayJobRunDetailsFromJSON(json: any): DisplayJobRunDetails {
 	return DisplayJobRunDetailsFromJSONTyped(json, false);
@@ -53,9 +53,6 @@ export function DisplayJobRunDetailsFromJSONTyped(
 	}
 	if (instanceOfDisplayJobRunDetailsOneOf1(json)) {
 		return DisplayJobRunDetailsOneOf1FromJSONTyped(json, true);
-	}
-	if (typeof json === 'string' && json === 'undefined') {
-		return json;
 	}
 	return {} as any;
 }
@@ -79,9 +76,6 @@ export function DisplayJobRunDetailsToJSONTyped(
 	}
 	if (instanceOfDisplayJobRunDetailsOneOf1(value)) {
 		return DisplayJobRunDetailsOneOf1ToJSON(value as DisplayJobRunDetailsOneOf1);
-	}
-	if (typeof value === 'string' && value === 'undefined') {
-		return value;
 	}
 	return {};
 }
