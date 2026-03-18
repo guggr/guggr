@@ -6,6 +6,9 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	integrations: [svelte()],
 	vite: {
+		define: {
+			__APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? ''),
+		},
 		plugins: [tailwindcss()],
 	},
 });
