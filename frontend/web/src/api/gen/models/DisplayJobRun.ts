@@ -38,7 +38,7 @@ export interface DisplayJobRun {
 	 * @type {DisplayJobRunDetails}
 	 * @memberof DisplayJobRun
 	 */
-	details: DisplayJobRunDetails;
+	details?: DisplayJobRunDetails | null;
 	/**
 	 *
 	 * @type {string}
@@ -76,7 +76,6 @@ export interface DisplayJobRun {
  */
 export function instanceOfDisplayJobRun(value: object): value is DisplayJobRun {
 	if (!('batchId' in value) || value['batchId'] === undefined) return false;
-	if (!('details' in value) || value['details'] === undefined) return false;
 	if (!('id' in value) || value['id'] === undefined) return false;
 	if (!('jobId' in value) || value['jobId'] === undefined) return false;
 	if (!('reachable' in value) || value['reachable'] === undefined) return false;
@@ -96,7 +95,8 @@ export function DisplayJobRunFromJSONTyped(json: any, ignoreDiscriminator: boole
 	}
 	return {
 		batchId: json['batch_id'],
-		details: DisplayJobRunDetailsFromJSON(json['details']),
+		details:
+			json['details'] == null ? undefined : DisplayJobRunDetailsFromJSON(json['details']),
 		id: json['id'],
 		jobId: json['job_id'],
 		reachable: json['reachable'],
