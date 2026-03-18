@@ -2,7 +2,7 @@ use database_client::{
     models::{Job, JobResultHttp, JobResultPing, JobRun},
     schema::{job, job_result_http, job_result_ping, job_runs},
 };
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, NullableExpressionMethods, QueryDsl, RunQueryDsl};
 use frunk::labelled::Transmogrifier;
 
 use crate::{
@@ -29,29 +29,37 @@ impl RepositoryJobRunPort for Postgres {
 
         match selected_job.job_type_id.as_str() {
             "http" => {
-                let http_rows: Vec<(JobRun, JobResultHttp)> = job_runs::table
-                    .inner_join(job_result_http::table)
+                let http_rows: Vec<(JobRun, Option<JobResultHttp>)> = job_runs::table
+                    .left_join(job_result_http::table)
                     .filter(job_runs::job_id.eq(job_id))
-                    .select((job_runs::all_columns, job_result_http::all_columns))
+                    .select((
+                        job_runs::all_columns,
+                        job_result_http::all_columns.nullable(),
+                    ))
                     .order(job_runs::timestamp.desc())
                     .limit(limit)
                     .offset(offset)
                     .load(&mut conn)
                     .map_err(PostgresError::from)?;
+
                 Ok(http_rows
                     .into_iter()
                     .map(|(job_row, http_row)| {
                         let mut job = DisplayJobRun::from(job_row);
-                        job.details = DisplayJobRunDetails::Http(http_row.transmogrify());
+                        job.details =
+                            http_row.map(|row| DisplayJobRunDetails::Http(row.transmogrify()));
                         job
                     })
                     .collect())
             }
             "ping" => {
-                let ping_rows: Vec<(JobRun, JobResultPing)> = job_runs::table
-                    .inner_join(job_result_ping::table)
+                let ping_rows: Vec<(JobRun, Option<JobResultPing>)> = job_runs::table
+                    .left_join(job_result_ping::table)
                     .filter(job_runs::job_id.eq(job_id))
-                    .select((job_runs::all_columns, job_result_ping::all_columns))
+                    .select((
+                        job_runs::all_columns,
+                        job_result_ping::all_columns.nullable(),
+                    ))
                     .order(job_runs::timestamp.desc())
                     .limit(limit)
                     .offset(offset)
@@ -60,9 +68,10 @@ impl RepositoryJobRunPort for Postgres {
 
                 Ok(ping_rows
                     .into_iter()
-                    .map(|(job_row, row)| {
+                    .map(|(job_row, ping_row)| {
                         let mut job = DisplayJobRun::from(job_row);
-                        job.details = DisplayJobRunDetails::Ping(row.transmogrify());
+                        job.details =
+                            ping_row.map(|row| DisplayJobRunDetails::Ping(row.transmogrify()));
                         job
                     })
                     .collect())

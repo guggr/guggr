@@ -932,15 +932,21 @@
 					"timestamp",
 					"triggered_notification",
 					"batch_id",
-					"reachable",
-					"details"
+					"reachable"
 				],
 				"properties": {
 					"batch_id": {
 						"type": "string"
 					},
 					"details": {
-						"$ref": "#/components/schemas/DisplayJobRunDetails"
+						"oneOf": [
+							{
+								"type": "null"
+							},
+							{
+								"$ref": "#/components/schemas/DisplayJobRunDetails"
+							}
+						]
 					},
 					"id": {
 						"type": "string"
@@ -979,10 +985,6 @@
 								"$ref": "#/components/schemas/DisplayJobResultPing"
 							}
 						}
-					},
-					{
-						"type": "string",
-						"enum": ["undefined"]
 					}
 				],
 				"description": "Returned JobRun details"
