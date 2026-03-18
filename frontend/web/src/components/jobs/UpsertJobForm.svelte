@@ -1,25 +1,136 @@
 <script lang="ts">
+	import { config, GroupsApi, JobsApi, type CreateJobDetails, type DisplayGroup } from '@/api';
+	import Error from '@/components/shared/Error.svelte';
+	import Loading from '@/components/shared/Loading.svelte';
 	import { preventDefault } from '@/lib/event';
+	import alerts from '@/stores/alerts.svelte';
+	import { onMount } from 'svelte';
 
 	let { edit = false }: { edit?: boolean } = $props();
+
+	let id = $state('');
 
 	let name = $state(''),
 		type = $state(''),
 		interval = $state(300),
 		group = $state(''),
 		notifications = $state(false),
-		notificationText = $state('');
+		notificationText = $state(''),
+		pingDetails = $state({ host: '' }),
+		httpDetails = $state({ url: '' });
 
-	const upsertJob = () => {
-		// TODO
+	let groupsPromise = $state(new Promise<DisplayGroup[]>(() => {}));
+
+	onMount(() => {
+		id = new URLSearchParams(window.location.search).get('id') ?? '';
+
+		if (edit) loadEditJob();
+
+		const api = new GroupsApi(config);
+
+		groupsPromise = api.listGroups();
+	});
+
+	const loadEditJob = async () => {
+		if (!id) return alerts.push('Job ID missing', 'ERROR');
+
+		const api = new JobsApi(config);
+
+		const job = await api
+			.getJob({ id })
+			.catch(() => alerts.push('Failed to fetch job', 'ERROR'));
+
+		if (!job) return;
+
+		name = job.name;
+		type = job.jobTypeId;
+		interval = job.runEvery;
+		group = job.groupId;
+		notifications = job.notifyUsers;
+		notificationText = job.customNotification || '';
+
+		if (job.jobTypeId === 'ping' && typeof job.details !== 'string' && 'ping' in job.details)
+			pingDetails = job.details.ping;
+
+		if (job.jobTypeId === 'http' && typeof job.details !== 'string' && 'http' in job.details)
+			httpDetails = job.details.http;
+	};
+
+	const upsertJob = async () => {
+		if (edit) return editJob();
+
+		return createJob();
+	};
+
+	const editJob = async () => {
+		const api = new JobsApi(config);
+
+		let details: CreateJobDetails = { ping: pingDetails };
+		if (type === 'http') details = { http: httpDetails };
+
+		const job = await api
+			.updateJob({
+				id,
+				updateRequestJob: {
+					name,
+					jobTypeId: type,
+					groupId: group,
+					notifyUsers: notifications,
+					customNotification: notificationText,
+					runEvery: interval,
+					details: details,
+				},
+			})
+			.catch(() => alerts.push('Failed to update job', 'ERROR'));
+
+		if (!job) return;
+
+		window.location.replace(`/jobs/details?id=${job.id}`);
+	};
+
+	const createJob = async () => {
+		const api = new JobsApi(config);
+
+		let details: CreateJobDetails = { ping: pingDetails };
+		if (type === 'http') details = { http: httpDetails };
+
+		const job = await api
+			.createJob({
+				createJob: {
+					name,
+					jobTypeId: type,
+					groupId: group,
+					notifyUsers: notifications,
+					customNotification: notificationText,
+					runEvery: interval,
+					details: details,
+				},
+			})
+			.catch(() => alerts.push('Failed to create job', 'ERROR'));
+
+		if (!job) return;
+
+		window.location.replace(`/jobs/details?id=${job.id}`);
 	};
 </script>
 
-<form onsubmit={preventDefault(upsertJob)} class="mx-auto w-xl max-w-full *:not-last:mb-4">
+<form onsubmit={preventDefault(upsertJob)} class="mx-auto w-xl max-w-full px-2 *:not-last:mb-4">
+	<div class="breadcrumbs px-2 text-sm">
+		<menu>
+			<li><a href="/">Home</a></li>
+			{#if id}
+				<li><a href="/jobs/details?id={id}">{name}</a></li>
+			{:else}
+				<li><a href="/jobs">Jobs</a></li>
+			{/if}
+			<li>{edit ? 'Edit job' : 'Create job'}</li>
+		</menu>
+	</div>
+
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
 		<legend>Job Details</legend>
 
-		<div class="flex justify-between">
+		<div class="flex flex-wrap justify-between gap-2">
 			<label class="input">
 				<span class="label">Job name</span>
 				<input type="text" bind:value={name} required placeholder="Name" />
@@ -59,20 +170,61 @@
 		</label>
 	</fieldset>
 
+	{#if type === 'ping'}
+		<fieldset class="fieldset bg-base-100 rounded-box p-4">
+			<legend>Ping Job Settings</legend>
+
+			<label class="input">
+				<span class="label">Host</span>
+				<input type="text" bind:value={pingDetails.host} required placeholder="0.0.0.0" />
+			</label>
+		</fieldset>
+	{/if}
+
+	{#if type === 'http'}
+		<fieldset class="fieldset bg-base-100 rounded-box p-4">
+			<legend>HTTP Job Settings</legend>
+
+			<label>
+				<div class="input validator">
+					<span class="label">URL</span>
+					<input
+						type="text"
+						bind:value={httpDetails.url}
+						required
+						pattern={'https?\:\/\/.+'}
+						placeholder="https://gug.gr"
+					/>
+				</div>
+				<span class="label my-1 items-baseline">
+					Remember to include the protocol <code>https://</code>
+				</span>
+			</label>
+		</fieldset>
+	{/if}
+
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
 		<legend>Group</legend>
 
-		<div class="flex flex-wrap gap-2">
-			<input
-				type="radio"
-				name="group"
-				bind:group
-				value="group-id"
-				required
-				aria-label="group name"
-				class="btn btn-outline btn-sm rounded-badge"
-			/>
-		</div>
+		{#await groupsPromise}
+			<Loading />
+		{:then groups}
+			<div class="flex flex-wrap gap-2">
+				{#each groups as g}
+					<input
+						type="radio"
+						name="group"
+						bind:group
+						value={g.id}
+						required
+						aria-label={g.name}
+						class="btn btn-outline btn-sm rounded-badge"
+					/>
+				{/each}
+			</div>
+		{:catch}
+			<Error />
+		{/await}
 	</fieldset>
 
 	<fieldset class="fieldset bg-base-100 rounded-box p-4">
@@ -87,16 +239,15 @@
 			/>
 		</label>
 
-		<label class="mt-4 w-xs max-w-full">
-			<span class="label my-1"
-				>Custom notification text
+		<label class="mt-4">
+			<span class="label my-1">
+				Custom notification text
 				<span class="badge badge-xs badge-soft">Optional</span>
 			</span>
 			<input
 				type="text"
 				bind:value={notificationText}
-				required
-				class="input validator"
+				class="input block"
 				placeholder="Name"
 			/>
 			<span class="label my-1">Only takes effect if notifications are enabled</span>

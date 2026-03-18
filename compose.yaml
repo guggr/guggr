@@ -93,6 +93,8 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    expose:
+      - 8081
     restart: unless-stopped
   frontend:
     build:
