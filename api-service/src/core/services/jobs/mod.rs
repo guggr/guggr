@@ -27,6 +27,13 @@ impl ServiceJobPort for Service {
 
         let job = self.db.create_job(Job::from(new_job.clone()))?;
 
+        if (new_job.job_type_id == "http" && !matches!(new_job.details, CreateJobDetails::Http(_)))
+            || (new_job.job_type_id == "ping"
+                && !matches!(new_job.details, CreateJobDetails::Ping(_)))
+        {
+            return Err(DomainError::BadRequest);
+        }
+
         let detail = match new_job.details {
             CreateJobDetails::Http(d) => DisplayJobDetails::Http(
                 self.db
