@@ -5,7 +5,6 @@ title: ''
 labels: bug
 assignees: ''
 type: Bug
-
 ---
 
 <!-- a clear and concise description of what the bug is -->
