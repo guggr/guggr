@@ -1,14 +1,7 @@
 use async_trait::async_trait;
 use deadpool_lapin::Pool;
 use gen_proto_types::job_result::v1::JobResult;
-use lapin::{
-    BasicProperties,
-    options::{BasicPublishOptions, QueueDeclareOptions},
-    types::{
-        AMQPValue::{LongInt, LongString},
-        FieldTable,
-    },
-};
+use lapin::{BasicProperties, options::BasicPublishOptions};
 use prost::Message;
 use thiserror::Error;
 use tracing::debug;
@@ -37,43 +30,6 @@ pub enum RabbitMQPublisherError {
 impl RabbitMQPublisher {
     pub const fn new(pool: Pool, queue_name: String) -> Self {
         Self { pool, queue_name }
-    }
-
-    /// Sets up the `RabbitMQ` queue for publishing job results.
-    ///
-    /// # Errors
-    /// Raises an [`RabbitMQDriverError`] if there is either a problem with
-    /// acquiring a connection from the pool, creating a channel on the
-    /// connection or declaring the queue.
-    pub async fn setup_queue(&self) -> Result<(), RabbitMQDriverError> {
-        let connection = self.pool.get().await?;
-
-        let channel = connection.create_channel().await?;
-
-        channel
-            .queue_declare(
-                &self.queue_name,
-                QueueDeclareOptions {
-                    durable: true,
-                    ..Default::default()
-                },
-                Self::queue_args(),
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    fn queue_args() -> FieldTable {
-        let mut args = FieldTable::default();
-        // set queue type to quorum
-        args.insert("x-queue-type".into(), LongString("quorum".into()));
-        // set maximum delivery limit until messages get pushed into dead letter
-        // exchange
-        args.insert("x-delivery-limit".into(), LongInt(5));
-        // TODO: specify dead letter exchange in setup schema
-
-        args
     }
 }
 

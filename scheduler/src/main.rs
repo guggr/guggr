@@ -42,11 +42,6 @@ async fn main() -> Result<()> {
         )
         .context("while initializing rabbitmq publisher")?,
     );
-    debug!("setting publisher schema up");
-    publisher
-        .setup_schema()
-        .await
-        .context("while setting up rabbitmq publisher schema")?;
 
     debug!("initializing service");
     let service = SchedulerService::new(fetcher, publisher.clone());
