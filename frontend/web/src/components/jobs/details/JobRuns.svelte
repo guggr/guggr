@@ -20,7 +20,7 @@
 	<Loading />
 {:then jobRuns}
 	<ul class="flex flex-row-reverse gap-1 overflow-x-auto p-1">
-		{#each jobRuns as jobRun}
+		{#each jobRuns as jobRun (jobRun.id)}
 			{@render run(jobRun)}
 		{:else}
 			<li class="w-full text-base-content/80 font-bold">No job runs available yet.</li>

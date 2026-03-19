@@ -3,6 +3,7 @@
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
+	import LogoEyeRotate from '@/components/shared/LogoEyeRotate.svelte';
 	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
@@ -34,8 +35,17 @@
 	<Loading />
 {:then jobs}
 	<ul class="*:not-last:mb-6">
-		{#each jobs.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j}
+		{#each jobs.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j (j.id)}
 			{@render job(j)}
+		{:else}
+			<div class="p-8">
+				<div class="max-w-48 mx-auto w-full">
+					<LogoEyeRotate />
+				</div>
+				<p class="text-base-content/70 text-center">
+					No jobs found. <a href="/jobs/create" class="link">Create one now!</a>
+				</p>
+			</div>
 		{/each}
 	</ul>
 {:catch}
