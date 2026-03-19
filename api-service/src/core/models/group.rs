@@ -43,6 +43,14 @@ pub struct DisplayGroup {
     pub members: Vec<DisplayGroupMember>,
 }
 
+#[serde_with::serde_as]
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, LabelledGeneric, ToSchema, Default)]
+/// Struct to Update a Group
+pub struct UpdateRequestGroup {
+    pub name: String,
+    pub members: Vec<DisplayGroupMember>,
+}
+
 impl From<CreateGroup> for Group {
     fn from(value: CreateGroup) -> Self {
         Self {
