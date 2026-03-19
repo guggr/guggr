@@ -38,7 +38,7 @@
 		<legend class=" fieldset-legend">Group Members</legend>
 
 		<ul class="list @container">
-			{#each members as member}
+			{#each members as member (member.id)}
 				{@render groupMember(member)}
 			{/each}
 		</ul>

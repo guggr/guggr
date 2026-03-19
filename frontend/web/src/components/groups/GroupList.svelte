@@ -8,7 +8,7 @@
 </script>
 
 <ul class="list">
-	{#each groups as g}
+	{#each groups as g (g.id)}
 		{@render group(g)}
 	{:else}
 		<li class="font-bold text-base-content/70 text-center my-4">
