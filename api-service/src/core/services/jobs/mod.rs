@@ -18,6 +18,13 @@ pub mod runs;
 
 impl ServiceJobPort for Service {
     fn create_job(&self, user_id: UserId, new_job: CreateJob) -> Result<DisplayJob, DomainError> {
+        if (new_job.job_type_id == "http" && !matches!(new_job.details, CreateJobDetails::Http(_)))
+            || (new_job.job_type_id == "ping"
+                && !matches!(new_job.details, CreateJobDetails::Ping(_)))
+        {
+            return Err(DomainError::BadRequest);
+        }
+
         if !self
             .db
             .check_user_can_create_job(&user_id.0, &new_job.group_id)?
@@ -26,13 +33,6 @@ impl ServiceJobPort for Service {
         }
 
         let job = self.db.create_job(Job::from(new_job.clone()))?;
-
-        if (new_job.job_type_id == "http" && !matches!(new_job.details, CreateJobDetails::Http(_)))
-            || (new_job.job_type_id == "ping"
-                && !matches!(new_job.details, CreateJobDetails::Ping(_)))
-        {
-            return Err(DomainError::BadRequest);
-        }
 
         let detail = match new_job.details {
             CreateJobDetails::Http(d) => DisplayJobDetails::Http(
