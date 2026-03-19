@@ -31,6 +31,7 @@ export * from './TokenRefreshRequest';
 export * from './TokenResponse';
 export * from './UpdateJobDetailsHttp';
 export * from './UpdateJobDetailsPing';
+export * from './UpdateRequestGroup';
 export * from './UpdateRequestJob';
 export * from './UpdateRequestJobDetails';
 export * from './UpdateRequestJobDetailsOneOf';
