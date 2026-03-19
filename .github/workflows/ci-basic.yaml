@@ -127,7 +127,7 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - run: cargo clippy --all-features --all-targets -- -D warnings
@@ -161,7 +161,7 @@ jobs:
       - run: rustup update stable && rustup default stable
       - uses: cargo-bins/cargo-binstall@v1.17.7
       - run: cargo binstall cargo-nextest
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
@@ -185,7 +185,7 @@ jobs:
           node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - name: Check openapi spec
