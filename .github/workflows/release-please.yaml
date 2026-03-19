@@ -16,6 +16,7 @@ jobs:
     outputs:
       pr: ${{ steps.release.outputs.pr }}
       releases-created: ${{ steps.release.outputs.releases_created }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
@@ -33,6 +34,8 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+    with:
+      version: ${{ needs.release-please.outputs.version }}
 
   format-release-please:
     name: 🎨 format release please
