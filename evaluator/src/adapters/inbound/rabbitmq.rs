@@ -190,7 +190,6 @@ async fn process_delivery(
 
     debug!("received job: {:?}", &job_result);
 
-    // Evaluierung
     match service.evaluate_job_result(&job_result).await {
         Ok(()) => {
             debug!("successfully evaluated job with id {}", &job_result.id);
