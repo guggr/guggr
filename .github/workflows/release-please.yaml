@@ -58,7 +58,7 @@ jobs:
           ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.3.0
+        uses: pnpm/action-setup@v5.0.0
         with:
           cache: true
 
