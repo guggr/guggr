@@ -210,7 +210,7 @@
 			<Loading />
 		{:then groups}
 			<div class="flex flex-wrap gap-2">
-				{#each groups as g}
+				{#each groups as g (g.id)}
 					<input
 						type="radio"
 						name="group"
@@ -220,6 +220,8 @@
 						aria-label={g.name}
 						class="btn btn-outline btn-sm rounded-badge"
 					/>
+				{:else}
+					<p class="text-base-content/70">You don't have any groups yet.</p>
 				{/each}
 			</div>
 		{:catch}
