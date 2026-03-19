@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use actix_web::{
-    HttpMessage, HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, get, patch,
-    post, web,
+    HttpMessage, HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, get, post,
+    put, web,
 };
 use garde_actix_web::web::Json;
 use utoipa_actix_web::service_config::ServiceConfig;
@@ -141,7 +141,7 @@ pub async fn get(
     security(("token" = [])),
     tag = "groups"
 )]
-#[patch("/{id}")]
+#[put("/{id}")]
 /// Update Group
 pub async fn update(
     svc: web::Data<Arc<dyn ServicePort>>,
