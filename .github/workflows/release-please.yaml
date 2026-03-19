@@ -1,0 +1,99 @@
+on:
+  push:
+    branches:
+      - main
+
+name: release-please
+
+jobs:
+  release-please:
+    name: 📣 release please
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      pr: ${{ steps.release.outputs.pr }}
+      releases-created: ${{ steps.release.outputs.releases_created }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
+
+  build:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases-created == 'true' }}
+    uses: ./.github/workflows/build.yaml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    with:
+      version: ${{ needs.release-please.outputs.version }}
+
+  format-release-please:
+    name: 🎨 format release please
+    runs-on: ubuntu-24.04
+    needs: release-please
+    if: ${{ needs.release-please.outputs.pr }}
+    permissions:
+      contents: write
+    steps:
+      - name: Generate GitHub App token
+        uses: actions/create-github-app-token@v3.0.0
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.3.0
+        with:
+          cache: true
+
+      - name: Install node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: 'package.json'
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      - run: pnpm gen
+
+      - run: rustup update stable && rustup default stable
+      - name: Update Cargo.lock
+        run: cargo update --workspace
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+
+      - name: Commit and push
+        run: |
+          git add api-service/openapi.json CHANGELOG.md Cargo.lock
+          git add frontend
+
+              if git diff --cached --quiet; then
+                echo "nothing to commit, exiting"
+                exit 0
+              fi
+
+          git commit -m 'chore: update Cargo.lock and format release files' --no-verify
+          git push

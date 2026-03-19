@@ -1,10 +1,16 @@
 name: build and publish container images
 
 on:
-  push:
-    tags:
-      - '*'
-
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
 env:
   REGISTRY: ghcr.io
   IMAGE_BASE: ${{ github.repository }}
@@ -34,7 +40,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/buildcache
           tags: |
-            type=ref,event=tag
+            type=semver,pattern={{version}},value=${{ inputs.version }}
             type=sha,format=long,prefix=sha-
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
@@ -101,7 +107,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_BASE }}/${{ matrix.image }}
           tags: |
-            type=ref,event=tag
+            type=semver,pattern={{version}},value=${{ inputs.version }}
             type=sha,format=long,prefix=sha-
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
