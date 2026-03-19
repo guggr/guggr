@@ -99,18 +99,6 @@ pub trait ToProto<T> {
     fn to_proto(&self) -> T;
 }
 
-impl ToProto<protify::proto_types::Duration> for Duration {
-    fn to_proto(&self) -> protify::proto_types::Duration {
-        protify::proto_types::Duration {
-            // Theoretically u64 can be bigger than i64 but that only happens when working with
-            // times very far in the future
-            seconds: self.as_secs().cast_signed(),
-            // Nanos are always 0 <= n < 1_000_000_000 = 10^9. Therefore, casting is safe
-            nanos: self.subsec_nanos().cast_signed(),
-        }
-    }
-}
-
 impl ToProto<Timestamp> for Duration {
     fn to_proto(&self) -> Timestamp {
         Timestamp {
