@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use actix_web::{
     HttpMessage, HttpRequest, HttpResponse, Responder, error::ErrorInternalServerError, get, post,
-    web,
+    put, web,
 };
 use garde_actix_web::web::Json;
 use utoipa_actix_web::service_config::ServiceConfig;
@@ -13,7 +13,7 @@ use crate::{
         domain::{errors::DomainError, openapi_helper},
         models::{
             auth::UserId,
-            group::{CreateGroup, DisplayGroup},
+            group::{CreateGroup, DisplayGroup, UpdateRequestGroup},
         },
         ports::service::ServicePort,
     },
@@ -25,7 +25,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
         .wrap(Auth)
         .service(create)
         .service(list)
-        .service(get);
+        .service(get)
+        .service(update);
 
     cfg.service(scope);
 }
@@ -121,5 +122,41 @@ pub async fn get(
         .await
         .map_err(ErrorInternalServerError)??;
 
+    Ok(HttpResponse::Ok().json(group))
+}
+
+#[utoipa::path(
+    params(
+        ("id" = String, Path, description = "Group ID")
+    ),
+    request_body = UpdateRequestGroup,
+    operation_id = "update_group",
+    responses(
+        (status = 200, description = "Group successfully updated", body = DisplayGroup),
+        openapi_helper::ResBadRequest,
+        openapi_helper::ResUnauthorized,
+        openapi_helper::ResNotFound,
+        openapi_helper::ResInternalServerError,
+    ),
+    security(("token" = [])),
+    tag = "groups"
+)]
+#[put("/{id}")]
+/// Update Group
+pub async fn update(
+    svc: web::Data<Arc<dyn ServicePort>>,
+    body: web::Json<UpdateRequestGroup>,
+    path: web::Path<String>,
+    req: HttpRequest,
+) -> actix_web::Result<impl Responder> {
+    let auth_user = req
+        .extensions()
+        .get::<UserId>()
+        .cloned()
+        .ok_or(DomainError::Unauthorized)?;
+    let group =
+        web::block(move || svc.update_group(auth_user, &path.into_inner(), body.into_inner()))
+            .await
+            .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(group))
 }

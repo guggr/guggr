@@ -7,7 +7,7 @@ use database_client::models::{
 use crate::core::{
     domain::errors::DomainError,
     models::{
-        group::DisplayGroupMember,
+        group::{DisplayGroupMember, UpdateRequestGroup},
         job::{
             JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
             ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
@@ -64,6 +64,16 @@ pub trait RepositoryGroupPort: Send + Sync {
         &self,
         group_ids: &[&str],
     ) -> Result<HashMap<String, Vec<DisplayGroupMember>>, DomainError>;
+
+    /// Check user permissions for group updates.
+    fn check_user_can_update_group(&self, id: &str, user_id: &str) -> Result<bool, DomainError>;
+
+    /// Update group
+    fn update_group(
+        &self,
+        group_id: &str,
+        updated_group: UpdateRequestGroup,
+    ) -> Result<(Group, Vec<DisplayGroupMember>), DomainError>;
 }
 
 pub trait RepositoryUserGroupMappingPort: Send + Sync {
