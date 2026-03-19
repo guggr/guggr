@@ -12,6 +12,7 @@ use lapin::{
     options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicQosOptions},
     types::FieldTable,
 };
+use nanoid::nanoid;
 use prost::{DecodeError, Message};
 use thiserror::Error;
 use tracing::{debug, error, info};
@@ -174,7 +175,7 @@ async fn process_delivery(
             id: job_request.id,
             timestamp: Some(timestamp.to_proto()),
             batch_id: job_request.batch_id,
-            run_id: String::from("0"),
+            run_id: nanoid!(),
             job_type: job_request.job_type,
             ..Default::default()
         }

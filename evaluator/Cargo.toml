@@ -22,3 +22,4 @@ lapin = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 protify = { workspace = true }
 ipnet = { workspace = true }
+nanoid.workspace = true
