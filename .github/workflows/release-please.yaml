@@ -70,8 +70,7 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Format openapi.json and Changelog
-        run: pnpm prettier api-service/openapi.json CHANGELOG.md -w
+      - run: pnpm gen
 
       - run: rustup update stable && rustup default stable
       - name: Update Cargo.lock
@@ -89,6 +88,7 @@ jobs:
       - name: Commit and push
         run: |
           git add api-service/openapi.json CHANGELOG.md Cargo.lock
+          git add frontend
 
               if git diff --cached --quiet; then
                 echo "nothing to commit, exiting"
