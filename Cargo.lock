@@ -1734,6 +1734,7 @@ dependencies = [
  "gen-proto-types",
  "ipnet",
  "lapin",
+ "nanoid",
  "prost",
  "protify",
  "thiserror 2.0.18",

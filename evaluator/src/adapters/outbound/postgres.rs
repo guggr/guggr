@@ -174,7 +174,7 @@ impl PostgresAdapter {
         } else if let Some(ping) = &job_result.ping {
             ping.reachable
         } else {
-            return Err(PostgresAdapterError::NoResult(job_result.run_id.clone()));
+            false
         };
 
         let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)?;
