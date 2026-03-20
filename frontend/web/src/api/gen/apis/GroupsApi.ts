@@ -13,7 +13,12 @@
  */
 
 import * as runtime from '../runtime';
-import type { BadRequestErrorBody, CreateGroup, DisplayGroup } from '../models/index';
+import type {
+	BadRequestErrorBody,
+	CreateGroup,
+	DisplayGroup,
+	UpdateRequestGroup,
+} from '../models/index';
 import {
 	BadRequestErrorBodyFromJSON,
 	BadRequestErrorBodyToJSON,
@@ -21,6 +26,8 @@ import {
 	CreateGroupToJSON,
 	DisplayGroupFromJSON,
 	DisplayGroupToJSON,
+	UpdateRequestGroupFromJSON,
+	UpdateRequestGroupToJSON,
 } from '../models/index';
 
 export interface CreateGroupRequest {
@@ -29,6 +36,11 @@ export interface CreateGroupRequest {
 
 export interface GetGroupRequest {
 	id: string;
+}
+
+export interface UpdateGroupRequest {
+	id: string;
+	updateRequestGroup: UpdateRequestGroup;
 }
 
 /**
@@ -205,6 +217,77 @@ export class GroupsApi extends runtime.BaseAPI {
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
 	): Promise<Array<DisplayGroup>> {
 		const response = await this.listGroupsRaw(initOverrides);
+		return await response.value();
+	}
+
+	/**
+	 * Creates request options for updateGroup without sending the request
+	 */
+	async updateGroupRequestOpts(
+		requestParameters: UpdateGroupRequest,
+	): Promise<runtime.RequestOpts> {
+		if (requestParameters['id'] == null) {
+			throw new runtime.RequiredError(
+				'id',
+				'Required parameter "id" was null or undefined when calling updateGroup().',
+			);
+		}
+
+		if (requestParameters['updateRequestGroup'] == null) {
+			throw new runtime.RequiredError(
+				'updateRequestGroup',
+				'Required parameter "updateRequestGroup" was null or undefined when calling updateGroup().',
+			);
+		}
+
+		const queryParameters: any = {};
+
+		const headerParameters: runtime.HTTPHeaders = {};
+
+		headerParameters['Content-Type'] = 'application/json';
+
+		if (this.configuration && this.configuration.accessToken) {
+			const token = this.configuration.accessToken;
+			const tokenString = await token('token', []);
+
+			if (tokenString) {
+				headerParameters['Authorization'] = `Bearer ${tokenString}`;
+			}
+		}
+
+		let urlPath = `/api/v1/groups/{id}`;
+		urlPath = urlPath.replace(`{${'id'}}`, encodeURIComponent(String(requestParameters['id'])));
+
+		return {
+			path: urlPath,
+			method: 'PUT',
+			headers: headerParameters,
+			query: queryParameters,
+			body: UpdateRequestGroupToJSON(requestParameters['updateRequestGroup']),
+		};
+	}
+
+	/**
+	 * Update Group
+	 */
+	async updateGroupRaw(
+		requestParameters: UpdateGroupRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction,
+	): Promise<runtime.ApiResponse<DisplayGroup>> {
+		const requestOptions = await this.updateGroupRequestOpts(requestParameters);
+		const response = await this.request(requestOptions, initOverrides);
+
+		return new runtime.JSONApiResponse(response, jsonValue => DisplayGroupFromJSON(jsonValue));
+	}
+
+	/**
+	 * Update Group
+	 */
+	async updateGroup(
+		requestParameters: UpdateGroupRequest,
+		initOverrides?: RequestInit | runtime.InitOverrideFunction,
+	): Promise<DisplayGroup> {
+		const response = await this.updateGroupRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 }
