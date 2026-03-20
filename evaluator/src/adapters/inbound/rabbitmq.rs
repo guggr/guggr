@@ -17,12 +17,10 @@ use prost::{DecodeError, Message};
 use thiserror::Error;
 use tracing::{debug, error, info};
 
-use crate::{
-    ToProto,
-    core::{
-        domain::errors::JobEvaluatorError, ports::message_consumer::MessageConsumerPort,
-        service::evalservice::EvalService,
-    },
+use crate::core::{
+    domain::{errors::JobEvaluatorError, type_mapper::ToProto},
+    ports::message_consumer::MessageConsumerPort,
+    service::evalservice::EvalService,
 };
 
 /// Errors for [`RabbitMQDriver`]

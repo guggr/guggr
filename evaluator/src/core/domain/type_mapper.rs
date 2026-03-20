@@ -1,8 +1,11 @@
+use std::time::Duration;
+
 use database_client::models as db_models;
 use gen_proto_types::job_result::{
     types::v1::{HttpJobResult, PingJobResult},
     v1::JobResult,
 };
+use protify::proto_types::Timestamp;
 
 use crate::{
     core::domain::errors::TypeMapperError, ipnet_from_bytes_host, naive_from_proto_ts,
@@ -122,7 +125,6 @@ impl ToProto<Timestamp> for Duration {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
