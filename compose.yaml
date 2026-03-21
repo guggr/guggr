@@ -10,7 +10,7 @@ services:
       RABBITMQ_DEFAULT_PASS: guggr
     volumes:
       - rabbitmq:/var/lib/rabbitmq/
-      - ./rabbitmq/rabbitmq_definitions.json:/etc/rabbitmq/definitions.json
+      - ./charts/files/rabbitmq_definitions.json:/etc/rabbitmq/definitions.json
       - ./rabbitmq/entrypoint.sh:/usr/bin/entrypoint.sh
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'check_port_connectivity']
