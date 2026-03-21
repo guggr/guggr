@@ -1,0 +1,70 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/guggr/guggr/api-service
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+fullnameOverride: ""
+nameOverride: ""
+
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  name: ""
+
+service:
+  port: 80
+  targetPort: 8081
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /api
+          pathType: Prefix
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: ""
+      namespace: ""
+      sectionName: ""
+  hostnames: []
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+autoscaling:
+  enabled: false
+
+nodeSelector: {}
+
+resources: {}
+
+tolerations: []
+
+affinity: {}
+
+env:
+  port: 8081
+  host: 0.0.0.0
+  auth_ttl: 900
+  auth_refresh_ttl: "2419200"
+  auth_secret: "great-secret"

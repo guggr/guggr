@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "guggr.fullname" . }}
+  name: {{ include "api-service.fullname" . }}
   labels:
-    {{- include "guggr.labels" . | nindent 4 }}
+    {{- include "api-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "guggr.selectorLabels" . | nindent 6 }}
+      {{- include "api-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "guggr.labels" . | nindent 8 }}
+        {{- include "api-service.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,11 +27,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "guggr.serviceAccountName" . }}
+      serviceAccountName: {{ include "api-service.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        {{- include "guggr.waitForPostgres" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -60,10 +62,39 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          env:
+          - name: POSTGRES_HOST
+            value: {{ include "guggr.postgresHost" . | quote }}
+          - name: POSTGRES_PORT
+            value: {{ .Values.global.postgres.port | toString | quote }}
+          - name: POSTGRES_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.databaseKey | quote }}
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.usernameKey | quote }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.passwordKey | quote }}
+          - name: API_SERVICE_HOST
+            value: {{ .Values.env.host | quote }}
+          - name: API_SERVICE_PORT
+            value: {{ .Values.env.port | quote }}
+          - name: API_SERVICE_AUTH_TTL
+            value: {{ .Values.env.auth_ttl | quote }}
+          - name: API_SERVICE_AUTH_REFRESH_TTL
+            value: {{ .Values.env.auth_refresh_ttl | quote }}
+          - name: API_SERVICE_AUTH_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth-secret
+                key: auth-secret
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

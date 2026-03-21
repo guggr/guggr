@@ -1,161 +1,226 @@
-# Default values for guggr.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+global:
+  ## @section Global RabbitMQ parameters
+  ## @descriptionStart
+  ## These parameters are used by the `agent`, `evaluator` and `scheduler` Subcharts
+  ## @descriptionEnd
+  rabbitmq:
+    ## @param global.rabbitmq.host Global RabbitMQ set to this charts' `rabbitmq.fullname` by default
+    host: ""
+    ## @param global.rabbitmq.port Global RabbitMQ AMQP port
+    port: 5672
+    ## @param global.rabbitmq.jobsQueue queue for jobs. Must match the definition in [rabbitmq_definitions.json](files/rabbitmq_definitions.json) when using the bundled RabbitMQ chart
+    jobsQueue: scheduler.jobs
+    ## @param global.rabbitmq.jobResultQueue queue for job results. Must match the definition in [rabbitmq_definitions.json](files/rabbitmq_definitions.json) when using the bundled RabbitMQ chart
+    jobResultQueue: agent.job_results
+    auth:
+      ## @param global.rabbitmq.auth.username Username of the RabbitMQ User
+      username: guggr
+      ## @param global.rabbitmq.auth.secretName Name of existing Secret containing the RabbitMQ Users' Password
+      secretName: guggr-rabbitmq
+      ## @param global.rabbitmq.auth.passwordKey Key in existing Secret containing the RabbitMQ Users' Password
+      passwordKey: password
+  ## @section Global Postgres parameters
+  ## @descriptionStart
+  ## These parameters are used by the `api-service`, `evaluator` and `scheduler` Subcharts
+  ## @descriptionEnd
+  postgres:
+    ## @param global.postgres.host Global Postgres Host, set to this charts' `postgres.fullname` by default
+    host: ""
+    ## @param global.postgres.port Global Postgres Port
+    port: 5432
+    auth:
+      ## @param global.postgres.auth.secretName Name of existing Secret containing the Postgres Username, Password and Database Name
+      secretName: guggr-postgres
+      ## @param global.postgres.auth.usernameKey Key in existing Secret containing the Postgres Username
+      usernameKey: username
+      ## @param global.postgres.auth.passwordKey Key in existing Secret containing the Postgres Users' Password
+      passwordKey: postgres-password
+      ## @param global.postgres.auth.databaseKey Key in existing Secret containing the Postgres Database
+      databaseKey: database
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+## @section Api-service Parameters
+api-service:
+  ## @param api-service.enabled Enable the Api-service
+  enabled: true
+  ## @param api-service.replicaCount Number of Api-service replicas to deploy
+  replicaCount: 1
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
-image:
-  repository: nginx
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ''
+  ## @param api-service.image Optional image override for the Api-service container.
+  image: {}
+    ## @param api-service.image.repository [default: ghcr.io/guggr/guggr/api-service] Override the image repository.
+    ## @param api-service.image.tag [default: AppVersion] Override the image tag.
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# This is to override the chart name.
-nameOverride: ''
-fullnameOverride: ''
+  ## @section Api-service Ingress
+  ingress:
+    ## @param api-service.ingress.enabled Enable ingress for the Api-service
+    enabled: false
+    ## @param api-service.ingress.className Ingress class name
+    className: ""
+    ## @param api-service.ingress.annotations Ingress annotations
+    annotations: {}
+    ## @param api-service.ingress.hosts [object] Ingress hosts configuration
+    hosts:
+      - host: guggr.internal
+        paths:
+          - path: /api
+            pathType: Prefix
+    ## @param api-service.ingress.tls Ingress TLS configuration
+    tls: []
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ''
+  ## @section Api-service HTTPRoute
+  httpRoute:
+    ## @param api-service.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Api-service
+    enabled: false
+    ## @param api-service.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param api-service.httpRoute.parentRefs [array] References to the parent Gateways
+    parentRefs:
+      - name: ""
+        namespace: ""
+        sectionName: ""
+    ## @param api-service.httpRoute.hostnames List of hostnames to match
+    hostnames: []
+    ## @param api-service.httpRoute.rules [array] HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
+## @section Frontend Parameters
+frontend:
+  ## @param frontend.enabled Enable the Frontend
+  enabled: true
+  ## @param frontend.replicaCount Number of Frontend replicas to deploy
+  replicaCount: 1
 
-podSecurityContext: {}
-  # fsGroup: 2000
+  ## @param frontend.image Optional image override for the Frontend container.
+  image: {}
+    ## @param frontend.image.repository [default: ghcr.io/guggr/guggr/frontend] Override the image repository.
+    ## @param frontend.image.tag [default: AppVersion] Override the image tag.
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  ## @section Frontend Ingress
+  ingress:
+    ## @param frontend.ingress.enabled Enable ingress for the Frontend
+    enabled: false
+    ## @param frontend.ingress.className Ingress class name
+    className: ""
+    ## @param frontend.ingress.annotations Ingress annotations
+    annotations: {}
+    ## @param frontend.ingress.hosts [object] Ingress hosts configuration
+    hosts:
+      - host: guggr.internal
+        paths:
+          - path: /
+            pathType: Prefix
+    ## @param frontend.ingress.tls Ingress TLS configuration
+    tls: []
 
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
-service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 80
+  ## @section Frontend HTTPRoute
+  httpRoute:
+    ## @param frontend.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Frontend
+    enabled: false
+    ## @param frontend.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param frontend.httpRoute.parentRefs [array] References to the parent Gateways
+    parentRefs:
+      - name: ""
+        namespace: ""
+        sectionName: ""
+    ## @param frontend.httpRoute.hostnames List of hostnames to match
+    hostnames: []
+    ## @param frontend.httpRoute.rules [array] HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
-ingress:
-  enabled: false
-  className: ''
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+## @section Agent Parameters
+agent:
+  ## @param agent.enabled Enable the Agent
+  enabled: true
+  ## @param agent.replicaCount Number of Agent replicas to deploy
+  replicaCount: 1
+  ## @param agent.image Optional image override for the Agent container.
+  image: {}
+    ## @param agent.image.repository [default: ghcr.io/guggr/guggr/agent] Override the image repository.
+    ## @param agent.image.tag [default: AppVersion] Override the image tag.
 
-# -- Expose the service via gateway-api HTTPRoute
-# Requires Gateway API resources and suitable controller installed within the cluster
-# (see: https://gateway-api.sigs.k8s.io/guides/)
-httpRoute:
-  # HTTPRoute enabled.
-  enabled: false
-  # HTTPRoute annotations.
-  annotations: {}
-  # Which Gateways this Route is attached to.
-  parentRefs:
-    - name: gateway
-      sectionName: http
-      # namespace: default
-  # Hostnames matching HTTP header.
-  hostnames:
-    - chart-example.local
-  # List of rules and filters applied.
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /headers
-  #   filters:
-  #   - type: RequestHeaderModifier
-  #     requestHeaderModifier:
-  #       set:
-  #       - name: My-Overwrite-Header
-  #         value: this-is-the-only-value
-  #       remove:
-  #       - User-Agent
-  # - matches:
-  #   - path:
-  #       type: PathPrefix
-  #       value: /echo
-  #     headers:
-  #     - name: version
-  #       value: v2
+## @section Evaluator Parameters
+evaluator:
+  ## @param evaluator.enabled Enable the Evaluator
+  enabled: true
+  ## @param evaluator.replicaCount Number of Evaluator replicas to deploy
+  replicaCount: 1
+  ## @param evaluator.image Optional image override for the Evaluator container.
+  image: {}
+    ## @param evaluator.image.repository [default: ghcr.io/guggr/guggr/evaluator] Override the image repository.
+    ## @param evaluator.image.tag [default: AppVersion] Override the image tag.
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+## @section Scheduler Parameters
+scheduler:
+  ## @param scheduler.enabled Enable the Scheduler
+  enabled: true
+  ## @param scheduler.replicaCount Number of Scheduler replicas to deploy
+  replicaCount: 1
+  ## @param scheduler.image Optional image override for the Scheduler container.
+  image: {}
+    ## @param scheduler.image.repository [default: ghcr.io/guggr/guggr/scheduler] Override the image repository.
+    ## @param scheduler.image.tag [default: AppVersion] Override the image tag.
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
+## @section Postgres Parameters
+postgres:
+  ## @param postgres.enabled Enable the bundled Postgres Subchart
+  enabled: true
+  ## @param postgres.replicaCount Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default)
+  replicaCount: 1
+  auth:
+    ## @param postgres.auth.username Name for default User that is created at startup
+    username: guggr
+    ## @param postgres.auth.database Name for default Database that is created at startup
+    database: guggr
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+## @section RabbitMQ Parameters
+rabbitmq:
+  ## @param rabbitmq.enabled Enable the bundled RabbitMQ Subchart
+  enabled: true
+  ## @param rabbitmq.replicaCount Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas)
+  replicaCount: 1
 
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+  auth:
+    ## @param rabbitmq.auth.enabled Enable RabbitMQ Authentication
+    enabled: true
+    ## @param rabbitmq.auth.username RabbitMQ default username
+    username: guggr
 
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+  managementPlugin:
+    ## @param rabbitmq.managementPlugin.enabled Enable RabbitMQ management plugin
+    enabled: false
 
-nodeSelector: {}
+  ## @param rabbitmq.extraVolumes [array] Extra volumes to add to RabbitMQ pods
+  extraVolumes:
+    - name: definitions
+      configMap:
+        name: rabbitmq-definitions
 
-tolerations: []
+  ## @param rabbitmq.extraVolumeMounts [array] Extra volumes to add to RabbitMQ pods
+  extraVolumeMounts:
+    - name: definitions
+      mountPath: /etc/rabbitmq-definitions
 
-affinity: {}
+  customScripts:
+    ## @param rabbitmq.customScripts.postStart [object]
+    ## load definitions after startup. The `definitions` key is not used since then we would have to add user & password
+    ## into the definition file which isn't that easy
+    postStart:
+      enabled: true
+      command:
+        - sh
+        - -ec
+        - |
+          sleep 5
+          rabbitmqctl await_startup
+          rabbitmqctl import_definitions /etc/rabbitmq-definitions/defs.json
+    ## @param rabbitmq.customScripts.initContainers Custom init containers to run before RabbitMQ starts
+    initContainers: []

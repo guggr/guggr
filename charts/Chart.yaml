@@ -2,18 +2,44 @@ apiVersion: v2
 name: guggr
 description: A Helm chart for Kubernetes
 type: application
+home: https://github.com/guggr/guggr
+icon: https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/assets/logo.svg
 
 version: 0.1.0
-
-appVersion: '1.16.0'
+appVersion: '0.1.0'
 
 dependencies:
-  - name: postgresql
-    repository: https://charts.bitnami.com/bitnami
-    version: 18.5.2
+  - name: agent
+    version: 0.1.0
+    repository: file://agent
+    alias: agent
+
+  - name: api-service
+    version: 0.1.0
+    repository: file://api-service
+    alias: api-service
+
+  - name: evaluator
+    version: 0.1.0
+    repository: file://evaluator
+    alias: evaluator
+
+  - name: frontend
+    version: 0.1.0
+    repository: file://frontend
+    alias: frontend
+
+  - name: scheduler
+    version: 0.1.0
+    repository: file://scheduler
+    alias: scheduler
+
+  - name: postgres
+    repository: oci://registry-1.docker.io/cloudpirates
+    version: 0.18.3
     alias: postgres
 
   - name: rabbitmq
-    repository: https://charts.bitnami.com/bitnami
-    version: 16.0.14
+    repository: oci://registry-1.docker.io/cloudpirates
+    version: 0.19.6
     alias: rabbitmq

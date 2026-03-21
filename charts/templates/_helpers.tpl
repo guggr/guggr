@@ -60,3 +60,57 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- /*
+Postgres Host is either taken from global.postgres.host or if it's nil, from the Release Name with `-postgres` appended
+*/}}
+{{- define "guggr.postgresHost" -}}
+{{- if .Values.global.postgres.host -}}
+{{- .Values.global.postgres.host -}}
+{{- else -}}
+{{- printf "%s-postgres" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+RabbitMQ Host is either taken from global.rabbitmq.host or if it's nil, from the Release Name with `-rabbitmq` appended
+*/}}
+{{- define "guggr.rabbitmqHost" -}}
+{{- if .Values.global.rabbitmq.host -}}
+{{- .Values.global.rabbitmq.host -}}
+{{- else -}}
+{{- printf "%s-rabbitmq" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+init container template that waits till the Postgres port is open
+*/}}
+{{- define "guggr.waitForPostgres" -}}
+- name: wait-for-postgres
+  image: busybox:1.37
+  command:
+    - sh
+    - -ec
+    - |
+      until nc -z {{ include "guggr.postgresHost" . }} {{ .Values.global.postgres.port }}; do
+        echo "waiting for postgres"
+        sleep 2
+      done
+{{- end -}}
+
+{{- /*
+init container template that waits till the RabbitMQ AMQP port is open
+*/}}
+{{- define "guggr.waitForRabbitMQ" -}}
+- name: wait-for-rabbitmq
+  image: busybox:1.37
+  command:
+    - sh
+    - -ec
+    - |
+      until nc -z {{ include "guggr.rabbitmqHost" . }} {{ .Values.global.rabbitmq.port }}; do
+        echo "waiting for rabbitmq"
+        sleep 2
+      done
+{{- end -}}
