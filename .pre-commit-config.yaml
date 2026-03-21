@@ -48,14 +48,14 @@ repos:
       - id: helm-lint
         name: run helm lint
         language: system
-        entry: helm lint charts
+        entry: helm lint charts/guggr
         pass_filenames: false
         files: ^charts/
 
       - id: helm-gen-readme
         name: generate helm chart readme
         language: system
-        entry: readme-generator -v charts/values.yaml -r charts/README.md
+        entry: readme-generator -v charts/guggr/values.yaml -r charts/guggr/README.md
         pass_filenames: false
         files: ^charts/
 
