@@ -114,3 +114,18 @@ init container template that waits till the RabbitMQ AMQP port is open
         sleep 2
       done
 {{- end -}}
+
+
+{{/*
+Generate the application url
+*/}}
+{{- define "guggr.url" -}}
+{{- if .Values.frontend.ingress.enabled -}}
+{{- $host := index .Values.frontend.ingress.hosts 0 -}}
+{{- if .Values.frontend.ingress.tls -}}
+https://{{ $host.host }}
+{{- else -}}
+http://{{ $host.host }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
