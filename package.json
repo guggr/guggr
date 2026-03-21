@@ -11,6 +11,7 @@
 		"gen:frontend-web-openapi-port": "openapi-generator-cli generate -i api-service/openapi.json -g typescript-fetch -o frontend/web/src/api/gen && pnpm format"
 	},
 	"devDependencies": {
+		"@bitnami/readme-generator-for-helm": "github:bitnami/readme-generator-for-helm#3.0.1",
 		"@openapitools/openapi-generator-cli": "^2.30.2",
 		"prettier": "^3.8.1",
 		"prettier-plugin-astro": "^0.14.1",
