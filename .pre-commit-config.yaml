@@ -52,6 +52,13 @@ repos:
         pass_filenames: false
         files: ^charts/
 
+      - id: helm-gen-readme
+        name: generate helm chart readme
+        language: system
+        entry: readme-generator -v charts/values.yaml -r charts/README.md
+        pass_filenames: false
+        files: ^charts/
+
       - id: cargo-fmt
         name: run cargo fmt
         types: [rust]

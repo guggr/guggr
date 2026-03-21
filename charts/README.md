@@ -61,23 +61,33 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 
 ### Frontend Parameters
 
-| Name                             | Description                                              | Value                          |
-| -------------------------------- | -------------------------------------------------------- | ------------------------------ |
-| `frontend.enabled`               | Enable the Frontend                                      | `true`                         |
-| `frontend.replicaCount`          | Number of Frontend replicas to deploy                    | `1`                            |
-| `frontend.image`                 | Optional image override for the Frontend container.      | `{}`                           |
-| `frontend.image.repository`      | Override the image repository.                           | `ghcr.io/guggr/guggr/frontend` |
-| `frontend.image.tag`             | Override the image tag.                                  | `AppVersion`                   |
-| `frontend.ingress.enabled`       | Enable ingress for the Frontend                          | `false`                        |
-| `frontend.ingress.className`     | Ingress class name                                       | `""`                           |
-| `frontend.ingress.annotations`   | Ingress annotations                                      | `{}`                           |
-| `frontend.ingress.hosts`         | Ingress hosts configuration                              | `{}`                           |
-| `frontend.ingress.tls`           | Ingress TLS configuration                                | `[]`                           |
-| `frontend.httpRoute.enabled`     | Enable Gateway API HTTPRoute generation for the Frontend | `false`                        |
-| `frontend.httpRoute.annotations` | Additional annotations for the HTTPRoute resource        | `{}`                           |
-| `frontend.httpRoute.parentRefs`  | References to the parent Gateways                        | `[]`                           |
-| `frontend.httpRoute.hostnames`   | List of hostnames to match                               | `[]`                           |
-| `frontend.httpRoute.rules`       | HTTPRoute rules                                          | `[]`                           |
+| Name                        | Description                                         | Value                          |
+| --------------------------- | --------------------------------------------------- | ------------------------------ |
+| `frontend.enabled`          | Enable the Frontend                                 | `true`                         |
+| `frontend.replicaCount`     | Number of Frontend replicas to deploy               | `1`                            |
+| `frontend.image`            | Optional image override for the Frontend container. | `{}`                           |
+| `frontend.image.repository` | Override the image repository.                      | `ghcr.io/guggr/guggr/frontend` |
+| `frontend.image.tag`        | Override the image tag.                             | `AppVersion`                   |
+
+### Frontend Ingress
+
+| Name                           | Description                     | Value   |
+| ------------------------------ | ------------------------------- | ------- |
+| `frontend.ingress.enabled`     | Enable ingress for the Frontend | `false` |
+| `frontend.ingress.className`   | Ingress class name              | `""`    |
+| `frontend.ingress.annotations` | Ingress annotations             | `{}`    |
+| `frontend.ingress.hosts`       | Ingress hosts configuration     | `{}`    |
+| `frontend.ingress.tls`         | Ingress TLS configuration       | `[]`    |
+
+### Frontend HTTPRoute
+
+| Name                             | Description                                              | Value   |
+| -------------------------------- | -------------------------------------------------------- | ------- |
+| `frontend.httpRoute.enabled`     | Enable Gateway API HTTPRoute generation for the Frontend | `false` |
+| `frontend.httpRoute.annotations` | Additional annotations for the HTTPRoute resource        | `{}`    |
+| `frontend.httpRoute.parentRefs`  | References to the parent Gateways                        | `[]`    |
+| `frontend.httpRoute.hostnames`   | List of hostnames to match                               | `[]`    |
+| `frontend.httpRoute.rules`       | HTTPRoute rules                                          | `[]`    |
 
 ### Agent Parameters
 
