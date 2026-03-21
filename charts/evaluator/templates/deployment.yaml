@@ -92,6 +92,8 @@ spec:
               secretKeyRef:
                 name: {{ .Values.global.postgres.auth.secretName | quote }}
                 key: {{ .Values.global.postgres.auth.passwordKey | quote }}
+          - name: RUST_LOG
+            value: {{ .Values.logLevel | toString | quote }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

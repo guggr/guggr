@@ -31,13 +31,14 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 
 ### Api-service Parameters
 
-| Name                           | Description                                            | Value                             |
-| ------------------------------ | ------------------------------------------------------ | --------------------------------- |
-| `api-service.enabled`          | Enable the Api-service                                 | `true`                            |
-| `api-service.replicaCount`     | Number of Api-service replicas to deploy               | `1`                               |
-| `api-service.image`            | Optional image override for the Api-service container. | `{}`                              |
-| `api-service.image.repository` | Override the image repository.                         | `ghcr.io/guggr/guggr/api-service` |
-| `api-service.image.tag`        | Override the image tag.                                | `AppVersion`                      |
+| Name                           | Description                                                                            | Value                             |
+| ------------------------------ | -------------------------------------------------------------------------------------- | --------------------------------- |
+| `api-service.enabled`          | Enable the Api-service                                                                 | `true`                            |
+| `api-service.replicaCount`     | Number of Api-service replicas to deploy                                               | `1`                               |
+| `api-service.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                            |
+| `api-service.image`            | Optional image override for the Api-service container.                                 | `{}`                              |
+| `api-service.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/api-service` |
+| `api-service.image.tag`        | Override the image tag.                                                                | `AppVersion`                      |
 
 ### Api-service Ingress
 
@@ -91,33 +92,36 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 
 ### Agent Parameters
 
-| Name                     | Description                                      | Value                       |
-| ------------------------ | ------------------------------------------------ | --------------------------- |
-| `agent.enabled`          | Enable the Agent                                 | `true`                      |
-| `agent.replicaCount`     | Number of Agent replicas to deploy               | `1`                         |
-| `agent.image`            | Optional image override for the Agent container. | `{}`                        |
-| `agent.image.repository` | Override the image repository.                   | `ghcr.io/guggr/guggr/agent` |
-| `agent.image.tag`        | Override the image tag.                          | `AppVersion`                |
+| Name                     | Description                                                                            | Value                       |
+| ------------------------ | -------------------------------------------------------------------------------------- | --------------------------- |
+| `agent.enabled`          | Enable the Agent                                                                       | `true`                      |
+| `agent.replicaCount`     | Number of Agent replicas to deploy                                                     | `1`                         |
+| `agent.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                      |
+| `agent.image`            | Optional image override for the Agent container.                                       | `{}`                        |
+| `agent.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/agent` |
+| `agent.image.tag`        | Override the image tag.                                                                | `AppVersion`                |
 
 ### Evaluator Parameters
 
-| Name                         | Description                                          | Value                           |
-| ---------------------------- | ---------------------------------------------------- | ------------------------------- |
-| `evaluator.enabled`          | Enable the Evaluator                                 | `true`                          |
-| `evaluator.replicaCount`     | Number of Evaluator replicas to deploy               | `1`                             |
-| `evaluator.image`            | Optional image override for the Evaluator container. | `{}`                            |
-| `evaluator.image.repository` | Override the image repository.                       | `ghcr.io/guggr/guggr/evaluator` |
-| `evaluator.image.tag`        | Override the image tag.                              | `AppVersion`                    |
+| Name                         | Description                                                                            | Value                           |
+| ---------------------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
+| `evaluator.enabled`          | Enable the Evaluator                                                                   | `true`                          |
+| `evaluator.replicaCount`     | Number of Evaluator replicas to deploy                                                 | `1`                             |
+| `evaluator.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                          |
+| `evaluator.image`            | Optional image override for the Evaluator container.                                   | `{}`                            |
+| `evaluator.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/evaluator` |
+| `evaluator.image.tag`        | Override the image tag.                                                                | `AppVersion`                    |
 
 ### Scheduler Parameters
 
-| Name                         | Description                                          | Value                           |
-| ---------------------------- | ---------------------------------------------------- | ------------------------------- |
-| `scheduler.enabled`          | Enable the Scheduler                                 | `true`                          |
-| `scheduler.replicaCount`     | Number of Scheduler replicas to deploy               | `1`                             |
-| `scheduler.image`            | Optional image override for the Scheduler container. | `{}`                            |
-| `scheduler.image.repository` | Override the image repository.                       | `ghcr.io/guggr/guggr/scheduler` |
-| `scheduler.image.tag`        | Override the image tag.                              | `AppVersion`                    |
+| Name                         | Description                                                                            | Value                           |
+| ---------------------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
+| `scheduler.enabled`          | Enable the Scheduler                                                                   | `true`                          |
+| `scheduler.replicaCount`     | Number of Scheduler replicas to deploy                                                 | `1`                             |
+| `scheduler.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                          |
+| `scheduler.image`            | Optional image override for the Scheduler container.                                   | `{}`                            |
+| `scheduler.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/scheduler` |
+| `scheduler.image.tag`        | Override the image tag.                                                                | `AppVersion`                    |
 
 ### Postgres Parameters
 

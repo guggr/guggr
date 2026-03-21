@@ -12,6 +12,8 @@ nameOverride: ""
 serviceAccount:
   create: false
 
+logLevel: info
+
 podAnnotations: {}
 podLabels: {}
 

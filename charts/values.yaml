@@ -44,6 +44,8 @@ api-service:
   enabled: true
   ## @param api-service.replicaCount Number of Api-service replicas to deploy
   replicaCount: 1
+  ## @param api-service.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  logLevel: info
 
   ## @param api-service.image Optional image override for the Api-service container.
   image: {}
@@ -142,6 +144,8 @@ agent:
   enabled: true
   ## @param agent.replicaCount Number of Agent replicas to deploy
   replicaCount: 1
+  ## @param agent.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  logLevel: info
   ## @param agent.image Optional image override for the Agent container.
   image: {}
     ## @param agent.image.repository [default: ghcr.io/guggr/guggr/agent] Override the image repository.
@@ -153,6 +157,8 @@ evaluator:
   enabled: true
   ## @param evaluator.replicaCount Number of Evaluator replicas to deploy
   replicaCount: 1
+  ## @param evaluator.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  logLevel: info
   ## @param evaluator.image Optional image override for the Evaluator container.
   image: {}
     ## @param evaluator.image.repository [default: ghcr.io/guggr/guggr/evaluator] Override the image repository.
@@ -164,6 +170,8 @@ scheduler:
   enabled: true
   ## @param scheduler.replicaCount Number of Scheduler replicas to deploy
   replicaCount: 1
+  ## @param scheduler.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  logLevel: info
   ## @param scheduler.image Optional image override for the Scheduler container.
   image: {}
     ## @param scheduler.image.repository [default: ghcr.io/guggr/guggr/scheduler] Override the image repository.

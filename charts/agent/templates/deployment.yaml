@@ -74,6 +74,8 @@ spec:
               secretKeyRef:
                 name: {{ .Values.global.rabbitmq.auth.secretName | quote }}
                 key: {{ .Values.global.rabbitmq.auth.passwordKey | quote }}
+          - name: RUST_LOG
+            value: {{ .Values.logLevel | toString | quote }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
