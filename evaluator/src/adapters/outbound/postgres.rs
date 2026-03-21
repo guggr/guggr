@@ -183,9 +183,9 @@ impl PostgresAdapter {
             .values(&job_run)
             .execute(&mut conn)?;
 
-        if let Some(http) = &job_result.http {
+        if reachable && let Some(http) = &job_result.http {
             self.write_job_result_http(&job_result.run_id, http)?;
-        } else if let Some(ping) = &job_result.ping {
+        } else if reachable && let Some(ping) = &job_result.ping {
             self.write_job_result_ping(&job_result.run_id, ping)?;
         }
         Ok(())
