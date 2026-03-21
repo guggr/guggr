@@ -9,31 +9,6 @@ version: 0.1.0
 appVersion: '0.1.0'
 
 dependencies:
-  - name: agent
-    version: 0.1.0
-    repository: file://agent
-    alias: agent
-
-  - name: api-service
-    version: 0.1.0
-    repository: file://api-service
-    alias: api-service
-
-  - name: evaluator
-    version: 0.1.0
-    repository: file://evaluator
-    alias: evaluator
-
-  - name: frontend
-    version: 0.1.0
-    repository: file://frontend
-    alias: frontend
-
-  - name: scheduler
-    version: 0.1.0
-    repository: file://scheduler
-    alias: scheduler
-
   - name: postgres
     repository: oci://registry-1.docker.io/cloudpirates
     version: 0.18.3

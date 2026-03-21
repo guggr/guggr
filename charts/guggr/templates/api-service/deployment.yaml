@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-service.fullname" . }}
+  labels:
+    {{- include "api-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.apiService.autoscaling.enabled }}
+  replicas: {{ .Values.apiService.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "api-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.apiService.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "api-service.labels" . | nindent 8 }}
+        {{- with .Values.apiService.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.apiService.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "api-service.serviceAccountName" . }}
+      {{- with .Values.apiService.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "guggr.waitForPostgres" . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.apiService.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.apiService.image.repository }}:{{ .Values.apiService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.apiService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.apiService.service.port }}
+              protocol: TCP
+          {{- with .Values.apiService.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiService.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiService.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.apiService.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+          - name: POSTGRES_HOST
+            value: {{ include "guggr.postgresHost" . | quote }}
+          - name: POSTGRES_PORT
+            value: {{ .Values.global.postgres.port | toString | quote }}
+          - name: POSTGRES_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.databaseKey | quote }}
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.usernameKey | quote }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.passwordKey | quote }}
+          - name: API_SERVICE_HOST
+            value: {{ .Values.apiService.env.host | quote }}
+          - name: API_SERVICE_PORT
+            value: {{ .Values.apiService.env.port | quote }}
+          - name: API_SERVICE_AUTH_TTL
+            value: {{ .Values.apiService.env.auth_ttl | quote }}
+          - name: API_SERVICE_AUTH_REFRESH_TTL
+            value: {{ .Values.apiService.env.auth_refresh_ttl | quote }}
+          - name: API_SERVICE_AUTH_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth-secret
+                key: auth-secret
+          - name: RUST_LOG
+            value: {{ .Values.apiService.logLevel | toString | quote }}
+      {{- with .Values.apiService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

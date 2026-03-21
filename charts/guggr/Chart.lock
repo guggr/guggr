@@ -1,24 +1,9 @@
 dependencies:
-- name: agent
-  repository: file://agent
-  version: 0.1.0
-- name: api-service
-  repository: file://api-service
-  version: 0.1.0
-- name: evaluator
-  repository: file://evaluator
-  version: 0.1.0
-- name: frontend
-  repository: file://frontend
-  version: 0.1.0
-- name: scheduler
-  repository: file://scheduler
-  version: 0.1.0
 - name: postgres
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.18.3
 - name: rabbitmq
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.19.6
-digest: sha256:444a235eea32db9f8bd70044975691e4c75bbc9c44f9651aed3efec0660f59ec
-generated: "2026-03-20T14:55:00.128102136+01:00"
+digest: sha256:f2dc95a4096365820aa94b94d44c716f2da009680b00c17eb1049cb9b2c8366a
+generated: "2026-03-21T23:47:52.865465145+01:00"

@@ -21,7 +21,7 @@ global:
       passwordKey: password
   ## @section Global Postgres parameters
   ## @descriptionStart
-  ## These parameters are used by the `api-service`, `evaluator` and `scheduler` Subcharts
+  ## These parameters are used by the `apiService`, `evaluator` and `scheduler` Subcharts
   ## @descriptionEnd
   postgres:
     ## @param global.postgres.host Global Postgres Host, set to this charts' `postgres.fullname` by default
@@ -39,55 +39,116 @@ global:
       databaseKey: database
 
 ## @section Api-service Parameters
-api-service:
-  ## @param api-service.enabled Enable the Api-service
+apiService:
+  ## @param apiService.enabled Enable the Api-service
   enabled: true
-  ## @param api-service.replicaCount Number of Api-service replicas to deploy
+  ## @param apiService.replicaCount Number of Api-service replicas to deploy
   replicaCount: 1
-  ## @param api-service.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  ## @param apiService.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
   logLevel: info
 
-  ## @param api-service.image Optional image override for the Api-service container.
-  image: {}
-    ## @param api-service.image.repository [default: ghcr.io/guggr/guggr/api-service] Override the image repository.
-    ## @param api-service.image.tag [default: AppVersion] Override the image tag.
+  ## @param apiService.fullnameOverride String to fully override api-service.fullname
+  fullnameOverride: ""
+  ## @param apiService.nameOverride String to partially override api-service.fullname
+  nameOverride: ""
+
+  ## @section Api-service Image Configuration
+  image:
+    ## @param apiService.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/api-service
+    ## @param apiService.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param apiService.image.tag [default: AppVersion] The image tag
+
+  ## @param apiService.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Api-service Service Account
+  serviceAccount:
+    ## @param apiService.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param apiService.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param apiService.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param apiService.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
 
   ## @section Api-service Ingress
   ingress:
-    ## @param api-service.ingress.enabled Enable ingress for the Api-service
+    ## @param apiService.ingress.enabled Enable ingress for the Api-service
     enabled: false
-    ## @param api-service.ingress.className Ingress class name
+    ## @param apiService.ingress.className Ingress class name
     className: ""
-    ## @param api-service.ingress.annotations Ingress annotations
+    ## @param apiService.ingress.annotations Ingress annotations
     annotations: {}
-    ## @param api-service.ingress.hosts [object] Ingress hosts configuration
+    ## @param apiService.ingress.hosts [object] Ingress hosts configuration
     hosts:
       - host: guggr.internal
         paths:
           - path: /api
             pathType: Prefix
-    ## @param api-service.ingress.tls Ingress TLS configuration
+    ## @param apiService.ingress.tls Ingress TLS configuration
     tls: []
+
+  ## @section Service configuration
+  service:
+    ## @param apiService.service.port Api-service service port
+    port: 80
+    ## @param apiService.service.targetPort Api-service container port
+    targetPort: 8081
 
   ## @section Api-service HTTPRoute
   httpRoute:
-    ## @param api-service.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Api-service
+    ## @param apiService.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Api-service
     enabled: false
-    ## @param api-service.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    ## @param apiService.httpRoute.annotations Additional annotations for the HTTPRoute resource
     annotations: {}
-    ## @param api-service.httpRoute.parentRefs [array] References to the parent Gateways
+    ## @param apiService.httpRoute.parentRefs [array] References to the parent Gateways
     parentRefs:
       - name: ""
         namespace: ""
         sectionName: ""
-    ## @param api-service.httpRoute.hostnames List of hostnames to match
+    ## @param apiService.httpRoute.hostnames List of hostnames to match
     hostnames: []
-    ## @param api-service.httpRoute.rules [array] HTTPRoute rules
+    ## @param apiService.httpRoute.rules [array] HTTPRoute rules
     rules:
       - matches:
           - path:
               type: PathPrefix
               value: /
+
+  ## @section Api-service Additional Parameters
+  ## @param apiService.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param apiService.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param apiService.podSecurityContext Security Context of the pods
+  podSecurityContext: {}
+  ## @param apiService.securityContext Container-level security context configuration
+  securityContext: {}
+  ## @param apiService.autoscaling HorizontalPodAutoscaler configuration
+  autoscaling: {}
+  ## @param apiService.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param apiService.resources Resource requests and limits for the container
+  resources: {}
+  ## @param apiService.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param apiService.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+
+  ## @section Api-service Environment variables
+  env:
+    ## @param apiService.env.port Port the Api-service listens on. Must match with `apiService.service.targetPort`
+    port: 8081
+    ## @param apiService.env.host Host the Api-service binds to
+    host: 0.0.0.0
+    ## @param apiService.env.auth_ttl TTL of auth tokens
+    auth_ttl: 900
+    ## @param apiService.env.auth_refresh_ttl TTL of refresh tokens
+    auth_refresh_ttl: "2419200"
+
 
 ## @section Frontend Parameters
 frontend:
@@ -96,10 +157,32 @@ frontend:
   ## @param frontend.replicaCount Number of Frontend replicas to deploy
   replicaCount: 1
 
-  ## @param frontend.image Optional image override for the Frontend container.
-  image: {}
-    ## @param frontend.image.repository [default: ghcr.io/guggr/guggr/frontend] Override the image repository.
-    ## @param frontend.image.tag [default: AppVersion] Override the image tag.
+  ## @param frontend.fullnameOverride String to fully override api-service.fullname
+  fullnameOverride: ""
+  ## @param frontend.nameOverride String to partially override api-service.fullname
+  nameOverride: ""
+
+  ## @section Frontend Image Configuration
+  image:
+    ## @param frontend.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/frontend
+    ## @param frontend.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param frontend.image.tag [default: AppVersion] The image tag
+
+  ## @param frontend.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Frontend Service Account
+  serviceAccount:
+    ## @param frontend.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param frontend.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param frontend.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param frontend.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
 
   ## @section Frontend Ingress
   ingress:
@@ -117,6 +200,13 @@ frontend:
             pathType: Prefix
     ## @param frontend.ingress.tls Ingress TLS configuration
     tls: []
+
+  ## @section Service configuration
+  service:
+    ## @param frontend.service.port Api-service service port
+    port: 80
+    ## @param frontend.service.targetPort Api-service container port
+    targetPort: 8080
 
   ## @section Frontend HTTPRoute
   httpRoute:
@@ -138,18 +228,80 @@ frontend:
               type: PathPrefix
               value: /
 
+  ## @section Frontend Additional Parameters
+  ## @param frontend.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param frontend.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param frontend.podSecurityContext Security Context of the pods
+  podSecurityContext: {}
+  ## @param frontend.securityContext Container-level security context configuration
+  securityContext: {}
+  ## @param frontend.autoscaling HorizontalPodAutoscaler configuration
+  autoscaling: {}
+  ## @param frontend.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param frontend.resources Resource requests and limits for the container
+  resources: {}
+  ## @param frontend.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param frontend.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+
 ## @section Agent Parameters
 agent:
   ## @param agent.enabled Enable the Agent
   enabled: true
   ## @param agent.replicaCount Number of Agent replicas to deploy
   replicaCount: 1
-  ## @param agent.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  ## @param agent.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
   logLevel: info
-  ## @param agent.image Optional image override for the Agent container.
-  image: {}
-    ## @param agent.image.repository [default: ghcr.io/guggr/guggr/agent] Override the image repository.
-    ## @param agent.image.tag [default: AppVersion] Override the image tag.
+  ## @param agent.fullnameOverride String to fully override api-service.fullname
+  fullnameOverride: ""
+  ## @param agent.nameOverride String to partially override api-service.fullname
+  nameOverride: ""
+
+  ## @section Agent Image Configuration
+  image:
+    ## @param agent.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/agent
+    ## @param agent.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param agent.image.tag [default: AppVersion] The image tag
+
+  ## @param agent.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Agent Service Account
+  serviceAccount:
+    ## @param agent.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param agent.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param agent.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param agent.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Agent Additional Parameters
+  ## @param agent.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param agent.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param agent.podSecurityContext Security Context of the pods
+  podSecurityContext: {}
+  ## @param agent.securityContext Container-level security context configuration
+  securityContext: {}
+  ## @param agent.autoscaling HorizontalPodAutoscaler configuration
+  autoscaling: {}
+  ## @param agent.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param agent.resources Resource requests and limits for the container
+  resources: {}
+  ## @param agent.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param agent.affinity Pod affinity and anti-affinity rules
+  affinity: {}
 
 ## @section Evaluator Parameters
 evaluator:
@@ -157,12 +309,54 @@ evaluator:
   enabled: true
   ## @param evaluator.replicaCount Number of Evaluator replicas to deploy
   replicaCount: 1
-  ## @param evaluator.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  ## @param evaluator.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
   logLevel: info
-  ## @param evaluator.image Optional image override for the Evaluator container.
-  image: {}
-    ## @param evaluator.image.repository [default: ghcr.io/guggr/guggr/evaluator] Override the image repository.
-    ## @param evaluator.image.tag [default: AppVersion] Override the image tag.
+  ## @param evaluator.fullnameOverride String to fully override api-service.fullname
+  fullnameOverride: ""
+  ## @param evaluator.nameOverride String to partially override api-service.fullname
+  nameOverride: ""
+
+  ## @section Evaluator Image Configuration
+  image:
+    ## @param evaluator.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/evaluator
+    ## @param evaluator.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param evaluator.image.tag [default: AppVersion] The image tag
+
+  ## @param evaluator.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Evaluator Service Account
+  serviceAccount:
+    ## @param evaluator.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param evaluator.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param evaluator.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param evaluator.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Evaluator Additional Parameters
+  ## @param evaluator.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param evaluator.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param evaluator.podSecurityContext Security Context of the pods
+  podSecurityContext: {}
+  ## @param evaluator.securityContext Container-level security context configuration
+  securityContext: {}
+  ## @param evaluator.autoscaling HorizontalPodAutoscaler configuration
+  autoscaling: {}
+  ## @param evaluator.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param evaluator.resources Resource requests and limits for the container
+  resources: {}
+  ## @param evaluator.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param evaluator.affinity Pod affinity and anti-affinity rules
+  affinity: {}
 
 ## @section Scheduler Parameters
 scheduler:
@@ -170,12 +364,54 @@ scheduler:
   enabled: true
   ## @param scheduler.replicaCount Number of Scheduler replicas to deploy
   replicaCount: 1
-  ## @param scheduler.logLevel Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+  ## @param scheduler.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
   logLevel: info
-  ## @param scheduler.image Optional image override for the Scheduler container.
-  image: {}
-    ## @param scheduler.image.repository [default: ghcr.io/guggr/guggr/scheduler] Override the image repository.
-    ## @param scheduler.image.tag [default: AppVersion] Override the image tag.
+  ## @param scheduler.fullnameOverride String to fully override api-service.fullname
+  fullnameOverride: ""
+  ## @param scheduler.nameOverride String to partially override api-service.fullname
+  nameOverride: ""
+
+  ## @section Scheduler Image Configuration
+  image:
+    ## @param scheduler.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/scheduler
+    ## @param scheduler.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param scheduler.image.tag [default: AppVersion] The image tag
+
+  ## @param scheduler.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Scheduler Service Account
+  serviceAccount:
+    ## @param scheduler.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param scheduler.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param scheduler.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param scheduler.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Scheduler Additional Parameters
+  ## @param scheduler.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param scheduler.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param scheduler.podSecurityContext Security Context of the pods
+  podSecurityContext: {}
+  ## @param scheduler.securityContext Container-level security context configuration
+  securityContext: {}
+  ## @param scheduler.autoscaling HorizontalPodAutoscaler configuration
+  autoscaling: {}
+  ## @param scheduler.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param scheduler.resources Resource requests and limits for the container
+  resources: {}
+  ## @param scheduler.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param scheduler.affinity Pod affinity and anti-affinity rules
+  affinity: {}
 
 ## @section Postgres Parameters
 postgres:

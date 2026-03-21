@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "evaluator.fullname" . }}
+  labels:
+    {{- include "evaluator.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.evaluator.autoscaling.enabled }}
+  replicas: {{ .Values.evaluator.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "evaluator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.evaluator.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "evaluator.labels" . | nindent 8 }}
+        {{- with .Values.evaluator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.evaluator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "evaluator.serviceAccountName" . }}
+      {{- with .Values.evaluator.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "guggr.waitForPostgres" . | nindent 8 }}
+        {{- include "guggr.waitForRabbitMQ" . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.evaluator.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.evaluator.image.repository }}:{{ .Values.evaluator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.evaluator.image.pullPolicy }}
+          {{- with .Values.evaluator.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.evaluator.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.evaluator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.evaluator.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+          - name: RABBITMQ_HOST
+            value: {{ include "guggr.rabbitmqHost" . | quote }}
+          - name: RABBITMQ_PORT
+            value: {{ .Values.global.rabbitmq.port | toString | quote }}
+          - name: RABBITMQ_JOB_RESULT_QUEUE
+            value: {{ .Values.global.rabbitmq.jobResultQueue | toString | quote }}
+          - name: RABBITMQ_USER
+            value: {{ .Values.global.rabbitmq.auth.username | toString | quote }}
+          - name: RABBITMQ_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.rabbitmq.auth.secretName | quote }}
+                key: {{ .Values.global.rabbitmq.auth.passwordKey | quote }}
+          - name: POSTGRES_HOST
+            value: {{ include "guggr.postgresHost" . | quote }}
+          - name: POSTGRES_PORT
+            value: {{ .Values.global.postgres.port | toString | quote }}
+          - name: POSTGRES_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.databaseKey | quote }}
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.usernameKey | quote }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.postgres.auth.secretName | quote }}
+                key: {{ .Values.global.postgres.auth.passwordKey | quote }}
+          - name: RUST_LOG
+            value: {{ .Values.evaluator.logLevel | toString | quote }}
+      {{- with .Values.evaluator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.evaluator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.evaluator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

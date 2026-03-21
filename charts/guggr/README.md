@@ -18,7 +18,7 @@ These parameters are used by the `agent`, `evaluator` and `scheduler` Subcharts
 
 ### Global Postgres parameters
 
-These parameters are used by the `api-service`, `evaluator` and `scheduler` Subcharts
+These parameters are used by the `apiService`, `evaluator` and `scheduler` Subcharts
 
 | Name                               | Description                                                                          | Value               |
 | ---------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
@@ -31,44 +31,108 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 
 ### Api-service Parameters
 
-| Name                           | Description                                                                            | Value                             |
-| ------------------------------ | -------------------------------------------------------------------------------------- | --------------------------------- |
-| `api-service.enabled`          | Enable the Api-service                                                                 | `true`                            |
-| `api-service.replicaCount`     | Number of Api-service replicas to deploy                                               | `1`                               |
-| `api-service.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                            |
-| `api-service.image`            | Optional image override for the Api-service container.                                 | `{}`                              |
-| `api-service.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/api-service` |
-| `api-service.image.tag`        | Override the image tag.                                                                | `AppVersion`                      |
+| Name                          | Description                                                                              | Value  |
+| ----------------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| `apiService.enabled`          | Enable the Api-service                                                                   | `true` |
+| `apiService.replicaCount`     | Number of Api-service replicas to deploy                                                 | `1`    |
+| `apiService.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
+| `apiService.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
+| `apiService.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+
+### Api-service Image Configuration
+
+| Name                          | Description           | Value                             |
+| ----------------------------- | --------------------- | --------------------------------- |
+| `apiService.image.repository` | The image repository  | `ghcr.io/guggr/guggr/api-service` |
+| `apiService.image.pullPolicy` | The image pull policy | `Always`                          |
+| `apiService.image.tag`        | The image tag         | `AppVersion`                      |
+| `apiService.imagePullSecrets` | Image pull secrets    | `[]`                              |
+
+### Api-service Service Account
+
+| Name                                    | Description                                                                                                              | Value   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `apiService.serviceAccount.create`      | Specifies whether a service account should be created                                                                    | `false` |
+| `apiService.serviceAccount.annotations` | Annotations to add to the service account                                                                                | `{}`    |
+| `apiService.serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template | `""`    |
+| `apiService.serviceAccount.automount`   | Whether to automount the SA token inside the pod                                                                         | `false` |
 
 ### Api-service Ingress
 
-| Name                              | Description                        | Value   |
-| --------------------------------- | ---------------------------------- | ------- |
-| `api-service.ingress.enabled`     | Enable ingress for the Api-service | `false` |
-| `api-service.ingress.className`   | Ingress class name                 | `""`    |
-| `api-service.ingress.annotations` | Ingress annotations                | `{}`    |
-| `api-service.ingress.hosts`       | Ingress hosts configuration        | `{}`    |
-| `api-service.ingress.tls`         | Ingress TLS configuration          | `[]`    |
+| Name                             | Description                        | Value   |
+| -------------------------------- | ---------------------------------- | ------- |
+| `apiService.ingress.enabled`     | Enable ingress for the Api-service | `false` |
+| `apiService.ingress.className`   | Ingress class name                 | `""`    |
+| `apiService.ingress.annotations` | Ingress annotations                | `{}`    |
+| `apiService.ingress.hosts`       | Ingress hosts configuration        | `{}`    |
+| `apiService.ingress.tls`         | Ingress TLS configuration          | `[]`    |
+
+### Service configuration
+
+| Name                            | Description                | Value  |
+| ------------------------------- | -------------------------- | ------ |
+| `apiService.service.port`       | Api-service service port   | `80`   |
+| `apiService.service.targetPort` | Api-service container port | `8081` |
 
 ### Api-service HTTPRoute
 
-| Name                                | Description                                                 | Value   |
-| ----------------------------------- | ----------------------------------------------------------- | ------- |
-| `api-service.httpRoute.enabled`     | Enable Gateway API HTTPRoute generation for the Api-service | `false` |
-| `api-service.httpRoute.annotations` | Additional annotations for the HTTPRoute resource           | `{}`    |
-| `api-service.httpRoute.parentRefs`  | References to the parent Gateways                           | `[]`    |
-| `api-service.httpRoute.hostnames`   | List of hostnames to match                                  | `[]`    |
-| `api-service.httpRoute.rules`       | HTTPRoute rules                                             | `[]`    |
+| Name                               | Description                                                 | Value   |
+| ---------------------------------- | ----------------------------------------------------------- | ------- |
+| `apiService.httpRoute.enabled`     | Enable Gateway API HTTPRoute generation for the Api-service | `false` |
+| `apiService.httpRoute.annotations` | Additional annotations for the HTTPRoute resource           | `{}`    |
+| `apiService.httpRoute.parentRefs`  | References to the parent Gateways                           | `[]`    |
+| `apiService.httpRoute.hostnames`   | List of hostnames to match                                  | `[]`    |
+| `apiService.httpRoute.rules`       | HTTPRoute rules                                             | `[]`    |
+
+### Api-service Additional Parameters
+
+| Name                            | Description                                           | Value |
+| ------------------------------- | ----------------------------------------------------- | ----- |
+| `apiService.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
+| `apiService.podLabels`          | Map of labels to add to the pods                      | `{}`  |
+| `apiService.podSecurityContext` | Security Context of the pods                          | `{}`  |
+| `apiService.securityContext`    | Container-level security context configuration        | `{}`  |
+| `apiService.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `apiService.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `apiService.resources`          | Resource requests and limits for the container        | `{}`  |
+| `apiService.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `apiService.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Api-service Environment variables
+
+| Name                              | Description                                                                      | Value     |
+| --------------------------------- | -------------------------------------------------------------------------------- | --------- |
+| `apiService.env.port`             | Port the Api-service listens on. Must match with `apiService.service.targetPort` | `8081`    |
+| `apiService.env.host`             | Host the Api-service binds to                                                    | `0.0.0.0` |
+| `apiService.env.auth_ttl`         | TTL of auth tokens                                                               | `900`     |
+| `apiService.env.auth_refresh_ttl` | TTL of refresh tokens                                                            | `2419200` |
 
 ### Frontend Parameters
 
-| Name                        | Description                                         | Value                          |
-| --------------------------- | --------------------------------------------------- | ------------------------------ |
-| `frontend.enabled`          | Enable the Frontend                                 | `true`                         |
-| `frontend.replicaCount`     | Number of Frontend replicas to deploy               | `1`                            |
-| `frontend.image`            | Optional image override for the Frontend container. | `{}`                           |
-| `frontend.image.repository` | Override the image repository.                      | `ghcr.io/guggr/guggr/frontend` |
-| `frontend.image.tag`        | Override the image tag.                             | `AppVersion`                   |
+| Name                        | Description                                       | Value  |
+| --------------------------- | ------------------------------------------------- | ------ |
+| `frontend.enabled`          | Enable the Frontend                               | `true` |
+| `frontend.replicaCount`     | Number of Frontend replicas to deploy             | `1`    |
+| `frontend.fullnameOverride` | String to fully override api-service.fullname     | `""`   |
+| `frontend.nameOverride`     | String to partially override api-service.fullname | `""`   |
+
+### Frontend Image Configuration
+
+| Name                        | Description           | Value                          |
+| --------------------------- | --------------------- | ------------------------------ |
+| `frontend.image.repository` | The image repository  | `ghcr.io/guggr/guggr/frontend` |
+| `frontend.image.pullPolicy` | The image pull policy | `Always`                       |
+| `frontend.image.tag`        | The image tag         | `AppVersion`                   |
+| `frontend.imagePullSecrets` | Image pull secrets    | `[]`                           |
+
+### Frontend Service Account
+
+| Name                                  | Description                                                                                                              | Value   |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `frontend.serviceAccount.create`      | Specifies whether a service account should be created                                                                    | `false` |
+| `frontend.serviceAccount.annotations` | Annotations to add to the service account                                                                                | `{}`    |
+| `frontend.serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template | `""`    |
+| `frontend.serviceAccount.automount`   | Whether to automount the SA token inside the pod                                                                         | `false` |
 
 ### Frontend Ingress
 
@@ -80,6 +144,13 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 | `frontend.ingress.hosts`       | Ingress hosts configuration     | `{}`    |
 | `frontend.ingress.tls`         | Ingress TLS configuration       | `[]`    |
 
+### Service configuration
+
+| Name                          | Description                | Value  |
+| ----------------------------- | -------------------------- | ------ |
+| `frontend.service.port`       | Api-service service port   | `80`   |
+| `frontend.service.targetPort` | Api-service container port | `8080` |
+
 ### Frontend HTTPRoute
 
 | Name                             | Description                                              | Value   |
@@ -90,38 +161,145 @@ These parameters are used by the `api-service`, `evaluator` and `scheduler` Subc
 | `frontend.httpRoute.hostnames`   | List of hostnames to match                               | `[]`    |
 | `frontend.httpRoute.rules`       | HTTPRoute rules                                          | `[]`    |
 
+### Frontend Additional Parameters
+
+| Name                          | Description                                           | Value |
+| ----------------------------- | ----------------------------------------------------- | ----- |
+| `frontend.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
+| `frontend.podLabels`          | Map of labels to add to the pods                      | `{}`  |
+| `frontend.podSecurityContext` | Security Context of the pods                          | `{}`  |
+| `frontend.securityContext`    | Container-level security context configuration        | `{}`  |
+| `frontend.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `frontend.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `frontend.resources`          | Resource requests and limits for the container        | `{}`  |
+| `frontend.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `frontend.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+
 ### Agent Parameters
 
-| Name                     | Description                                                                            | Value                       |
-| ------------------------ | -------------------------------------------------------------------------------------- | --------------------------- |
-| `agent.enabled`          | Enable the Agent                                                                       | `true`                      |
-| `agent.replicaCount`     | Number of Agent replicas to deploy                                                     | `1`                         |
-| `agent.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                      |
-| `agent.image`            | Optional image override for the Agent container.                                       | `{}`                        |
-| `agent.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/agent` |
-| `agent.image.tag`        | Override the image tag.                                                                | `AppVersion`                |
+| Name                     | Description                                                                              | Value  |
+| ------------------------ | ---------------------------------------------------------------------------------------- | ------ |
+| `agent.enabled`          | Enable the Agent                                                                         | `true` |
+| `agent.replicaCount`     | Number of Agent replicas to deploy                                                       | `1`    |
+| `agent.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
+| `agent.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
+| `agent.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+
+### Agent Image Configuration
+
+| Name                     | Description           | Value                       |
+| ------------------------ | --------------------- | --------------------------- |
+| `agent.image.repository` | The image repository  | `ghcr.io/guggr/guggr/agent` |
+| `agent.image.pullPolicy` | The image pull policy | `Always`                    |
+| `agent.image.tag`        | The image tag         | `AppVersion`                |
+| `agent.imagePullSecrets` | Image pull secrets    | `[]`                        |
+
+### Agent Service Account
+
+| Name                               | Description                                                                                                              | Value   |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `agent.serviceAccount.create`      | Specifies whether a service account should be created                                                                    | `false` |
+| `agent.serviceAccount.annotations` | Annotations to add to the service account                                                                                | `{}`    |
+| `agent.serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template | `""`    |
+| `agent.serviceAccount.automount`   | Whether to automount the SA token inside the pod                                                                         | `false` |
+
+### Agent Additional Parameters
+
+| Name                       | Description                                           | Value |
+| -------------------------- | ----------------------------------------------------- | ----- |
+| `agent.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
+| `agent.podLabels`          | Map of labels to add to the pods                      | `{}`  |
+| `agent.podSecurityContext` | Security Context of the pods                          | `{}`  |
+| `agent.securityContext`    | Container-level security context configuration        | `{}`  |
+| `agent.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `agent.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `agent.resources`          | Resource requests and limits for the container        | `{}`  |
+| `agent.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `agent.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
 
 ### Evaluator Parameters
 
-| Name                         | Description                                                                            | Value                           |
-| ---------------------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
-| `evaluator.enabled`          | Enable the Evaluator                                                                   | `true`                          |
-| `evaluator.replicaCount`     | Number of Evaluator replicas to deploy                                                 | `1`                             |
-| `evaluator.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                          |
-| `evaluator.image`            | Optional image override for the Evaluator container.                                   | `{}`                            |
-| `evaluator.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/evaluator` |
-| `evaluator.image.tag`        | Override the image tag.                                                                | `AppVersion`                    |
+| Name                         | Description                                                                              | Value  |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| `evaluator.enabled`          | Enable the Evaluator                                                                     | `true` |
+| `evaluator.replicaCount`     | Number of Evaluator replicas to deploy                                                   | `1`    |
+| `evaluator.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
+| `evaluator.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
+| `evaluator.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+
+### Evaluator Image Configuration
+
+| Name                         | Description           | Value                           |
+| ---------------------------- | --------------------- | ------------------------------- |
+| `evaluator.image.repository` | The image repository  | `ghcr.io/guggr/guggr/evaluator` |
+| `evaluator.image.pullPolicy` | The image pull policy | `Always`                        |
+| `evaluator.image.tag`        | The image tag         | `AppVersion`                    |
+| `evaluator.imagePullSecrets` | Image pull secrets    | `[]`                            |
+
+### Evaluator Service Account
+
+| Name                                   | Description                                                                                                              | Value   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `evaluator.serviceAccount.create`      | Specifies whether a service account should be created                                                                    | `false` |
+| `evaluator.serviceAccount.annotations` | Annotations to add to the service account                                                                                | `{}`    |
+| `evaluator.serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template | `""`    |
+| `evaluator.serviceAccount.automount`   | Whether to automount the SA token inside the pod                                                                         | `false` |
+
+### Evaluator Additional Parameters
+
+| Name                           | Description                                           | Value |
+| ------------------------------ | ----------------------------------------------------- | ----- |
+| `evaluator.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
+| `evaluator.podLabels`          | Map of labels to add to the pods                      | `{}`  |
+| `evaluator.podSecurityContext` | Security Context of the pods                          | `{}`  |
+| `evaluator.securityContext`    | Container-level security context configuration        | `{}`  |
+| `evaluator.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `evaluator.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `evaluator.resources`          | Resource requests and limits for the container        | `{}`  |
+| `evaluator.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `evaluator.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
 
 ### Scheduler Parameters
 
-| Name                         | Description                                                                            | Value                           |
-| ---------------------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
-| `scheduler.enabled`          | Enable the Scheduler                                                                   | `true`                          |
-| `scheduler.replicaCount`     | Number of Scheduler replicas to deploy                                                 | `1`                             |
-| `scheduler.logLevel`         | Handed down to RUST_LOG. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` | `info`                          |
-| `scheduler.image`            | Optional image override for the Scheduler container.                                   | `{}`                            |
-| `scheduler.image.repository` | Override the image repository.                                                         | `ghcr.io/guggr/guggr/scheduler` |
-| `scheduler.image.tag`        | Override the image tag.                                                                | `AppVersion`                    |
+| Name                         | Description                                                                              | Value  |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| `scheduler.enabled`          | Enable the Scheduler                                                                     | `true` |
+| `scheduler.replicaCount`     | Number of Scheduler replicas to deploy                                                   | `1`    |
+| `scheduler.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
+| `scheduler.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
+| `scheduler.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+
+### Scheduler Image Configuration
+
+| Name                         | Description           | Value                           |
+| ---------------------------- | --------------------- | ------------------------------- |
+| `scheduler.image.repository` | The image repository  | `ghcr.io/guggr/guggr/scheduler` |
+| `scheduler.image.pullPolicy` | The image pull policy | `Always`                        |
+| `scheduler.image.tag`        | The image tag         | `AppVersion`                    |
+| `scheduler.imagePullSecrets` | Image pull secrets    | `[]`                            |
+
+### Scheduler Service Account
+
+| Name                                   | Description                                                                                                              | Value   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `scheduler.serviceAccount.create`      | Specifies whether a service account should be created                                                                    | `false` |
+| `scheduler.serviceAccount.annotations` | Annotations to add to the service account                                                                                | `{}`    |
+| `scheduler.serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template | `""`    |
+| `scheduler.serviceAccount.automount`   | Whether to automount the SA token inside the pod                                                                         | `false` |
+
+### Scheduler Additional Parameters
+
+| Name                           | Description                                           | Value |
+| ------------------------------ | ----------------------------------------------------- | ----- |
+| `scheduler.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
+| `scheduler.podLabels`          | Map of labels to add to the pods                      | `{}`  |
+| `scheduler.podSecurityContext` | Security Context of the pods                          | `{}`  |
+| `scheduler.securityContext`    | Container-level security context configuration        | `{}`  |
+| `scheduler.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `scheduler.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `scheduler.resources`          | Resource requests and limits for the container        | `{}`  |
+| `scheduler.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `scheduler.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
 
 ### Postgres Parameters
 
