@@ -1,6 +1,6 @@
 import { AuthApi, Configuration } from '@/api';
 import { isValid } from '@/lib/jwt';
-import auth from '@/stores/auth.svelte';
+import auth, { authLoading } from '@/stores/auth.svelte';
 import { get } from 'svelte/store';
 
 export * from '@/api/gen';
@@ -10,6 +10,8 @@ const BASE_PATH = import.meta.env.DEV ? 'http://localhost:8081' : '';
 export const config = new Configuration({
 	basePath: BASE_PATH,
 	accessToken: async () => {
+		await authLoading;
+
 		const authData = get(auth);
 		if (!authData) return '';
 
