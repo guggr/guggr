@@ -1,4 +1,5 @@
 <script lang="ts">
+	import CopyMyUserId from '@/components/shared/CopyMyUserId.svelte';
 	import { preventDefault } from '@/lib/event';
 
 	let name = $state(''),
@@ -19,6 +20,8 @@
 		<span class="label">Email</span>
 		<input type="email" bind:value={email} placeholder="Email" disabled />
 	</label>
+
+	<CopyMyUserId />
 
 	<div class="pt-2">
 		<button type="submit" class="btn btn-primary btn-soft">Update profile</button>
