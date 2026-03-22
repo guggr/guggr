@@ -4,7 +4,7 @@
 
 ### Global RabbitMQ parameters
 
-These parameters are used by the `agent`, `evaluator` and `scheduler` Subcharts
+These parameters are used by the `agent`, `evaluator` and `scheduler`
 
 | Name                               | Description                                                                                                                                            | Value               |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
@@ -18,7 +18,7 @@ These parameters are used by the `agent`, `evaluator` and `scheduler` Subcharts
 
 ### Global Postgres parameters
 
-These parameters are used by the `apiService`, `evaluator` and `scheduler` Subcharts
+These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 | Name                               | Description                                                                          | Value               |
 | ---------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
@@ -36,8 +36,8 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `apiService.enabled`          | Enable the Api-service                                                                   | `true` |
 | `apiService.replicaCount`     | Number of Api-service replicas to deploy                                                 | `1`    |
 | `apiService.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
-| `apiService.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
-| `apiService.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+| `apiService.fullnameOverride` | String to fully override `api-service.fullname`                                          | `""`   |
+| `apiService.nameOverride`     | String to partially override `api-service.fullname`                                      | `""`   |
 
 ### Api-service Image Configuration
 
@@ -67,7 +67,7 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `apiService.ingress.hosts`       | Ingress hosts configuration        | `{}`    |
 | `apiService.ingress.tls`         | Ingress TLS configuration          | `[]`    |
 
-### Service configuration
+### Api-service Service configuration
 
 | Name                            | Description                | Value  |
 | ------------------------------- | -------------------------- | ------ |
@@ -109,12 +109,12 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 
 ### Frontend Parameters
 
-| Name                        | Description                                       | Value  |
-| --------------------------- | ------------------------------------------------- | ------ |
-| `frontend.enabled`          | Enable the Frontend                               | `true` |
-| `frontend.replicaCount`     | Number of Frontend replicas to deploy             | `1`    |
-| `frontend.fullnameOverride` | String to fully override api-service.fullname     | `""`   |
-| `frontend.nameOverride`     | String to partially override api-service.fullname | `""`   |
+| Name                        | Description                                      | Value  |
+| --------------------------- | ------------------------------------------------ | ------ |
+| `frontend.enabled`          | Enable the Frontend                              | `true` |
+| `frontend.replicaCount`     | Number of Frontend replicas to deploy            | `1`    |
+| `frontend.fullnameOverride` | String to fully override `frontend.fullname`     | `""`   |
+| `frontend.nameOverride`     | String to partially override `frontend.fullname` | `""`   |
 
 ### Frontend Image Configuration
 
@@ -144,7 +144,7 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `frontend.ingress.hosts`       | Ingress hosts configuration     | `{}`    |
 | `frontend.ingress.tls`         | Ingress TLS configuration       | `[]`    |
 
-### Service configuration
+### Frontend Service configuration
 
 | Name                          | Description                | Value  |
 | ----------------------------- | -------------------------- | ------ |
@@ -182,8 +182,8 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `agent.enabled`          | Enable the Agent                                                                         | `true` |
 | `agent.replicaCount`     | Number of Agent replicas to deploy                                                       | `1`    |
 | `agent.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
-| `agent.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
-| `agent.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+| `agent.fullnameOverride` | String to fully override `agent.fullname`                                                | `""`   |
+| `agent.nameOverride`     | String to partially override `agent.fullname`                                            | `""`   |
 
 ### Agent Image Configuration
 
@@ -224,8 +224,8 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `evaluator.enabled`          | Enable the Evaluator                                                                     | `true` |
 | `evaluator.replicaCount`     | Number of Evaluator replicas to deploy                                                   | `1`    |
 | `evaluator.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
-| `evaluator.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
-| `evaluator.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+| `evaluator.fullnameOverride` | String to fully override `evaluator.fullname`                                            | `""`   |
+| `evaluator.nameOverride`     | String to partially override `evaluator.fullname`                                        | `""`   |
 
 ### Evaluator Image Configuration
 
@@ -266,8 +266,8 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler` Subch
 | `scheduler.enabled`          | Enable the Scheduler                                                                     | `true` |
 | `scheduler.replicaCount`     | Number of Scheduler replicas to deploy                                                   | `1`    |
 | `scheduler.logLevel`         | Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error` | `info` |
-| `scheduler.fullnameOverride` | String to fully override api-service.fullname                                            | `""`   |
-| `scheduler.nameOverride`     | String to partially override api-service.fullname                                        | `""`   |
+| `scheduler.fullnameOverride` | String to fully override `scheduler.fullname`                                            | `""`   |
+| `scheduler.nameOverride`     | String to partially override `scheduler.fullname`                                        | `""`   |
 
 ### Scheduler Image Configuration
 
