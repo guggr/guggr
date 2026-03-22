@@ -7,3 +7,12 @@ const auth = writable<{
 } | null>(null);
 
 export default auth;
+
+/** Call this once auth data has been retrieved from localStorage */
+export let authLoaded: (value?: unknown) => void;
+/** Resolves once auth data has been read from localStorage */
+export const authLoading = $state(
+	new Promise(res => {
+		authLoaded = res;
+	}),
+);
