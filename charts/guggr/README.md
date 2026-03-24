@@ -323,3 +323,40 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 | `rabbitmq.extraVolumeMounts`            | Extra volumes to add to RabbitMQ pods                                                              | `[]`    |
 | `rabbitmq.customScripts.postStart`      |                                                                                                    | `{}`    |
 | `rabbitmq.customScripts.initContainers` | Custom init containers to run before RabbitMQ starts                                               | `[]`    |
+
+
+## Example Configurations
+
+
+### HA-Setup with bundled Postgres & RabbitMQ
+```yaml
+# ha.yaml
+apiService:
+  replicaCount: 3
+
+frontend:
+  replicaCount: 3
+
+agent:
+  replicaCount: 3
+
+evaluator:
+  replicaCount: 3
+
+scheduler:
+  replicaCount: 3
+
+rabbitmq:
+  replicaCount: 3
+  peerDiscoveryK8sPlugin:
+    enabled: true
+
+postgres:
+  replicaCount: 3
+
+```
+
+Deploy with:
+```sh
+helm install guggr ./charts/guggr -f ha.yaml
+```
