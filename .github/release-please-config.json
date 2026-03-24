@@ -23,11 +23,6 @@
 				{
 					"type": "yaml",
 					"path": "charts/Chart.yaml",
-					"jsonpath": "$.version"
-				},
-				{
-					"type": "yaml",
-					"path": "charts/Chart.yaml",
 					"jsonpath": "$.appVersion"
 				},
 				{
