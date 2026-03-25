@@ -188,7 +188,7 @@
 			{#if 'http' in job.details}
 				{@const http_details = job.details.http as DisplayJobDetailsHttp}
 				<li>
-					<span class="text-base-content/80">Host:</span>
+					<span class="text-base-content/80">URL:</span>
 					<b class="font-bold"><a href={http_details.url}>{http_details.url}</a></b>
 				</li>
 			{/if}
