@@ -40,7 +40,7 @@
 	</button>
 </div>
 
-<div class="card bg-base-100 card-sm w-96 max-w-full shadow-sm">
+<div class="card bg-base-100 card-sm mb-4 w-96 max-w-full shadow-sm">
 	<div class="card-body">
 		<CopyMyUserId />
 	</div>
