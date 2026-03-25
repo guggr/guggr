@@ -355,8 +355,3 @@ postgres:
   replicaCount: 3
 
 ```
-
-Deploy with:
-```sh
-helm install guggr ./charts/guggr -f ha.yaml
-```
