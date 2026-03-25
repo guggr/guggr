@@ -3,15 +3,21 @@
 		config,
 		GroupsApi,
 		JobsApi,
+		type CreateJobDetails,
+		type CreateJobDetailsOneOf,
+		type CreateJobDetailsOneOf1,
+		type CreateJobDetailsPing,
 		type DisplayGroup,
 		type DisplayJob,
+		type DisplayJobDetailsHttp,
+		type DisplayJobDetailsPing,
 		type DisplayJobRun,
 	} from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
-	import { relativeTime } from '@/lib/formatter';
+	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import alerts from '@/stores/alerts.svelte';
 	import auth from '@/stores/auth.svelte';
@@ -151,6 +157,52 @@
 			{/if}
 		</div>
 	</div>
+{/snippet}
+
+<div class="rounded-box bg-base-100 my-4 p-4 shadow-md">
+	{#await jobPromise}
+		<Loading />
+	{:then job}
+		<div class="gap-2">
+			<h2 class="text-base-content/80 mb-2 text-lg font-bold">Details</h2>
+			<div class="mt-2 flex flex-wrap items-center gap-6">
+				{@render jobDetails(job)}
+			</div>
+		</div>
+	{:catch}
+		<Error />
+	{/await}
+</div>
+
+{#snippet jobDetails(job: DisplayJob)}
+	<ul class="text-sm">
+		{#if typeof job.details === 'object' && job.details !== null}
+			{#if 'ping' in job.details}
+				{@const ping_details = job.details.ping as DisplayJobDetailsPing}
+				<li>
+					<span class="text-base-content/80">Host:</span>
+					<b class="font-bold">{ping_details.host}</b>
+				</li>
+			{/if}
+
+			{#if 'http' in job.details}
+				{@const http_details = job.details.http as DisplayJobDetailsHttp}
+				<li>
+					<span class="text-base-content/80">Host:</span>
+					<b class="font-bold"><a href={http_details.url}>{http_details.url}</a></b>
+				</li>
+			{/if}
+		{/if}
+		<li>
+			<span class="text-base-content/80">Interval:</span>
+			<b class="font-bold"
+				>Every {duration.format({
+					minutes: Math.floor(job.runEvery / 60),
+					seconds: job.runEvery % 60,
+				})}</b
+			>
+		</li>
+	</ul>
 {/snippet}
 
 <div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
