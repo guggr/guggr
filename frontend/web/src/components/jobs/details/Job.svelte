@@ -161,35 +161,33 @@
 	{:then job}
 		<div class="gap-2">
 			<h3 class="text-base-content/80 mb-2 text-lg font-bold">Details</h3>
-			<div class="mt-2 flex flex-wrap items-center gap-6">
-				<ul class="text-sm">
-					{#if typeof job.details === 'object' && 'ping' in job.details}
-						{@const pingDetails = job.details.ping}
-						<li>
-							<span class="text-base-content/80">Host:</span>
-							<b class="font-bold">{pingDetails.host}</b>
-						</li>
-					{/if}
-
-					{#if typeof job.details === 'object' && 'http' in job.details}
-						{@const httpDetails = job.details.http}
-						<li>
-							<span class="text-base-content/80">URL:</span>
-							<a class="link font-bold" href={httpDetails.url}>{httpDetails.url}</a>
-						</li>
-					{/if}
-
+			<ul class="text-sm">
+				{#if typeof job.details === 'object' && 'ping' in job.details}
+					{@const pingDetails = job.details.ping}
 					<li>
-						<span class="text-base-content/80">Interval:</span>
-						<b class="font-bold"
-							>Every {duration.format({
-								minutes: Math.floor(job.runEvery / 60),
-								seconds: job.runEvery % 60,
-							})}</b
-						>
+						<span class="text-base-content/80">Host:</span>
+						<b class="font-bold">{pingDetails.host}</b>
 					</li>
-				</ul>
-			</div>
+				{/if}
+
+				{#if typeof job.details === 'object' && 'http' in job.details}
+					{@const httpDetails = job.details.http}
+					<li>
+						<span class="text-base-content/80">URL:</span>
+						<a class="link font-bold" href={httpDetails.url}>{httpDetails.url}</a>
+					</li>
+				{/if}
+
+				<li>
+					<span class="text-base-content/80">Interval:</span>
+					<b class="font-bold"
+						>Every {duration.format({
+							minutes: Math.floor(job.runEvery / 60),
+							seconds: job.runEvery % 60,
+						})}</b
+					>
+				</li>
+			</ul>
 		</div>
 	{:catch}
 		<Error />
