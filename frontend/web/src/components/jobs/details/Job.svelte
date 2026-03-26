@@ -165,19 +165,19 @@
 				<ul class="text-sm">
 					{#if typeof job.details === 'object' && job.details !== null}
 						{#if 'ping' in job.details}
-							{@const ping_details = job.details.ping as DisplayJobDetailsPing}
+							{@const pingDetails = job.details.ping}
 							<li>
 								<span class="text-base-content/80">Host:</span>
-								<b class="font-bold">{ping_details.host}</b>
+								<b class="font-bold">{pingDetails.host}</b>
 							</li>
 						{/if}
 
 						{#if 'http' in job.details}
-							{@const http_details = job.details.http as DisplayJobDetailsHttp}
+							{@const httpDetails = job.details.http}
 							<li>
 								<span class="text-base-content/80">URL:</span>
 								<b class="font-bold"
-									><a href={http_details.url}>{http_details.url}</a></b
+									><a href={httpDetails.url}>{httpDetails.url}</a></b
 								>
 							</li>
 						{/if}
