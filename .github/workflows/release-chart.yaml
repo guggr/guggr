@@ -15,12 +15,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: 'v4.1.1'
+
+      - name: Install helm plugin
+        run: helm plugin install https://github.com/halkeye/helm-repo-html --version v0.2.1 --verify=false
+
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - run: cp charts/index.tmpl ../index.tmpl
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Generate repo html index
+        run: |-
+          git checkout gh-pages
+          git pull # pull index.yaml commit from chart releaser
+          helm repo-html -t ../index.tmpl
+          if ! git diff --exit-code index.html > /dev/null 2>&1 ; then
+            git add index.html
+            git commit -s -m "Update index.html"
+            git push
+          fi
+          git checkout -
