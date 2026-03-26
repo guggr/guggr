@@ -10,7 +10,7 @@ use gen_proto_types::{
     job_result::{types::v1::HttpJobResult, v1::JobResult},
     job_types::v1::JobType,
 };
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::core::{
     ports::monitor::MonitorPort,
@@ -76,6 +76,7 @@ impl MonitorPort for HttpAdapter {
 
         let http_job_result = match res {
             Some(response) => {
+                debug!("http response: {:?}", &response);
                 let remote_ip = response
                     .remote_addr()
                     .ok_or_else(|| JobServiceError::AgentIssue(AgentError::RemoteAddress.into()))?
