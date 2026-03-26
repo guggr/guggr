@@ -160,7 +160,7 @@
 		<Loading />
 	{:then job}
 		<div class="gap-2">
-			<h2 class="text-base-content/80 mb-2 text-lg font-bold">Details</h2>
+			<h3 class="text-base-content/80 mb-2 text-lg font-bold">Details</h3>
 			<div class="mt-2 flex flex-wrap items-center gap-6">
 				<ul class="text-sm">
 					{#if typeof job.details === 'object' && job.details !== null}
