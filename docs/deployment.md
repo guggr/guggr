@@ -9,7 +9,7 @@ git clone git@github.com:guggr/guggr.git && cd guggr
 docker compose up -d
 ```
 
-Guggr will then be available under http://localhost:8080
+guggr will then be available under http://localhost:8080
 
 ## Production Deployment
 
