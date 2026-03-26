@@ -73,6 +73,7 @@ impl MonitorPort for PingAdapter {
 
         let ping_result = match pinger.ping(PingSequence(0), &[0; 8]).await {
             Ok((packet, latency)) => {
+                debug!("icmp packet: {:?}", &packet);
                 info!(
                     "received ping {} from {}",
                     match packet {
