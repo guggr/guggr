@@ -1,6 +1,7 @@
 {
 	"initial-version": "0.1.0",
 	"include-v-in-release-name": false,
+	"bump-minor-pre-major": true,
 	"packages": {
 		".": {
 			"include-component-in-tag": false,

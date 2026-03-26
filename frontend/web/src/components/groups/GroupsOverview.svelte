@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { config, GroupsApi, type DisplayGroup } from '@/api';
 	import GroupList from '@/components/groups/GroupList.svelte';
+	import CopyMyUserId from '@/components/shared/CopyMyUserId.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import alerts from '@/stores/alerts.svelte';
@@ -37,6 +38,12 @@
 	<button onclick={createNewGroup} class="btn btn-primary btn-soft btn-sm sm:btn-md">
 		Create new
 	</button>
+</div>
+
+<div class="card bg-base-100 card-sm mb-4 w-96 max-w-full shadow-sm">
+	<div class="card-body">
+		<CopyMyUserId />
+	</div>
 </div>
 
 {#await groupsPromise}

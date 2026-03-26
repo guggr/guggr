@@ -6,12 +6,14 @@
 		onsubmit,
 		title,
 		actionTitle,
+		disabled = false,
 		children,
 		subtext,
 	}: {
 		onsubmit: () => void;
 		title: string;
 		actionTitle: string;
+		disabled?: boolean;
 		children?: Snippet;
 		subtext?: Snippet;
 	} = $props();
@@ -24,7 +26,9 @@
 
 			{@render children?.()}
 
-			<button type="submit" class="btn dark:btn-soft btn-primary mt-4">{actionTitle}</button>
+			<button type="submit" {disabled} class="btn dark:btn-soft btn-primary mt-4"
+				>{actionTitle}</button
+			>
 		</fieldset>
 
 		{#if subtext}
