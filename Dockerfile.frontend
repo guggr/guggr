@@ -21,5 +21,5 @@ RUN cd frontend/web && pnpm build
 FROM docker.io/nginxinc/nginx-unprivileged:1.29.5-alpine-slim
 
 COPY frontend/web/nginx.conf /etc/nginx/templates/default.conf.template
-COPY frontend/web/init_nginx.sh /docker-entrypoint.sh
+COPY frontend/web/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --from=build /app/frontend/web/dist /usr/share/nginx/html
