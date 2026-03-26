@@ -89,6 +89,14 @@ init container template that waits till the Postgres port is open
 {{- define "guggr.waitForPostgres" -}}
 - name: wait-for-postgres
   image: busybox:1.37
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   command:
     - sh
     - -ec
@@ -105,6 +113,14 @@ init container template that waits till the RabbitMQ AMQP port is open
 {{- define "guggr.waitForRabbitMQ" -}}
 - name: wait-for-rabbitmq
   image: busybox:1.37
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   command:
     - sh
     - -ec

@@ -86,17 +86,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Api-service Additional Parameters
 
-| Name                            | Description                                           | Value |
-| ------------------------------- | ----------------------------------------------------- | ----- |
-| `apiService.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
-| `apiService.podLabels`          | Map of labels to add to the pods                      | `{}`  |
-| `apiService.podSecurityContext` | Security Context of the pods                          | `{}`  |
-| `apiService.securityContext`    | Container-level security context configuration        | `{}`  |
-| `apiService.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `apiService.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `apiService.resources`          | Resource requests and limits for the container        | `{}`  |
-| `apiService.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `apiService.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                        | Description                                           | Value |
+| --------------------------- | ----------------------------------------------------- | ----- |
+| `apiService.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
+| `apiService.podLabels`      | Map of labels to add to the pods                      | `{}`  |
+| `apiService.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `apiService.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `apiService.resources`      | Resource requests and limits for the container        | `{}`  |
+| `apiService.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `apiService.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Api-service Security Context
+
+| Name                                                  | Description                                       | Value     |
+| ----------------------------------------------------- | ------------------------------------------------- | --------- |
+| `apiService.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
+| `apiService.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `apiService.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `apiService.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Api-service Environment variables
 
@@ -163,17 +170,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Frontend Additional Parameters
 
-| Name                          | Description                                           | Value |
-| ----------------------------- | ----------------------------------------------------- | ----- |
-| `frontend.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
-| `frontend.podLabels`          | Map of labels to add to the pods                      | `{}`  |
-| `frontend.podSecurityContext` | Security Context of the pods                          | `{}`  |
-| `frontend.securityContext`    | Container-level security context configuration        | `{}`  |
-| `frontend.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `frontend.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `frontend.resources`          | Resource requests and limits for the container        | `{}`  |
-| `frontend.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `frontend.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                      | Description                                           | Value |
+| ------------------------- | ----------------------------------------------------- | ----- |
+| `frontend.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
+| `frontend.podLabels`      | Map of labels to add to the pods                      | `{}`  |
+| `frontend.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `frontend.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `frontend.resources`      | Resource requests and limits for the container        | `{}`  |
+| `frontend.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `frontend.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Frontend Security Context
+
+| Name                                                | Description                                       | Value     |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `frontend.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
+| `frontend.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `frontend.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
+| `frontend.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Agent Parameters
 
@@ -205,17 +219,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Agent Additional Parameters
 
-| Name                       | Description                                           | Value |
-| -------------------------- | ----------------------------------------------------- | ----- |
-| `agent.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
-| `agent.podLabels`          | Map of labels to add to the pods                      | `{}`  |
-| `agent.podSecurityContext` | Security Context of the pods                          | `{}`  |
-| `agent.securityContext`    | Container-level security context configuration        | `{}`  |
-| `agent.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `agent.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `agent.resources`          | Resource requests and limits for the container        | `{}`  |
-| `agent.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `agent.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                   | Description                                           | Value |
+| ---------------------- | ----------------------------------------------------- | ----- |
+| `agent.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
+| `agent.podLabels`      | Map of labels to add to the pods                      | `{}`  |
+| `agent.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `agent.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `agent.resources`      | Resource requests and limits for the container        | `{}`  |
+| `agent.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `agent.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Agent Security Context
+
+| Name                                             | Description                                       | Value     |
+| ------------------------------------------------ | ------------------------------------------------- | --------- |
+| `agent.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
+| `agent.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `agent.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `agent.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Evaluator Parameters
 
@@ -247,17 +268,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Evaluator Additional Parameters
 
-| Name                           | Description                                           | Value |
-| ------------------------------ | ----------------------------------------------------- | ----- |
-| `evaluator.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
-| `evaluator.podLabels`          | Map of labels to add to the pods                      | `{}`  |
-| `evaluator.podSecurityContext` | Security Context of the pods                          | `{}`  |
-| `evaluator.securityContext`    | Container-level security context configuration        | `{}`  |
-| `evaluator.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `evaluator.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `evaluator.resources`          | Resource requests and limits for the container        | `{}`  |
-| `evaluator.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `evaluator.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                       | Description                                           | Value |
+| -------------------------- | ----------------------------------------------------- | ----- |
+| `evaluator.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
+| `evaluator.podLabels`      | Map of labels to add to the pods                      | `{}`  |
+| `evaluator.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `evaluator.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `evaluator.resources`      | Resource requests and limits for the container        | `{}`  |
+| `evaluator.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `evaluator.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Evaluator Security Context
+
+| Name                                                 | Description                                       | Value     |
+| ---------------------------------------------------- | ------------------------------------------------- | --------- |
+| `evaluator.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
+| `evaluator.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `evaluator.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `evaluator.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Scheduler Parameters
 
@@ -289,17 +317,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Scheduler Additional Parameters
 
-| Name                           | Description                                           | Value |
-| ------------------------------ | ----------------------------------------------------- | ----- |
-| `scheduler.podAnnotations`     | Map of annotations to add to the pods                 | `{}`  |
-| `scheduler.podLabels`          | Map of labels to add to the pods                      | `{}`  |
-| `scheduler.podSecurityContext` | Security Context of the pods                          | `{}`  |
-| `scheduler.securityContext`    | Container-level security context configuration        | `{}`  |
-| `scheduler.autoscaling`        | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `scheduler.nodeSelector`       | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `scheduler.resources`          | Resource requests and limits for the container        | `{}`  |
-| `scheduler.tolerations`        | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `scheduler.affinity`           | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                       | Description                                           | Value |
+| -------------------------- | ----------------------------------------------------- | ----- |
+| `scheduler.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
+| `scheduler.podLabels`      | Map of labels to add to the pods                      | `{}`  |
+| `scheduler.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
+| `scheduler.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
+| `scheduler.resources`      | Resource requests and limits for the container        | `{}`  |
+| `scheduler.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
+| `scheduler.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+
+### Scheduler Security Context
+
+| Name                                                 | Description                                       | Value     |
+| ---------------------------------------------------- | ------------------------------------------------- | --------- |
+| `scheduler.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
+| `scheduler.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `scheduler.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `scheduler.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Postgres Parameters
 

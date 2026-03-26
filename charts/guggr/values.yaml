@@ -123,10 +123,6 @@ apiService:
   podAnnotations: {}
   ## @param apiService.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param apiService.podSecurityContext Security Context of the pods
-  podSecurityContext: {}
-  ## @param apiService.securityContext Container-level security context configuration
-  securityContext: {}
   ## @param apiService.autoscaling HorizontalPodAutoscaler configuration
   autoscaling: {}
   ## @param apiService.nodeSelector Node selector for scheduling pods onto specific nodes
@@ -137,6 +133,19 @@ apiService:
   tolerations: []
   ## @param apiService.affinity Pod affinity and anti-affinity rules
   affinity: {}
+
+  ## @section Api-service Security Context
+  podSecurityContext:
+    ## @param apiService.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param apiService.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param apiService.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param apiService.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
 
   ## @section Api-service Environment variables
   env:
@@ -233,10 +242,6 @@ frontend:
   podAnnotations: {}
   ## @param frontend.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param frontend.podSecurityContext Security Context of the pods
-  podSecurityContext: {}
-  ## @param frontend.securityContext Container-level security context configuration
-  securityContext: {}
   ## @param frontend.autoscaling HorizontalPodAutoscaler configuration
   autoscaling: {}
   ## @param frontend.nodeSelector Node selector for scheduling pods onto specific nodes
@@ -247,6 +252,19 @@ frontend:
   tolerations: []
   ## @param frontend.affinity Pod affinity and anti-affinity rules
   affinity: {}
+
+  ## @section Frontend Security Context
+  podSecurityContext:
+    ## @param frontend.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param frontend.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param frontend.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: false
+    ## @param frontend.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
 
 ## @section Agent Parameters
 agent:
@@ -288,10 +306,6 @@ agent:
   podAnnotations: {}
   ## @param agent.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param agent.podSecurityContext Security Context of the pods
-  podSecurityContext: {}
-  ## @param agent.securityContext Container-level security context configuration
-  securityContext: {}
   ## @param agent.autoscaling HorizontalPodAutoscaler configuration
   autoscaling: {}
   ## @param agent.nodeSelector Node selector for scheduling pods onto specific nodes
@@ -302,6 +316,19 @@ agent:
   tolerations: []
   ## @param agent.affinity Pod affinity and anti-affinity rules
   affinity: {}
+
+  ## @section Agent Security Context
+  podSecurityContext:
+    ## @param agent.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param agent.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param agent.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param agent.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
 
 ## @section Evaluator Parameters
 evaluator:
@@ -343,10 +370,6 @@ evaluator:
   podAnnotations: {}
   ## @param evaluator.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param evaluator.podSecurityContext Security Context of the pods
-  podSecurityContext: {}
-  ## @param evaluator.securityContext Container-level security context configuration
-  securityContext: {}
   ## @param evaluator.autoscaling HorizontalPodAutoscaler configuration
   autoscaling: {}
   ## @param evaluator.nodeSelector Node selector for scheduling pods onto specific nodes
@@ -357,6 +380,19 @@ evaluator:
   tolerations: []
   ## @param evaluator.affinity Pod affinity and anti-affinity rules
   affinity: {}
+
+  ## @section Evaluator Security Context
+  podSecurityContext:
+    ## @param evaluator.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param evaluator.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param evaluator.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param evaluator.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
 
 ## @section Scheduler Parameters
 scheduler:
@@ -398,10 +434,6 @@ scheduler:
   podAnnotations: {}
   ## @param scheduler.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param scheduler.podSecurityContext Security Context of the pods
-  podSecurityContext: {}
-  ## @param scheduler.securityContext Container-level security context configuration
-  securityContext: {}
   ## @param scheduler.autoscaling HorizontalPodAutoscaler configuration
   autoscaling: {}
   ## @param scheduler.nodeSelector Node selector for scheduling pods onto specific nodes
@@ -412,6 +444,19 @@ scheduler:
   tolerations: []
   ## @param scheduler.affinity Pod affinity and anti-affinity rules
   affinity: {}
+
+  ## @section Scheduler Security Context
+  podSecurityContext:
+    ## @param scheduler.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param scheduler.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param scheduler.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param scheduler.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
 
 ## @section Postgres Parameters
 postgres:
