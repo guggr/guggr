@@ -17,13 +17,13 @@ Deploying guggr for production use can be achieved by first adding our helm repo
 
 ```sh
 helm repo add guggr https://guggr.github.io/guggr
-helm install guggr guggr/guggr
+helm install guggr guggr/guggr-chart
 ```
 
 You can customize the deployment by overwriting helm values with
 
 ```sh
-helm install guggr guggr/guggr -f yourvalues.yaml
+helm install guggr guggr/guggr-chart -f yourvalues.yaml
 ```
 
 Example configurations can be seen [here](../charts/guggr/README.md#example-configurations)
