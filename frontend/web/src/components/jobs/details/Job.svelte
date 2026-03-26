@@ -162,44 +162,42 @@
 		<div class="gap-2">
 			<h2 class="text-base-content/80 mb-2 text-lg font-bold">Details</h2>
 			<div class="mt-2 flex flex-wrap items-center gap-6">
-				{@render jobDetails(job)}
+				<ul class="text-sm">
+					{#if typeof job.details === 'object' && job.details !== null}
+						{#if 'ping' in job.details}
+							{@const ping_details = job.details.ping as DisplayJobDetailsPing}
+							<li>
+								<span class="text-base-content/80">Host:</span>
+								<b class="font-bold">{ping_details.host}</b>
+							</li>
+						{/if}
+
+						{#if 'http' in job.details}
+							{@const http_details = job.details.http as DisplayJobDetailsHttp}
+							<li>
+								<span class="text-base-content/80">URL:</span>
+								<b class="font-bold"
+									><a href={http_details.url}>{http_details.url}</a></b
+								>
+							</li>
+						{/if}
+					{/if}
+					<li>
+						<span class="text-base-content/80">Interval:</span>
+						<b class="font-bold"
+							>Every {duration.format({
+								minutes: Math.floor(job.runEvery / 60),
+								seconds: job.runEvery % 60,
+							})}</b
+						>
+					</li>
+				</ul>
 			</div>
 		</div>
 	{:catch}
 		<Error />
 	{/await}
 </div>
-
-{#snippet jobDetails(job: DisplayJob)}
-	<ul class="text-sm">
-		{#if typeof job.details === 'object' && job.details !== null}
-			{#if 'ping' in job.details}
-				{@const ping_details = job.details.ping as DisplayJobDetailsPing}
-				<li>
-					<span class="text-base-content/80">Host:</span>
-					<b class="font-bold">{ping_details.host}</b>
-				</li>
-			{/if}
-
-			{#if 'http' in job.details}
-				{@const http_details = job.details.http as DisplayJobDetailsHttp}
-				<li>
-					<span class="text-base-content/80">URL:</span>
-					<b class="font-bold"><a href={http_details.url}>{http_details.url}</a></b>
-				</li>
-			{/if}
-		{/if}
-		<li>
-			<span class="text-base-content/80">Interval:</span>
-			<b class="font-bold"
-				>Every {duration.format({
-					minutes: Math.floor(job.runEvery / 60),
-					seconds: job.runEvery % 60,
-				})}</b
-			>
-		</li>
-	</ul>
-{/snippet}
 
 <div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
 	<h2 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h2>
