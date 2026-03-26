@@ -36,7 +36,7 @@ spec:
         {{- include "guggr.waitForPostgres" . | nindent 8 }}
         {{- include "guggr.waitForRabbitMQ" . | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "evaluator.name" . }}
           {{- with .Values.evaluator.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

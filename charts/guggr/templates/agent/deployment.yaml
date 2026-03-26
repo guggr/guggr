@@ -35,7 +35,7 @@ spec:
       initContainers:
         {{- include "guggr.waitForRabbitMQ" . | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "agent.name" . }}
           {{- with .Values.agent.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

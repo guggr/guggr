@@ -35,7 +35,7 @@ spec:
       initContainers:
         {{- include "guggr.waitForPostgres" . | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "api-service.name" . }}
           {{- with .Values.apiService.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
