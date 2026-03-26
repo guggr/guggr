@@ -253,6 +253,18 @@ frontend:
   ## @param frontend.affinity Pod affinity and anti-affinity rules
   affinity: {}
 
+  ## @param frontend.volumeMounts [object] Additional volume mounts for the container
+  volumeMounts:
+    ## needed so readOnlyRootFilesystem can be enabled
+    - name: tmp
+      mountPath: /tmp
+
+  ## @param frontend.volumes [object] Additional pod volumes for the deployment
+  volumes:
+    ## needed so readOnlyRootFilesystem can be enabled
+    - name: tmp
+      emptyDir: {}
+
   ## @section Frontend Security Context
   podSecurityContext:
     ## @param frontend.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
@@ -261,7 +273,7 @@ frontend:
     ## @param frontend.securityContext.allowPrivilegeEscalation Enable container privilege escalation
     allowPrivilegeEscalation: false
     ## @param frontend.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
     ## @param frontend.securityContext.capabilities.drop Linux capabilities to be dropped
     capabilities:
       drop: ["ALL"]

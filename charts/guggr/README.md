@@ -179,6 +179,8 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 | `frontend.resources`      | Resource requests and limits for the container        | `{}`  |
 | `frontend.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
 | `frontend.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+| `frontend.volumeMounts`   | Additional volume mounts for the container            | `{}`  |
+| `frontend.volumes`        | Additional pod volumes for the deployment             | `{}`  |
 
 ### Frontend Security Context
 
@@ -186,7 +188,7 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 | --------------------------------------------------- | ------------------------------------------------- | --------- |
 | `frontend.podSecurityContext.runAsNonRoot`          | Configure the container to run as a non-root user | `true`    |
 | `frontend.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `frontend.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
+| `frontend.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `frontend.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Agent Parameters
