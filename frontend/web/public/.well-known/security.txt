@@ -1,0 +1,3 @@
+Contact: https://github.com/guggr/guggr/security/advisories/new
+Expires: 2027-03-25T23:00:00.000Z
+Policy: https://github.com/guggr/guggr/security/policy
