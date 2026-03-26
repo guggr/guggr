@@ -176,8 +176,8 @@
 							{@const httpDetails = job.details.http}
 							<li>
 								<span class="text-base-content/80">URL:</span>
-								<b class="font-bold"
-									><a href={httpDetails.url}>{httpDetails.url}</a></b
+								<a class="link font-bold" href={httpDetails.url}
+									>{httpDetails.url}</a
 								>
 							</li>
 						{/if}
