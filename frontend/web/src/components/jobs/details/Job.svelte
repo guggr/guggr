@@ -5,8 +5,6 @@
 		JobsApi,
 		type DisplayGroup,
 		type DisplayJob,
-		type DisplayJobDetailsHttp,
-		type DisplayJobDetailsPing,
 		type DisplayJobRun,
 	} from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
