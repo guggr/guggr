@@ -123,16 +123,29 @@ apiService:
   podAnnotations: {}
   ## @param apiService.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param apiService.autoscaling HorizontalPodAutoscaler configuration
-  autoscaling: {}
   ## @param apiService.nodeSelector Node selector for scheduling pods onto specific nodes
   nodeSelector: {}
-  ## @param apiService.resources Resource requests and limits for the container
-  resources: {}
   ## @param apiService.tolerations Tolerations for scheduling pods onto tainted nodes
   tolerations: []
   ## @param apiService.affinity Pod affinity and anti-affinity rules
   affinity: {}
+  ## @param apiService.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    ## @param apiService.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param apiService.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param apiService.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param apiService.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
 
   ## @section Api-service Security Context
   podSecurityContext:
@@ -242,16 +255,29 @@ frontend:
   podAnnotations: {}
   ## @param frontend.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param frontend.autoscaling HorizontalPodAutoscaler configuration
-  autoscaling: {}
   ## @param frontend.nodeSelector Node selector for scheduling pods onto specific nodes
   nodeSelector: {}
-  ## @param frontend.resources Resource requests and limits for the container
-  resources: {}
   ## @param frontend.tolerations Tolerations for scheduling pods onto tainted nodes
   tolerations: []
   ## @param frontend.affinity Pod affinity and anti-affinity rules
   affinity: {}
+  ## @param frontend.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param frontend.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param frontend.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param frontend.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param frontend.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
 
   ## @param frontend.volumeMounts [object] Additional volume mounts for the container
   volumeMounts:
@@ -318,16 +344,29 @@ agent:
   podAnnotations: {}
   ## @param agent.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param agent.autoscaling HorizontalPodAutoscaler configuration
-  autoscaling: {}
   ## @param agent.nodeSelector Node selector for scheduling pods onto specific nodes
   nodeSelector: {}
-  ## @param agent.resources Resource requests and limits for the container
-  resources: {}
   ## @param agent.tolerations Tolerations for scheduling pods onto tainted nodes
   tolerations: []
   ## @param agent.affinity Pod affinity and anti-affinity rules
   affinity: {}
+  ## @param agent.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    ## @param agent.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param agent.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param agent.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param agent.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
 
   ## @section Agent Security Context
   podSecurityContext:
@@ -382,16 +421,29 @@ evaluator:
   podAnnotations: {}
   ## @param evaluator.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param evaluator.autoscaling HorizontalPodAutoscaler configuration
-  autoscaling: {}
   ## @param evaluator.nodeSelector Node selector for scheduling pods onto specific nodes
   nodeSelector: {}
-  ## @param evaluator.resources Resource requests and limits for the container
-  resources: {}
   ## @param evaluator.tolerations Tolerations for scheduling pods onto tainted nodes
   tolerations: []
   ## @param evaluator.affinity Pod affinity and anti-affinity rules
   affinity: {}
+  ## @param evaluator.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param evaluator.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param evaluator.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param evaluator.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param evaluator.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
 
   ## @section Evaluator Security Context
   podSecurityContext:
@@ -446,16 +498,29 @@ scheduler:
   podAnnotations: {}
   ## @param scheduler.podLabels Map of labels to add to the pods
   podLabels: {}
-  ## @param scheduler.autoscaling HorizontalPodAutoscaler configuration
-  autoscaling: {}
   ## @param scheduler.nodeSelector Node selector for scheduling pods onto specific nodes
   nodeSelector: {}
-  ## @param scheduler.resources Resource requests and limits for the container
-  resources: {}
   ## @param scheduler.tolerations Tolerations for scheduling pods onto tainted nodes
   tolerations: []
   ## @param scheduler.affinity Pod affinity and anti-affinity rules
   affinity: {}
+  ## @param scheduler.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param scheduler.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param scheduler.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param scheduler.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param scheduler.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
 
   ## @section Scheduler Security Context
   podSecurityContext:

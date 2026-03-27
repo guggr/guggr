@@ -86,15 +86,18 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Api-service Additional Parameters
 
-| Name                        | Description                                           | Value |
-| --------------------------- | ----------------------------------------------------- | ----- |
-| `apiService.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
-| `apiService.podLabels`      | Map of labels to add to the pods                      | `{}`  |
-| `apiService.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `apiService.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `apiService.resources`      | Resource requests and limits for the container        | `{}`  |
-| `apiService.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `apiService.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                                                    | Description                                           | Value   |
+| ------------------------------------------------------- | ----------------------------------------------------- | ------- |
+| `apiService.podAnnotations`                             | Map of annotations to add to the pods                 | `{}`    |
+| `apiService.podLabels`                                  | Map of labels to add to the pods                      | `{}`    |
+| `apiService.nodeSelector`                               | Node selector for scheduling pods onto specific nodes | `{}`    |
+| `apiService.tolerations`                                | Tolerations for scheduling pods onto tainted nodes    | `[]`    |
+| `apiService.affinity`                                   | Pod affinity and anti-affinity rules                  | `{}`    |
+| `apiService.resources`                                  | Resource requests and limits for the container        | `{}`    |
+| `apiService.autoscaling.enabled`                        | Enable the HorizontalPodAutoscaler                    | `false` |
+| `apiService.autoscaling.minReplicas`                    | Minimum Replica count                                 | `1`     |
+| `apiService.autoscaling.maxReplicas`                    | Maximum Replica count                                 | `5`     |
+| `apiService.autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization                                | `70`    |
 
 ### Api-service Security Context
 
@@ -170,17 +173,20 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Frontend Additional Parameters
 
-| Name                      | Description                                           | Value |
-| ------------------------- | ----------------------------------------------------- | ----- |
-| `frontend.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
-| `frontend.podLabels`      | Map of labels to add to the pods                      | `{}`  |
-| `frontend.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `frontend.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `frontend.resources`      | Resource requests and limits for the container        | `{}`  |
-| `frontend.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `frontend.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
-| `frontend.volumeMounts`   | Additional volume mounts for the container            | `{}`  |
-| `frontend.volumes`        | Additional pod volumes for the deployment             | `{}`  |
+| Name                                                  | Description                                           | Value   |
+| ----------------------------------------------------- | ----------------------------------------------------- | ------- |
+| `frontend.podAnnotations`                             | Map of annotations to add to the pods                 | `{}`    |
+| `frontend.podLabels`                                  | Map of labels to add to the pods                      | `{}`    |
+| `frontend.nodeSelector`                               | Node selector for scheduling pods onto specific nodes | `{}`    |
+| `frontend.tolerations`                                | Tolerations for scheduling pods onto tainted nodes    | `[]`    |
+| `frontend.affinity`                                   | Pod affinity and anti-affinity rules                  | `{}`    |
+| `frontend.resources`                                  | Resource requests and limits for the container        | `{}`    |
+| `frontend.autoscaling.enabled`                        | Enable the HorizontalPodAutoscaler                    | `false` |
+| `frontend.autoscaling.minReplicas`                    | Minimum Replica count                                 | `1`     |
+| `frontend.autoscaling.maxReplicas`                    | Maximum Replica count                                 | `5`     |
+| `frontend.autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization                                | `70`    |
+| `frontend.volumeMounts`                               | Additional volume mounts for the container            | `{}`    |
+| `frontend.volumes`                                    | Additional pod volumes for the deployment             | `{}`    |
 
 ### Frontend Security Context
 
@@ -221,15 +227,18 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Agent Additional Parameters
 
-| Name                   | Description                                           | Value |
-| ---------------------- | ----------------------------------------------------- | ----- |
-| `agent.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
-| `agent.podLabels`      | Map of labels to add to the pods                      | `{}`  |
-| `agent.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `agent.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `agent.resources`      | Resource requests and limits for the container        | `{}`  |
-| `agent.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `agent.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                                               | Description                                           | Value   |
+| -------------------------------------------------- | ----------------------------------------------------- | ------- |
+| `agent.podAnnotations`                             | Map of annotations to add to the pods                 | `{}`    |
+| `agent.podLabels`                                  | Map of labels to add to the pods                      | `{}`    |
+| `agent.nodeSelector`                               | Node selector for scheduling pods onto specific nodes | `{}`    |
+| `agent.tolerations`                                | Tolerations for scheduling pods onto tainted nodes    | `[]`    |
+| `agent.affinity`                                   | Pod affinity and anti-affinity rules                  | `{}`    |
+| `agent.resources`                                  | Resource requests and limits for the container        | `{}`    |
+| `agent.autoscaling.enabled`                        | Enable the HorizontalPodAutoscaler                    | `false` |
+| `agent.autoscaling.minReplicas`                    | Minimum Replica count                                 | `1`     |
+| `agent.autoscaling.maxReplicas`                    | Maximum Replica count                                 | `5`     |
+| `agent.autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization                                | `70`    |
 
 ### Agent Security Context
 
@@ -270,15 +279,18 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Evaluator Additional Parameters
 
-| Name                       | Description                                           | Value |
-| -------------------------- | ----------------------------------------------------- | ----- |
-| `evaluator.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
-| `evaluator.podLabels`      | Map of labels to add to the pods                      | `{}`  |
-| `evaluator.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `evaluator.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `evaluator.resources`      | Resource requests and limits for the container        | `{}`  |
-| `evaluator.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `evaluator.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                                                   | Description                                           | Value   |
+| ------------------------------------------------------ | ----------------------------------------------------- | ------- |
+| `evaluator.podAnnotations`                             | Map of annotations to add to the pods                 | `{}`    |
+| `evaluator.podLabels`                                  | Map of labels to add to the pods                      | `{}`    |
+| `evaluator.nodeSelector`                               | Node selector for scheduling pods onto specific nodes | `{}`    |
+| `evaluator.tolerations`                                | Tolerations for scheduling pods onto tainted nodes    | `[]`    |
+| `evaluator.affinity`                                   | Pod affinity and anti-affinity rules                  | `{}`    |
+| `evaluator.resources`                                  | Resource requests and limits for the container        | `{}`    |
+| `evaluator.autoscaling.enabled`                        | Enable the HorizontalPodAutoscaler                    | `false` |
+| `evaluator.autoscaling.minReplicas`                    | Minimum Replica count                                 | `1`     |
+| `evaluator.autoscaling.maxReplicas`                    | Maximum Replica count                                 | `5`     |
+| `evaluator.autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization                                | `70`    |
 
 ### Evaluator Security Context
 
@@ -319,15 +331,18 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 
 ### Scheduler Additional Parameters
 
-| Name                       | Description                                           | Value |
-| -------------------------- | ----------------------------------------------------- | ----- |
-| `scheduler.podAnnotations` | Map of annotations to add to the pods                 | `{}`  |
-| `scheduler.podLabels`      | Map of labels to add to the pods                      | `{}`  |
-| `scheduler.autoscaling`    | HorizontalPodAutoscaler configuration                 | `{}`  |
-| `scheduler.nodeSelector`   | Node selector for scheduling pods onto specific nodes | `{}`  |
-| `scheduler.resources`      | Resource requests and limits for the container        | `{}`  |
-| `scheduler.tolerations`    | Tolerations for scheduling pods onto tainted nodes    | `[]`  |
-| `scheduler.affinity`       | Pod affinity and anti-affinity rules                  | `{}`  |
+| Name                                                   | Description                                           | Value   |
+| ------------------------------------------------------ | ----------------------------------------------------- | ------- |
+| `scheduler.podAnnotations`                             | Map of annotations to add to the pods                 | `{}`    |
+| `scheduler.podLabels`                                  | Map of labels to add to the pods                      | `{}`    |
+| `scheduler.nodeSelector`                               | Node selector for scheduling pods onto specific nodes | `{}`    |
+| `scheduler.tolerations`                                | Tolerations for scheduling pods onto tainted nodes    | `[]`    |
+| `scheduler.affinity`                                   | Pod affinity and anti-affinity rules                  | `{}`    |
+| `scheduler.resources`                                  | Resource requests and limits for the container        | `{}`    |
+| `scheduler.autoscaling.enabled`                        | Enable the HorizontalPodAutoscaler                    | `false` |
+| `scheduler.autoscaling.minReplicas`                    | Minimum Replica count                                 | `1`     |
+| `scheduler.autoscaling.maxReplicas`                    | Maximum Replica count                                 | `5`     |
+| `scheduler.autoscaling.targetCPUUtilizationPercentage` | Target CPU Utilization                                | `70`    |
 
 ### Scheduler Security Context
 
@@ -369,19 +384,24 @@ These parameters are used by the `apiService`, `evaluator` and `scheduler`
 ```yaml
 # ha.yaml
 apiService:
-  replicaCount: 3
+	autoscaling:
+  	enabled: true
 
 frontend:
-  replicaCount: 3
+	autoscaling:
+  	enabled: true
 
 agent:
-  replicaCount: 3
+	autoscaling:
+  	enabled: true
 
 evaluator:
-  replicaCount: 3
+	autoscaling:
+  	enabled: true
 
 scheduler:
-  replicaCount: 3
+	autoscaling:
+  	enabled: true
 
 rabbitmq:
   replicaCount: 3
