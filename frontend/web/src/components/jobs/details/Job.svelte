@@ -11,7 +11,7 @@
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
-	import { relativeTime } from '@/lib/formatter';
+	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import alerts from '@/stores/alerts.svelte';
 	import auth from '@/stores/auth.svelte';
@@ -152,6 +152,45 @@
 		</div>
 	</div>
 {/snippet}
+
+<div class="rounded-box bg-base-100 my-4 p-4 shadow-md">
+	{#await jobPromise}
+		<Loading />
+	{:then job}
+		<div class="gap-2">
+			<h3 class="text-base-content/80 mb-2 text-lg font-bold">Details</h3>
+			<ul class="text-sm">
+				{#if typeof job.details === 'object' && 'ping' in job.details}
+					{@const pingDetails = job.details.ping}
+					<li>
+						<span class="text-base-content/80">Host:</span>
+						<b class="font-bold">{pingDetails.host}</b>
+					</li>
+				{/if}
+
+				{#if typeof job.details === 'object' && 'http' in job.details}
+					{@const httpDetails = job.details.http}
+					<li>
+						<span class="text-base-content/80">URL:</span>
+						<a class="link font-bold" href={httpDetails.url}>{httpDetails.url}</a>
+					</li>
+				{/if}
+
+				<li>
+					<span class="text-base-content/80">Interval:</span>
+					<b class="font-bold"
+						>Every {duration.format({
+							minutes: Math.floor(job.runEvery / 60),
+							seconds: job.runEvery % 60,
+						})}</b
+					>
+				</li>
+			</ul>
+		</div>
+	{:catch}
+		<Error />
+	{/await}
+</div>
 
 <div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
 	<h2 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h2>
