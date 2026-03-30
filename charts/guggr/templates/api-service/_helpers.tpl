@@ -1,8 +1,8 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "guggr.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- define "api-service.name" -}}
+{{- default "api-service" .Values.apiService.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -10,11 +10,11 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "guggr.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- define "api-service.fullname" -}}
+{{- if .Values.apiService.fullnameOverride }}
+{{- .Values.apiService.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- $name := default "api-service" .Values.apiService.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "guggr.chart" -}}
+{{- define "api-service.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "guggr.labels" -}}
-helm.sh/chart: {{ include "guggr.chart" . }}
-{{ include "guggr.selectorLabels" . }}
+{{- define "api-service.labels" -}}
+helm.sh/chart: {{ include "api-service.chart" . }}
+{{ include "api-service.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,18 +45,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "guggr.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "guggr.name" . }}
+{{- define "api-service.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "api-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "guggr.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "guggr.fullname" .) .Values.serviceAccount.name }}
+{{- define "api-service.serviceAccountName" -}}
+{{- if .Values.apiService.serviceAccount.create }}
+{{- default (include "api-service.fullname" .) .Values.apiService.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.apiService.serviceAccount.name }}
 {{- end }}
 {{- end }}

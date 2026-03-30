@@ -139,11 +139,16 @@ jobs:
     if: ${{ needs.changes.outputs.helm == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
-
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: 'v4.1.1'
+      - name: Build dependencies
+        run: helm dependency build charts/guggr
       - uses: igabaydulin/helm-check-action@0.2.1
         env:
-          CHART_LOCATION: ./charts
-          CHART_VALUES: ./charts/values.yaml
+          CHART_LOCATION: ./charts/guggr/
+          CHART_VALUES: ./charts/guggr/values.yaml
 
   cargo-nextest:
     name: 🧐 testing - cargo

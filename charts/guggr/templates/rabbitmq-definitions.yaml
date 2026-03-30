@@ -1,0 +1,9 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-definitions
+data:
+  defs.json: |
+{{ .Files.Get "files/rabbitmq_definitions.json" | nindent 4 }}
+{{- end }}

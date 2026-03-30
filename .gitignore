@@ -163,3 +163,6 @@ target
 
 
 gen/proto_types/src/file_descriptor_set.bin
+
+# Built chart artifacts
+charts/guggr/charts
