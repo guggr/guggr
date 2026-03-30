@@ -15,7 +15,9 @@
 	"paths": {
 		"/api/v1/auth/login": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Login",
 				"operationId": "auth_login",
 				"requestBody": {
@@ -57,7 +59,9 @@
 		},
 		"/api/v1/auth/logout": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Logout and invalidate the refresh tokens",
 				"operationId": "auth_logout",
 				"requestBody": {
@@ -92,7 +96,9 @@
 		},
 		"/api/v1/auth/token/refresh": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Renew access and refresh tokens",
 				"operationId": "auth_refresh_token",
 				"requestBody": {
@@ -134,7 +140,9 @@
 		},
 		"/api/v1/groups": {
 			"get": {
-				"tags": ["groups"],
+				"tags": [
+					"groups"
+				],
 				"summary": "List groups visible by the logged in user",
 				"operationId": "list_groups",
 				"responses": {
@@ -168,7 +176,9 @@
 				]
 			},
 			"post": {
-				"tags": ["groups"],
+				"tags": [
+					"groups"
+				],
 				"summary": "Create group",
 				"operationId": "create_group",
 				"requestBody": {
@@ -215,7 +225,9 @@
 		},
 		"/api/v1/groups/{id}": {
 			"get": {
-				"tags": ["groups"],
+				"tags": [
+					"groups"
+				],
 				"summary": "Get group by ID",
 				"operationId": "get_group",
 				"parameters": [
@@ -257,7 +269,9 @@
 				]
 			},
 			"put": {
-				"tags": ["groups"],
+				"tags": [
+					"groups"
+				],
 				"summary": "Update Group",
 				"operationId": "update_group",
 				"parameters": [
@@ -321,7 +335,9 @@
 		},
 		"/api/v1/jobs": {
 			"get": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "List Jobs",
 				"operationId": "list_job",
 				"responses": {
@@ -352,7 +368,9 @@
 				]
 			},
 			"post": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "Create Job",
 				"operationId": "create_job",
 				"requestBody": {
@@ -402,7 +420,9 @@
 		},
 		"/api/v1/jobs/{id}": {
 			"get": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "Get Job",
 				"operationId": "get_job",
 				"parameters": [
@@ -444,7 +464,9 @@
 				]
 			},
 			"delete": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "Delete Job",
 				"operationId": "delete_job",
 				"parameters": [
@@ -476,7 +498,9 @@
 				]
 			},
 			"patch": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "Update Job",
 				"operationId": "update_job",
 				"parameters": [
@@ -540,7 +564,9 @@
 		},
 		"/api/v1/jobs/{id}/runs": {
 			"get": {
-				"tags": ["jobs"],
+				"tags": [
+					"jobs"
+				],
 				"summary": "List Job Runs",
 				"operationId": "list_job_runs",
 				"parameters": [
@@ -587,7 +613,9 @@
 		},
 		"/api/v1/users": {
 			"post": {
-				"tags": ["users"],
+				"tags": [
+					"users"
+				],
 				"summary": "Create user",
 				"operationId": "create_user",
 				"requestBody": {
@@ -629,7 +657,9 @@
 		},
 		"/api/v1/users/{id}": {
 			"get": {
-				"tags": ["users"],
+				"tags": [
+					"users"
+				],
 				"summary": "Get user by ID",
 				"operationId": "get_user",
 				"parameters": [
@@ -677,7 +707,10 @@
 			"AuthenticatedResponse": {
 				"type": "object",
 				"description": "Data sent upon login.",
-				"required": ["user", "auth"],
+				"required": [
+					"user",
+					"auth"
+				],
 				"properties": {
 					"auth": {
 						"$ref": "#/components/schemas/TokenResponse"
@@ -690,7 +723,9 @@
 			"BadRequestErrorBody": {
 				"type": "object",
 				"description": "Bad request errors",
-				"required": ["message"],
+				"required": [
+					"message"
+				],
 				"properties": {
 					"message": {
 						"type": "string"
@@ -700,7 +735,9 @@
 			"CreateGroup": {
 				"type": "object",
 				"description": "Struct to create a new Group",
-				"required": ["name"],
+				"required": [
+					"name"
+				],
 				"properties": {
 					"name": {
 						"type": "string",
@@ -711,10 +748,20 @@
 			"CreateJob": {
 				"type": "object",
 				"description": "Struct to create a new job",
-				"required": ["name", "job_type_id", "group_id", "notify_users", "run_every", "details"],
+				"required": [
+					"name",
+					"job_type_id",
+					"group_id",
+					"notify_users",
+					"run_every",
+					"details"
+				],
 				"properties": {
 					"custom_notification": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"details": {
 						"$ref": "#/components/schemas/CreateJobDetails"
@@ -742,7 +789,9 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["http"],
+						"required": [
+							"http"
+						],
 						"properties": {
 							"http": {
 								"$ref": "#/components/schemas/CreateJobDetailsHttp"
@@ -751,7 +800,9 @@
 					},
 					{
 						"type": "object",
-						"required": ["ping"],
+						"required": [
+							"ping"
+						],
 						"properties": {
 							"ping": {
 								"$ref": "#/components/schemas/CreateJobDetailsPing"
@@ -764,7 +815,9 @@
 			"CreateJobDetailsHttp": {
 				"type": "object",
 				"description": "Struct to create a new Job HTTP Detail",
-				"required": ["url"],
+				"required": [
+					"url"
+				],
 				"properties": {
 					"url": {
 						"type": "string"
@@ -774,7 +827,9 @@
 			"CreateJobDetailsPing": {
 				"type": "object",
 				"description": "Struct to create a new Job Ping Detail",
-				"required": ["host"],
+				"required": [
+					"host"
+				],
 				"properties": {
 					"host": {
 						"type": "string"
@@ -784,7 +839,11 @@
 			"CreateUser": {
 				"type": "object",
 				"description": "Struct to create a new user",
-				"required": ["email", "password", "name"],
+				"required": [
+					"email",
+					"password",
+					"name"
+				],
 				"properties": {
 					"email": {
 						"type": "string",
@@ -803,7 +862,11 @@
 			"DisplayGroup": {
 				"type": "object",
 				"description": "Returned Group",
-				"required": ["id", "name", "members"],
+				"required": [
+					"id",
+					"name",
+					"members"
+				],
 				"properties": {
 					"id": {
 						"type": "string"
@@ -822,7 +885,11 @@
 			"DisplayGroupMember": {
 				"type": "object",
 				"description": "Returned user",
-				"required": ["id", "name", "role"],
+				"required": [
+					"id",
+					"name",
+					"role"
+				],
 				"properties": {
 					"id": {
 						"type": "string"
@@ -850,7 +917,10 @@
 				],
 				"properties": {
 					"custom_notification": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"details": {
 						"$ref": "#/components/schemas/DisplayJobDetails"
@@ -865,7 +935,10 @@
 						"type": "string"
 					},
 					"last_scheduled": {
-						"type": ["string", "null"],
+						"type": [
+							"string",
+							"null"
+						],
 						"format": "date-time"
 					},
 					"name": {
@@ -888,7 +961,9 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["http"],
+						"required": [
+							"http"
+						],
 						"properties": {
 							"http": {
 								"$ref": "#/components/schemas/DisplayJobDetailsHttp"
@@ -897,7 +972,9 @@
 					},
 					{
 						"type": "object",
-						"required": ["ping"],
+						"required": [
+							"ping"
+						],
 						"properties": {
 							"ping": {
 								"$ref": "#/components/schemas/DisplayJobDetailsPing"
@@ -906,7 +983,9 @@
 					},
 					{
 						"type": "string",
-						"enum": ["undefined"]
+						"enum": [
+							"undefined"
+						]
 					}
 				],
 				"description": "Returned Job Details"
@@ -914,7 +993,10 @@
 			"DisplayJobDetailsHttp": {
 				"type": "object",
 				"description": "Returned Job HTTP Detail",
-				"required": ["id", "url"],
+				"required": [
+					"id",
+					"url"
+				],
 				"properties": {
 					"id": {
 						"type": "string"
@@ -927,7 +1009,10 @@
 			"DisplayJobDetailsPing": {
 				"type": "object",
 				"description": "Returned Job Ping Detail",
-				"required": ["id", "host"],
+				"required": [
+					"id",
+					"host"
+				],
 				"properties": {
 					"host": {
 						"type": "string"
@@ -939,7 +1024,13 @@
 			},
 			"DisplayJobResultHttp": {
 				"type": "object",
-				"required": ["id", "ip_address", "status_code", "latency", "payload"],
+				"required": [
+					"id",
+					"ip_address",
+					"status_code",
+					"latency",
+					"payload"
+				],
 				"properties": {
 					"id": {
 						"type": "string"
@@ -969,7 +1060,11 @@
 			},
 			"DisplayJobResultPing": {
 				"type": "object",
-				"required": ["id", "ip_address", "latency"],
+				"required": [
+					"id",
+					"ip_address",
+					"latency"
+				],
 				"properties": {
 					"id": {
 						"type": "string"
@@ -1032,7 +1127,9 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["http"],
+						"required": [
+							"http"
+						],
 						"properties": {
 							"http": {
 								"$ref": "#/components/schemas/DisplayJobResultHttp"
@@ -1041,7 +1138,9 @@
 					},
 					{
 						"type": "object",
-						"required": ["ping"],
+						"required": [
+							"ping"
+						],
 						"properties": {
 							"ping": {
 								"$ref": "#/components/schemas/DisplayJobResultPing"
@@ -1054,7 +1153,11 @@
 			"DisplayUser": {
 				"type": "object",
 				"description": "Returned user",
-				"required": ["id", "email", "name"],
+				"required": [
+					"id",
+					"email",
+					"name"
+				],
 				"properties": {
 					"email": {
 						"type": "string"
@@ -1070,7 +1173,10 @@
 			"LoginRequest": {
 				"type": "object",
 				"description": "Data used to authenticate.",
-				"required": ["email", "password"],
+				"required": [
+					"email",
+					"password"
+				],
 				"properties": {
 					"email": {
 						"type": "string"
@@ -1083,7 +1189,9 @@
 			"LogoutRequest": {
 				"type": "object",
 				"description": "Data used to logout.",
-				"required": ["refresh_token"],
+				"required": [
+					"refresh_token"
+				],
 				"properties": {
 					"refresh_token": {
 						"type": "string"
@@ -1093,7 +1201,9 @@
 			"TokenRefreshRequest": {
 				"type": "object",
 				"description": "Data used to refresh the access and refresh tokens.",
-				"required": ["refresh_token"],
+				"required": [
+					"refresh_token"
+				],
 				"properties": {
 					"refresh_token": {
 						"type": "string"
@@ -1103,7 +1213,10 @@
 			"TokenResponse": {
 				"type": "object",
 				"description": "Authentication tokens as received after successful authentication.",
-				"required": ["access_token", "refresh_token"],
+				"required": [
+					"access_token",
+					"refresh_token"
+				],
 				"properties": {
 					"access_token": {
 						"type": "string"
@@ -1118,7 +1231,10 @@
 				"description": "Struct to update a new Job HTTP Detail",
 				"properties": {
 					"url": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					}
 				}
 			},
@@ -1127,14 +1243,20 @@
 				"description": "Struct to update a new Job Ping Detail",
 				"properties": {
 					"host": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					}
 				}
 			},
 			"UpdateRequestGroup": {
 				"type": "object",
 				"description": "Struct to Update a Group",
-				"required": ["name", "members"],
+				"required": [
+					"name",
+					"members"
+				],
 				"properties": {
 					"members": {
 						"type": "array",
@@ -1152,7 +1274,10 @@
 				"description": "Struct to Update a Job",
 				"properties": {
 					"custom_notification": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"details": {
 						"oneOf": [
@@ -1165,26 +1290,47 @@
 						]
 					},
 					"group_id": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"id": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"job_type_id": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"last_scheduled": {
-						"type": ["string", "null"],
+						"type": [
+							"string",
+							"null"
+						],
 						"format": "date-time"
 					},
 					"name": {
-						"type": ["string", "null"]
+						"type": [
+							"string",
+							"null"
+						]
 					},
 					"notify_users": {
-						"type": ["boolean", "null"]
+						"type": [
+							"boolean",
+							"null"
+						]
 					},
 					"run_every": {
-						"type": ["integer", "null"],
+						"type": [
+							"integer",
+							"null"
+						],
 						"format": "int64",
 						"default": 60
 					}
@@ -1194,7 +1340,9 @@
 				"oneOf": [
 					{
 						"type": "object",
-						"required": ["http"],
+						"required": [
+							"http"
+						],
 						"properties": {
 							"http": {
 								"$ref": "#/components/schemas/UpdateJobDetailsHttp"
@@ -1203,7 +1351,9 @@
 					},
 					{
 						"type": "object",
-						"required": ["ping"],
+						"required": [
+							"ping"
+						],
 						"properties": {
 							"ping": {
 								"$ref": "#/components/schemas/UpdateJobDetailsPing"
