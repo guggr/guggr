@@ -4,7 +4,7 @@
 
 ### Requirements
 
-If you want to develop the helm chart, you should probably have a local cluster running with e.g [kind](https://kind.sigs.k8s.io/) and [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) (handles e.g ingress). Besides that, you also should have `kubectl` instaleld.
+If you want to develop the helm chart, you should probably have a local cluster running with e.g [kind](https://kind.sigs.k8s.io/) and [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) (handles e.g ingress). Besides that, you also should have `kubectl` installed.
 
 The following helm chart values work well with the [kind](https://kind.sigs.k8s.io/) + [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) setup.
 
@@ -31,13 +31,14 @@ frontend:
             pathType: Prefix
 ```
 
-You can deploy it by running:
+You need to run [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) in the background or in another terminal window with elevated permissions so guggr can be reachable locally.
+
+After you started [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind), you can deploy guggr by running:
 
 ```sh
 helm install guggr -f kind.yaml charts/guggr
 ```
 
-You need to run [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) in the background or in another terminal window with elevated permissions so guggr can be reachable locally.
 In order for you to be able to reach guggr, you need to add the IP that is assigned to the ingress to your `/etc/hosts`. This IP can be retrieved by running:
 
 ```sh
