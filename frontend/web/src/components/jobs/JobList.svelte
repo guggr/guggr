@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { config, GroupsApi, JobsApi, type DisplayJob } from '@/api';
+	import { config, JobsApi, type DisplayJob } from '@/api';
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
@@ -8,12 +8,13 @@
 	import { getJobName } from '@/lib/jobs';
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
+	import { GroupsCache } from '@/lib/groupsCache';
 
 	let jobsPromise = $state(new Promise<DisplayJob[]>(() => {}));
 
 	let filterOfflineOnly = $state(false);
 
-	const groupsApi = new GroupsApi(config);
+	const groupsCache = new GroupsCache();
 
 	onMount(() => {
 		const api = new JobsApi(config);
@@ -78,10 +79,10 @@
 					>
 						<li>
 							<span class="sr-only">Group: </span>
-							{#await groupsApi.getGroup({ id: j.groupId })}
+							{#await groupsCache.get(j.groupId)}
 								<a href="/groups" class="link link-hover">{j.groupId}</a>
 							{:then group}
-								<a href="/groups" class="link link-hover">{group.name}</a>
+								<a href="/groups" class="link link-hover">{group?.name}</a>
 							{:catch}
 								<a href="/groups" class="link link-hover">{j.groupId}</a>
 							{/await}
