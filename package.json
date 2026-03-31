@@ -7,14 +7,16 @@
 	"scripts": {
 		"check": "prettier --check .",
 		"format": "prettier --write .",
-		"gen": "pnpm gen:frontend-web-openapi-port",
-		"gen:frontend-web-openapi-port": "openapi-generator-cli generate -i api-service/openapi.json -g typescript-fetch -o frontend/web/src/api/gen && pnpm format"
+		"gen": "pnpm gen:frontend-web-openapi-port && pnpm gen:helm-readme",
+		"gen:frontend-web-openapi-port": "openapi-generator-cli generate -i api-service/openapi.json -g typescript-fetch -o frontend/web/src/api/gen && pnpm format",
+		"gen:helm-readme": "readme-generator -v charts/guggr/values.yaml -r charts/guggr/README.md"
 	},
 	"devDependencies": {
-		"@openapitools/openapi-generator-cli": "^2.30.2",
+		"@bitnami/readme-generator-for-helm": "github:bitnami/readme-generator-for-helm#3.0.1",
+		"@openapitools/openapi-generator-cli": "^2.31.0",
 		"prettier": "^3.8.1",
 		"prettier-plugin-astro": "^0.14.1",
-		"prettier-plugin-sql": "^0.19.2",
+		"prettier-plugin-sql": "^0.20.0",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2"
 	},

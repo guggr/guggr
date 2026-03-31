@@ -48,7 +48,14 @@ repos:
       - id: helm-lint
         name: run helm lint
         language: system
-        entry: helm lint charts
+        entry: helm lint charts/guggr
+        pass_filenames: false
+        files: ^charts/
+
+      - id: helm-gen-readme
+        name: generate helm chart readme
+        language: system
+        entry: pnpm gen:helm-readme
         pass_filenames: false
         files: ^charts/
 

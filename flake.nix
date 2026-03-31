@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs-diesel-cli-ext-fix.url = "github:NixOS/nixpkgs/refs/pull/487982/head";
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
@@ -11,7 +10,6 @@
     {
       self,
       nixpkgs,
-      nixpkgs-diesel-cli-ext-fix,
       rust-overlay,
     }:
     let
@@ -27,9 +25,6 @@
         import nixpkgs {
           inherit system;
           overlays = [
-            (final: prev: {
-              diesel-cli-ext = (import nixpkgs-diesel-cli-ext-fix { inherit system; }).diesel-cli-ext;
-            })
             (import rust-overlay)
           ];
         }

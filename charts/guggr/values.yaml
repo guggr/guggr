@@ -1,0 +1,592 @@
+global:
+  ## @section Global RabbitMQ parameters
+  ## @descriptionStart
+  ## These parameters are used by the `agent`, `evaluator` and `scheduler`
+  ## @descriptionEnd
+  rabbitmq:
+    ## @param global.rabbitmq.host Global RabbitMQ set to this charts' `rabbitmq.fullname` by default
+    host: ""
+    ## @param global.rabbitmq.port Global RabbitMQ AMQP port
+    port: 5672
+    ## @param global.rabbitmq.jobsQueue queue for jobs. Must match the definition in [rabbitmq_definitions.json](files/rabbitmq_definitions.json) when using the bundled RabbitMQ chart
+    jobsQueue: scheduler.jobs
+    ## @param global.rabbitmq.jobResultQueue queue for job results. Must match the definition in [rabbitmq_definitions.json](files/rabbitmq_definitions.json) when using the bundled RabbitMQ chart
+    jobResultQueue: agent.job_results
+    auth:
+      ## @param global.rabbitmq.auth.username Username of the RabbitMQ User
+      username: guggr
+      ## @param global.rabbitmq.auth.secretName Name of existing Secret containing the RabbitMQ Users' Password
+      secretName: guggr-rabbitmq
+      ## @param global.rabbitmq.auth.passwordKey Key in existing Secret containing the RabbitMQ Users' Password
+      passwordKey: password
+  ## @section Global Postgres parameters
+  ## @descriptionStart
+  ## These parameters are used by the `apiService`, `evaluator` and `scheduler`
+  ## @descriptionEnd
+  postgres:
+    ## @param global.postgres.host Global Postgres Host, set to this charts' `postgres.fullname` by default
+    host: ""
+    ## @param global.postgres.port Global Postgres Port
+    port: 5432
+    auth:
+      ## @param global.postgres.auth.secretName Name of existing Secret containing the Postgres Username, Password and Database Name
+      secretName: guggr-postgres
+      ## @param global.postgres.auth.usernameKey Key in existing Secret containing the Postgres Username
+      usernameKey: username
+      ## @param global.postgres.auth.passwordKey Key in existing Secret containing the Postgres Users' Password
+      passwordKey: postgres-password
+      ## @param global.postgres.auth.databaseKey Key in existing Secret containing the Postgres Database
+      databaseKey: database
+
+## @section Api-service Parameters
+apiService:
+  ## @param apiService.enabled Enable the Api-service
+  enabled: true
+  ## @param apiService.replicaCount Number of Api-service replicas to deploy
+  replicaCount: 1
+  ## @param apiService.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
+  logLevel: info
+
+  ## @param apiService.fullnameOverride String to fully override `api-service.fullname`
+  fullnameOverride: ""
+  ## @param apiService.nameOverride String to partially override `api-service.fullname`
+  nameOverride: ""
+
+  ## @section Api-service Image Configuration
+  image:
+    ## @param apiService.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/api-service
+    ## @param apiService.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param apiService.image.tag [default: AppVersion] The image tag
+
+  ## @param apiService.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Api-service Service Account
+  serviceAccount:
+    ## @param apiService.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param apiService.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param apiService.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param apiService.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Api-service Ingress
+  ingress:
+    ## @param apiService.ingress.enabled Enable ingress for the Api-service
+    enabled: false
+    ## @param apiService.ingress.className Ingress class name
+    className: ""
+    ## @param apiService.ingress.annotations Ingress annotations
+    annotations: {}
+    ## @param apiService.ingress.hosts [object] Ingress hosts configuration
+    hosts:
+      - host: guggr.internal
+        paths:
+          - path: /api
+            pathType: Prefix
+    ## @param apiService.ingress.tls Ingress TLS configuration
+    tls: []
+
+  ## @section Api-service Service configuration
+  service:
+    ## @param apiService.service.port Api-service service port
+    port: 80
+    ## @param apiService.service.targetPort Api-service container port
+    targetPort: 8081
+
+  ## @section Api-service HTTPRoute
+  httpRoute:
+    ## @param apiService.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Api-service
+    enabled: false
+    ## @param apiService.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param apiService.httpRoute.parentRefs [array] References to the parent Gateways
+    parentRefs:
+      - name: ""
+        namespace: ""
+        sectionName: ""
+    ## @param apiService.httpRoute.hostnames List of hostnames to match
+    hostnames: []
+    ## @param apiService.httpRoute.rules [array] HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+  ## @section Api-service Additional Parameters
+  ## @param apiService.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param apiService.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param apiService.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param apiService.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param apiService.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+  ## @param apiService.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    ## @param apiService.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param apiService.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param apiService.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param apiService.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
+
+  ## @section Api-service Security Context
+  podSecurityContext:
+    ## @param apiService.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param apiService.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param apiService.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param apiService.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
+
+  ## @section Api-service Environment variables
+  env:
+    ## @param apiService.env.port Port the Api-service listens on. Must match with `apiService.service.targetPort`
+    port: 8081
+    ## @param apiService.env.host Host the Api-service binds to
+    host: 0.0.0.0
+    ## @param apiService.env.auth_ttl TTL of auth tokens
+    auth_ttl: 900
+    ## @param apiService.env.auth_refresh_ttl TTL of refresh tokens
+    auth_refresh_ttl: "2419200"
+
+
+## @section Frontend Parameters
+frontend:
+  ## @param frontend.enabled Enable the Frontend
+  enabled: true
+  ## @param frontend.replicaCount Number of Frontend replicas to deploy
+  replicaCount: 1
+
+  ## @param frontend.fullnameOverride String to fully override `frontend.fullname`
+  fullnameOverride: ""
+  ## @param frontend.nameOverride String to partially override `frontend.fullname`
+  nameOverride: ""
+
+  ## @section Frontend Image Configuration
+  image:
+    ## @param frontend.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/frontend
+    ## @param frontend.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param frontend.image.tag [default: AppVersion] The image tag
+
+  ## @param frontend.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Frontend Service Account
+  serviceAccount:
+    ## @param frontend.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param frontend.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param frontend.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param frontend.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Frontend Ingress
+  ingress:
+    ## @param frontend.ingress.enabled Enable ingress for the Frontend
+    enabled: false
+    ## @param frontend.ingress.className Ingress class name
+    className: ""
+    ## @param frontend.ingress.annotations Ingress annotations
+    annotations: {}
+    ## @param frontend.ingress.hosts [object] Ingress hosts configuration
+    hosts:
+      - host: guggr.internal
+        paths:
+          - path: /
+            pathType: Prefix
+    ## @param frontend.ingress.tls Ingress TLS configuration
+    tls: []
+
+  ## @section Frontend Service configuration
+  service:
+    ## @param frontend.service.port Api-service service port
+    port: 80
+    ## @param frontend.service.targetPort Api-service container port
+    targetPort: 8080
+
+  ## @section Frontend HTTPRoute
+  httpRoute:
+    ## @param frontend.httpRoute.enabled Enable Gateway API HTTPRoute generation for the Frontend
+    enabled: false
+    ## @param frontend.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param frontend.httpRoute.parentRefs [array] References to the parent Gateways
+    parentRefs:
+      - name: ""
+        namespace: ""
+        sectionName: ""
+    ## @param frontend.httpRoute.hostnames List of hostnames to match
+    hostnames: []
+    ## @param frontend.httpRoute.rules [array] HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+  ## @section Frontend Additional Parameters
+  ## @param frontend.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param frontend.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param frontend.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param frontend.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param frontend.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+  ## @param frontend.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param frontend.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param frontend.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param frontend.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param frontend.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
+
+  ## @param frontend.volumeMounts [object] Additional volume mounts for the container
+  volumeMounts:
+    ## needed so readOnlyRootFilesystem can be enabled
+    - name: tmp
+      mountPath: /tmp
+
+  ## @param frontend.volumes [object] Additional pod volumes for the deployment
+  volumes:
+    ## needed so readOnlyRootFilesystem can be enabled
+    - name: tmp
+      emptyDir: {}
+
+  ## @section Frontend Security Context
+  podSecurityContext:
+    ## @param frontend.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param frontend.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param frontend.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param frontend.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
+
+## @section Agent Parameters
+agent:
+  ## @param agent.enabled Enable the Agent
+  enabled: true
+  ## @param agent.replicaCount Number of Agent replicas to deploy
+  replicaCount: 1
+  ## @param agent.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
+  logLevel: info
+  ## @param agent.fullnameOverride String to fully override `agent.fullname`
+  fullnameOverride: ""
+  ## @param agent.nameOverride String to partially override `agent.fullname`
+  nameOverride: ""
+
+  ## @section Agent Image Configuration
+  image:
+    ## @param agent.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/agent
+    ## @param agent.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param agent.image.tag [default: AppVersion] The image tag
+
+  ## @param agent.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Agent Service Account
+  serviceAccount:
+    ## @param agent.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param agent.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param agent.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param agent.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Agent Additional Parameters
+  ## @param agent.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param agent.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param agent.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param agent.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param agent.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+  ## @param agent.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    ## @param agent.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param agent.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param agent.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param agent.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
+
+  ## @section Agent Security Context
+  podSecurityContext:
+    ## @param agent.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param agent.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param agent.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param agent.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
+
+## @section Evaluator Parameters
+evaluator:
+  ## @param evaluator.enabled Enable the Evaluator
+  enabled: true
+  ## @param evaluator.replicaCount Number of Evaluator replicas to deploy
+  replicaCount: 1
+  ## @param evaluator.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
+  logLevel: info
+  ## @param evaluator.fullnameOverride String to fully override `evaluator.fullname`
+  fullnameOverride: ""
+  ## @param evaluator.nameOverride String to partially override `evaluator.fullname`
+  nameOverride: ""
+
+  ## @section Evaluator Image Configuration
+  image:
+    ## @param evaluator.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/evaluator
+    ## @param evaluator.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param evaluator.image.tag [default: AppVersion] The image tag
+
+  ## @param evaluator.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Evaluator Service Account
+  serviceAccount:
+    ## @param evaluator.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param evaluator.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param evaluator.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param evaluator.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Evaluator Additional Parameters
+  ## @param evaluator.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param evaluator.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param evaluator.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param evaluator.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param evaluator.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+  ## @param evaluator.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param evaluator.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param evaluator.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param evaluator.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param evaluator.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
+
+  ## @section Evaluator Security Context
+  podSecurityContext:
+    ## @param evaluator.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param evaluator.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param evaluator.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param evaluator.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
+
+## @section Scheduler Parameters
+scheduler:
+  ## @param scheduler.enabled Enable the Scheduler
+  enabled: true
+  ## @param scheduler.replicaCount Number of Scheduler replicas to deploy
+  replicaCount: 1
+  ## @param scheduler.logLevel Handed down to `RUST_LOG`. Possible values are `trace`, `debug`, `info`, `warn`, `error`
+  logLevel: info
+  ## @param scheduler.fullnameOverride String to fully override `scheduler.fullname`
+  fullnameOverride: ""
+  ## @param scheduler.nameOverride String to partially override `scheduler.fullname`
+  nameOverride: ""
+
+  ## @section Scheduler Image Configuration
+  image:
+    ## @param scheduler.image.repository The image repository
+    repository: ghcr.io/guggr/guggr/scheduler
+    ## @param scheduler.image.pullPolicy The image pull policy
+    pullPolicy: Always
+    ## @param scheduler.image.tag [default: AppVersion] The image tag
+
+  ## @param scheduler.imagePullSecrets Image pull secrets
+  imagePullSecrets: []
+
+  ## @section Scheduler Service Account
+  serviceAccount:
+    ## @param scheduler.serviceAccount.create Specifies whether a service account should be created
+    create: false
+    ## @param scheduler.serviceAccount.annotations Annotations to add to the service account
+    annotations: {}
+    ## @param scheduler.serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template
+    name: ""
+    ## @param scheduler.serviceAccount.automount Whether to automount the SA token inside the pod
+    automount: false
+
+  ## @section Scheduler Additional Parameters
+  ## @param scheduler.podAnnotations Map of annotations to add to the pods
+  podAnnotations: {}
+  ## @param scheduler.podLabels Map of labels to add to the pods
+  podLabels: {}
+  ## @param scheduler.nodeSelector Node selector for scheduling pods onto specific nodes
+  nodeSelector: {}
+  ## @param scheduler.tolerations Tolerations for scheduling pods onto tainted nodes
+  tolerations: []
+  ## @param scheduler.affinity Pod affinity and anti-affinity rules
+  affinity: {}
+  ## @param scheduler.resources [object] Resource requests and limits for the container
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  autoscaling:
+    ## @param scheduler.autoscaling.enabled Enable the HorizontalPodAutoscaler
+    enabled: false
+    ## @param scheduler.autoscaling.minReplicas Minimum Replica count
+    minReplicas: 1
+    ## @param scheduler.autoscaling.maxReplicas Maximum Replica count
+    maxReplicas: 5
+    ## @param scheduler.autoscaling.targetCPUUtilizationPercentage Target CPU Utilization
+    targetCPUUtilizationPercentage: 70
+
+  ## @section Scheduler Security Context
+  podSecurityContext:
+    ## @param scheduler.podSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+    runAsNonRoot: true
+  securityContext:
+    ## @param scheduler.securityContext.allowPrivilegeEscalation Enable container privilege escalation
+    allowPrivilegeEscalation: false
+    ## @param scheduler.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+    readOnlyRootFilesystem: true
+    ## @param scheduler.securityContext.capabilities.drop Linux capabilities to be dropped
+    capabilities:
+      drop: ["ALL"]
+
+## @section Postgres Parameters
+postgres:
+  ## @param postgres.enabled Enable the bundled Postgres Subchart
+  enabled: true
+  ## @param postgres.replicaCount Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default)
+  replicaCount: 1
+  auth:
+    ## @param postgres.auth.username Name for default User that is created at startup
+    username: guggr
+    ## @param postgres.auth.database Name for default Database that is created at startup
+    database: guggr
+
+## @section RabbitMQ Parameters
+rabbitmq:
+  ## @param rabbitmq.enabled Enable the bundled RabbitMQ Subchart
+  enabled: true
+  ## @param rabbitmq.replicaCount Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas)
+  replicaCount: 1
+
+  auth:
+    ## @param rabbitmq.auth.enabled Enable RabbitMQ Authentication
+    enabled: true
+    ## @param rabbitmq.auth.username RabbitMQ default username
+    username: guggr
+
+  managementPlugin:
+    ## @param rabbitmq.managementPlugin.enabled Enable RabbitMQ management plugin
+    enabled: false
+
+  ## @param rabbitmq.extraVolumes [array] Extra volumes to add to RabbitMQ pods
+  extraVolumes:
+    - name: definitions
+      configMap:
+        name: rabbitmq-definitions
+
+  ## @param rabbitmq.extraVolumeMounts [array] Extra volumes to add to RabbitMQ pods
+  extraVolumeMounts:
+    - name: definitions
+      mountPath: /etc/rabbitmq-definitions
+
+  customScripts:
+    ## @param rabbitmq.customScripts.postStart [object]
+    ## load definitions after startup. The `definitions` key is not used since then we would have to add user & password
+    ## into the definition file which isn't that easy
+    postStart:
+      enabled: true
+      command:
+        - sh
+        - -ec
+        - |
+          sleep 5
+          rabbitmqctl await_startup
+          rabbitmqctl import_definitions /etc/rabbitmq-definitions/defs.json
+    ## @param rabbitmq.customScripts.initContainers Custom init containers to run before RabbitMQ starts
+    initContainers: []

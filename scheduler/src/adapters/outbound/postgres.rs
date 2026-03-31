@@ -84,30 +84,36 @@ impl PostgresFetcher {
 
         debug!("loading ids to lock from db");
 
+        let mut db_jobs = Vec::new();
+
         // TODO: This is scaling extraordinary bad, maybe come up with sth better here?
-        let ids_to_lock: Vec<String> = job::table
-            .select(job::id)
-            .filter(
-                job::last_scheduled
-                    .is_null()
-                    .or((job::last_scheduled.assume_not_null() + job::run_every).le(now)),
-            )
-            .for_update()
-            .skip_locked()
-            .load(&mut conn)?;
+        conn.build_transaction().serializable().run(|conn| {
+            let ids_to_lock: Vec<String> = job::table
+                .select(job::id)
+                .filter(
+                    job::last_scheduled
+                        .is_null()
+                        .or((job::last_scheduled.assume_not_null() + job::run_every).le(now)),
+                )
+                .for_update()
+                .skip_locked()
+                .load(conn)?;
 
-        debug!("loading job details from db");
-        let db_jobs = job::table
-            .filter(id.eq_any(&ids_to_lock))
-            .left_join(job_details_http::table)
-            .left_join(job_details_ping::table)
-            .load(&mut conn)?;
+            debug!("loading job details from db");
+            db_jobs = job::table
+                .filter(id.eq_any(&ids_to_lock))
+                .left_join(job_details_http::table)
+                .left_join(job_details_ping::table)
+                .load(conn)?;
 
-        debug!("setting last_scheduled timestamp in db to now");
-        diesel::update(job::table)
-            .filter(id.eq_any(ids_to_lock))
-            .set(last_scheduled.eq(now))
-            .execute(&mut conn)?;
+            debug!("setting last_scheduled timestamp in db to now");
+            diesel::update(job::table)
+                .filter(id.eq_any(ids_to_lock))
+                .set(last_scheduled.eq(now))
+                .execute(conn)?;
+
+            diesel::result::QueryResult::Ok(())
+        })?;
 
         Ok(db_jobs)
     }

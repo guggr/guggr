@@ -10,7 +10,7 @@
 			"name": "GPL-3.0",
 			"identifier": "GPL-3.0"
 		},
-		"version": "0.6.0"
+		"version": "0.1.0"
 	},
 	"paths": {
 		"/api/v1/auth/login": {
@@ -236,6 +236,68 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				},
+				"security": [
+					{
+						"token": []
+					}
+				]
+			},
+			"put": {
+				"tags": ["groups"],
+				"summary": "Update Group",
+				"operationId": "update_group",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "Group ID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRequestGroup"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Group successfully updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DisplayGroup"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestErrorBody"
 								}
 							}
 						}
@@ -980,15 +1042,21 @@
 					"timestamp",
 					"triggered_notification",
 					"batch_id",
-					"reachable",
-					"details"
+					"reachable"
 				],
 				"properties": {
 					"batch_id": {
 						"type": "string"
 					},
 					"details": {
-						"$ref": "#/components/schemas/DisplayJobRunDetails"
+						"oneOf": [
+							{
+								"type": "null"
+							},
+							{
+								"$ref": "#/components/schemas/DisplayJobRunDetails"
+							}
+						]
 					},
 					"id": {
 						"type": "string"
@@ -1027,10 +1095,6 @@
 								"$ref": "#/components/schemas/DisplayJobResultPing"
 							}
 						}
-					},
-					{
-						"type": "string",
-						"enum": ["undefined"]
 					}
 				],
 				"description": "Returned JobRun details"
@@ -1251,6 +1315,22 @@
 				"properties": {
 					"host": {
 						"type": ["string", "null"]
+					}
+				}
+			},
+			"UpdateRequestGroup": {
+				"type": "object",
+				"description": "Struct to Update a Group",
+				"required": ["name", "members"],
+				"properties": {
+					"members": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/DisplayGroupMember"
+						}
+					},
+					"name": {
+						"type": "string"
 					}
 				}
 			},

@@ -5,7 +5,7 @@ use crate::core::{
             AuthenticatedResponse, LoginRequest, LogoutRequest, TokenRefreshRequest, TokenResponse,
             UserId,
         },
-        group::{CreateGroup, DisplayGroup},
+        group::{CreateGroup, DisplayGroup, UpdateRequestGroup},
         job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
         pagination::{PaginatedResponse, PaginationQuery},
         user::{CreateUser, DisplayUser},
@@ -53,6 +53,13 @@ pub trait ServiceGroupPort: Send + Sync {
     fn get_group(&self, user_id: UserId, id: &str) -> Result<DisplayGroup, DomainError>;
     /// List groups by the supplied user ID
     fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError>;
+    /// Update group with supplied data
+    fn update_group(
+        &self,
+        user_id: UserId,
+        id: &str,
+        request: UpdateRequestGroup,
+    ) -> Result<DisplayGroup, DomainError>;
 }
 
 /// Service port for job run interactions.

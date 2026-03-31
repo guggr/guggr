@@ -5,9 +5,9 @@
 	const remove = (id: string) => () => alerts.remove(id);
 </script>
 
-<ul class="toast z-50 w-11/12 max-w-xl items-end">
+<ul class="toast pointer-events-none z-50 w-11/12 max-w-xl items-end">
 	{#each $alerts as alert (alert.id)}
-		<li role="alert" class="card card-sm card-border bg-base-100 shadow-lg">
+		<li role="alert" class="card card-sm card-border bg-base-100 pointer-events-auto shadow-lg">
 			<div class="card-body flex-row items-center gap-3">
 				{#if alert.level === 'INFO'}
 					<InfoIcon class="text-info shrink-0" />

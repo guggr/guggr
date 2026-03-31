@@ -2,6 +2,7 @@ use std::{collections::HashMap, error::Error, sync::Arc};
 
 use gen_proto_types::{job::v1::Job, job_types::v1::JobType};
 use thiserror::Error;
+use tracing::debug;
 
 use crate::core::ports::{monitor::MonitorPort, publisher::PublisherPort};
 
@@ -56,8 +57,10 @@ impl JobService {
     pub async fn process_job(&self, job: &Job, run_id: String) -> Result<(), JobServiceError> {
         let result = match self.processing_adapter.get(&job.job_type()) {
             None => return Err(JobServiceError::UnknownJobType),
-            Some(processing_adapter) => processing_adapter.execute(job, run_id).await?,
+            Some(processing_adapter) => processing_adapter.execute(job, run_id.clone()).await?,
         };
+
+        debug!("result for job with id {}: {:?}", &run_id, &result);
 
         self.publisher_adapter.publish_result(&result).await
     }
