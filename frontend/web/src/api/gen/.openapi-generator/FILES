@@ -31,6 +31,8 @@ models/DisplayJobRunDetailsOneOf1.ts
 models/DisplayUser.ts
 models/LoginRequest.ts
 models/LogoutRequest.ts
+models/PaginatedResponseDisplayGroup.ts
+models/PaginatedResponseDisplayGroupDataInner.ts
 models/PaginatedResponseDisplayJob.ts
 models/PaginatedResponseDisplayJobDataInner.ts
 models/PaginatedResponseDisplayJobRun.ts

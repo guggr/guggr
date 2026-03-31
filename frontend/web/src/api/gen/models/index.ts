@@ -27,6 +27,8 @@ export * from './DisplayJobRunDetailsOneOf1';
 export * from './DisplayUser';
 export * from './LoginRequest';
 export * from './LogoutRequest';
+export * from './PaginatedResponseDisplayGroup';
+export * from './PaginatedResponseDisplayGroupDataInner';
 export * from './PaginatedResponseDisplayJob';
 export * from './PaginatedResponseDisplayJobDataInner';
 export * from './PaginatedResponseDisplayJobRun';

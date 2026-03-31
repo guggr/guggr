@@ -17,6 +17,7 @@ import type {
 	BadRequestErrorBody,
 	CreateGroup,
 	DisplayGroup,
+	PaginatedResponseDisplayGroup,
 	UpdateRequestGroup,
 } from '../models/index';
 import {
@@ -26,6 +27,8 @@ import {
 	CreateGroupToJSON,
 	DisplayGroupFromJSON,
 	DisplayGroupToJSON,
+	PaginatedResponseDisplayGroupFromJSON,
+	PaginatedResponseDisplayGroupToJSON,
 	UpdateRequestGroupFromJSON,
 	UpdateRequestGroupToJSON,
 } from '../models/index';
@@ -36,6 +39,11 @@ export interface CreateGroupRequest {
 
 export interface GetGroupRequest {
 	id: string;
+}
+
+export interface ListGroupsRequest {
+	page?: number;
+	perPage?: number;
 }
 
 export interface UpdateGroupRequest {
@@ -172,8 +180,18 @@ export class GroupsApi extends runtime.BaseAPI {
 	/**
 	 * Creates request options for listGroups without sending the request
 	 */
-	async listGroupsRequestOpts(): Promise<runtime.RequestOpts> {
+	async listGroupsRequestOpts(
+		requestParameters: ListGroupsRequest,
+	): Promise<runtime.RequestOpts> {
 		const queryParameters: any = {};
+
+		if (requestParameters['page'] != null) {
+			queryParameters['page'] = requestParameters['page'];
+		}
+
+		if (requestParameters['perPage'] != null) {
+			queryParameters['per_page'] = requestParameters['perPage'];
+		}
 
 		const headerParameters: runtime.HTTPHeaders = {};
 
@@ -200,13 +218,14 @@ export class GroupsApi extends runtime.BaseAPI {
 	 * List groups visible by the logged in user
 	 */
 	async listGroupsRaw(
+		requestParameters: ListGroupsRequest,
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<runtime.ApiResponse<Array<DisplayGroup>>> {
-		const requestOptions = await this.listGroupsRequestOpts();
+	): Promise<runtime.ApiResponse<PaginatedResponseDisplayGroup>> {
+		const requestOptions = await this.listGroupsRequestOpts(requestParameters);
 		const response = await this.request(requestOptions, initOverrides);
 
 		return new runtime.JSONApiResponse(response, jsonValue =>
-			jsonValue.map(DisplayGroupFromJSON),
+			PaginatedResponseDisplayGroupFromJSON(jsonValue),
 		);
 	}
 
@@ -214,9 +233,10 @@ export class GroupsApi extends runtime.BaseAPI {
 	 * List groups visible by the logged in user
 	 */
 	async listGroups(
+		requestParameters: ListGroupsRequest = {},
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<Array<DisplayGroup>> {
-		const response = await this.listGroupsRaw(initOverrides);
+	): Promise<PaginatedResponseDisplayGroup> {
+		const response = await this.listGroupsRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 
