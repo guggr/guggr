@@ -5,7 +5,7 @@
 		JobsApi,
 		type DisplayGroup,
 		type DisplayJob,
-		type DisplayJobRun,
+		type PaginatedResponseDisplayJobRun,
 	} from '@/api';
 	import JobRuns from '@/components/jobs/details/JobRuns.svelte';
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
@@ -23,7 +23,7 @@
 		hasJobWritePermissions = $state(false);
 
 	let jobPromise = $state(new Promise<DisplayJob>(() => {})),
-		jobRunsPromise = $state(new Promise<DisplayJobRun[]>(() => {})),
+		jobRunsPromise = $state(new Promise<PaginatedResponseDisplayJobRun>(() => {})),
 		groupPromise = $state(new Promise<DisplayGroup>(() => {}));
 
 	onMount(async () => {

@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { config, GroupsApi, JobsApi, type DisplayJob } from '@/api';
+	import {
+		config,
+		GroupsApi,
+		JobsApi,
+		type PaginatedResponseDisplayJob,
+		type PaginatedResponseDisplayJobDataInner,
+	} from '@/api';
 	import JobStatus from '@/components/jobs/JobStatus.svelte';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
@@ -9,7 +15,7 @@
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
-	let jobsPromise = $state(new Promise<DisplayJob[]>(() => {}));
+	let jobsPromise = $state(new Promise<PaginatedResponseDisplayJob>(() => {}));
 
 	let filterOfflineOnly = $state(false);
 
@@ -35,7 +41,7 @@
 	<Loading />
 {:then jobs}
 	<ul class="*:not-last:mb-6">
-		{#each jobs.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j (j.id)}
+		{#each jobs.data.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j (j.id)}
 			{@render job(j)}
 		{:else}
 			<div class="p-8">
@@ -52,7 +58,7 @@
 	<Error />
 {/await}
 
-{#snippet job(j: DisplayJob)}
+{#snippet job(j: PaginatedResponseDisplayJobDataInner)}
 	{@const lastScheduledDiffMinutes = Math.round(
 		(Date.now() - (j.lastScheduled?.valueOf() || 0)) / 1000 / 60,
 	)}
