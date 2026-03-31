@@ -2,8 +2,9 @@ pub mod models;
 pub mod schema;
 
 use diesel::{
-    Connection, PgConnection,
+    Connection, PgConnection, define_sql_function,
     r2d2::{ConnectionManager, Pool},
+    sql_types::{Bool, Nullable},
 };
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use thiserror::Error;
@@ -51,4 +52,10 @@ fn run_migrations(connection: &mut impl MigrationHarness<diesel::pg::Pg>) -> Res
         .map_err(|e| DbError::MigrationError(e.to_string()))?;
 
     Ok(())
+}
+
+define_sql_function! {
+    #[sql_name = "COALESCE"]
+    /// SQL COALESCE for nullable bools, returning `y` when `x` is NULL.
+    fn coalesce_bool(x: Nullable<Bool>, y: Bool) -> Bool;
 }
