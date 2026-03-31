@@ -288,6 +288,38 @@
 							"maximum": 4294967295,
 							"minimum": 0
 						}
+					},
+					{
+						"name": "job_type_id",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["string", "null"]
+						}
+					},
+					{
+						"name": "notify_users",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["boolean", "null"]
+						}
+					},
+					{
+						"name": "run_every",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["string", "null"]
+						}
+					},
+					{
+						"name": "reachable",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["boolean", "null"]
+						}
 					}
 				],
 				"responses": {
