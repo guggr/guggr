@@ -7,10 +7,6 @@ import PageLayout from '@/layout/PageLayout.astro';
 	<h1 class="sr-only">Jobs</h1>
 
 	<div class="mx-auto w-3xl max-w-11/12">
-		<div class="mb-8 flex justify-end">
-			<a href="/jobs/create" class="btn btn-primary btn-soft">Create new job</a>
-		</div>
-
 		<JobList client:load />
 	</div>
 </PageLayout>

@@ -5,7 +5,7 @@
  -->
 
 <script lang="ts">
-	import auth from '@/stores/auth.svelte';
+	import auth, { authLoaded } from '@/stores/auth.svelte';
 	import settings from '@/stores/settings.svelte';
 	import { onMount } from 'svelte';
 	import type { Writable } from 'svelte/store';
@@ -23,6 +23,8 @@
 
 	onMount(() => {
 		localStorageStores.forEach(x => configureStore(x));
+
+		authLoaded();
 	});
 
 	const configureStore = (store: { key: string; store: Writable<any> }) => {

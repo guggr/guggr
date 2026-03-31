@@ -174,7 +174,7 @@ impl PostgresAdapter {
         } else if let Some(ping) = &job_result.ping {
             ping.reachable
         } else {
-            return Err(PostgresAdapterError::NoResult(job_result.run_id.clone()));
+            false
         };
 
         let job_run = JobRun::from_protobuf_type(notified, reachable, job_result)?;
@@ -182,6 +182,10 @@ impl PostgresAdapter {
         diesel::insert_into(job_runs::table)
             .values(&job_run)
             .execute(&mut conn)?;
+
+        if !reachable {
+            return Ok(());
+        }
 
         if let Some(http) = &job_result.http {
             self.write_job_result_http(&job_result.run_id, http)?;

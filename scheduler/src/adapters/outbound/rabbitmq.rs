@@ -1,14 +1,7 @@
 use async_trait::async_trait;
 use deadpool_lapin::Runtime;
 use gen_proto_types::job::v1::Job;
-use lapin::{
-    self, BasicProperties,
-    options::{BasicPublishOptions, QueueDeclareOptions},
-    types::{
-        AMQPValue::{LongInt, LongString},
-        FieldTable,
-    },
-};
+use lapin::{self, BasicProperties, options::BasicPublishOptions};
 use prost::Message;
 use thiserror::Error;
 use tracing::{debug, error, info};
@@ -68,44 +61,6 @@ impl RabbitMQPublisher {
         let pool = config.create_pool(Some(Runtime::Tokio1))?;
 
         Ok(Self { pool, queue_name })
-    }
-
-    /// Declares the job queue that will be used by [`Self::publish_to_queue`].
-    ///
-    /// # Errors
-    /// Returns an error if
-    /// - getting a connection from the Pool fails
-    ///   ([`RabbitMQPublisherError::PoolGetConnectionError`])
-    /// - creating a new channel fails
-    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
-    /// - declaring the queue fails
-    ///   ([`RabbitMQPublisherError::RabbitMQInteractionError`])
-    pub async fn setup_schema(&self) -> Result<(), RabbitMQPublisherError> {
-        let connection = self.pool.get().await?;
-
-        let channel = connection.create_channel().await?;
-
-        channel
-            .queue_declare(
-                &self.queue_name,
-                QueueDeclareOptions {
-                    durable: true, // not deleted
-                    ..Default::default()
-                },
-                Self::quorum_args(),
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    /// Helper function returning the arguments needed for declaring the queue.
-    fn quorum_args() -> FieldTable {
-        let mut arguments = FieldTable::default();
-        arguments.insert("x-queue-type".into(), LongString("quorum".into()));
-        arguments.insert("x-delivery-limit".into(), LongInt(5));
-
-        arguments
     }
 
     /// Publishes a given [`Job`] to the specified queue (through

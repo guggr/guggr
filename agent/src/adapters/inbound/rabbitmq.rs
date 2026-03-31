@@ -6,11 +6,8 @@ use futures_util::StreamExt;
 use gen_proto_types::job::v1::Job;
 use lapin::{
     message::Delivery,
-    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, QueueDeclareOptions},
-    types::{
-        AMQPValue::{LongInt, LongString},
-        FieldTable,
-    },
+    options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions},
+    types::FieldTable,
 };
 use prost::{DecodeError, Message};
 use thiserror::Error;
@@ -42,43 +39,6 @@ impl RabbitMQDriver {
             pool,
             queue_name,
         }
-    }
-
-    /// Sets up the `RabbitMQ` queue for reading jobs.
-    ///
-    /// # Errors
-    /// Raises an [`RabbitMQDriverError`] if there is either a problem with
-    /// acquiring a connection from the pool, creating a channel on the
-    /// connection or declaring the queue.
-    pub async fn setup_queues(&self) -> Result<(), RabbitMQDriverError> {
-        let connection = self.pool.get().await?;
-
-        let channel = connection.create_channel().await?;
-
-        channel
-            .queue_declare(
-                &self.queue_name,
-                QueueDeclareOptions {
-                    durable: true,
-                    ..Default::default()
-                },
-                Self::queue_args(),
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    fn queue_args() -> FieldTable {
-        let mut args = FieldTable::default();
-        // set queue type to quorum
-        args.insert("x-queue-type".into(), LongString("quorum".into()));
-        // set maximum delivery limit until messages get pushed into dead letter
-        // exchange
-        args.insert("x-delivery-limit".into(), LongInt(5));
-        // TODO: specify dead letter exchange in setup schema
-
-        args
     }
 
     /// Starts consuming the jobs from the `RabbitMQ` job queue and processing

@@ -1,0 +1,20 @@
+apiVersion: v2
+name: guggr-chart
+description: Helm chart for deploying guggr
+type: application
+home: https://github.com/guggr/guggr
+icon: https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/assets/logo.svg
+
+version: 0.1.0
+appVersion: '0.1.0'
+
+dependencies:
+  - name: postgres
+    repository: oci://registry-1.docker.io/cloudpirates
+    version: 0.18.3
+    alias: postgres
+
+  - name: rabbitmq
+    repository: oci://registry-1.docker.io/cloudpirates
+    version: 0.19.6
+    alias: rabbitmq

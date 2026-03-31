@@ -10,7 +10,7 @@
 	};
 </script>
 
-<FormCard title="Change password" actionTitle="Change password" onsubmit={changePassword}>
+<FormCard disabled title="Change password" actionTitle="Change password" onsubmit={changePassword}>
 	<label class="my-1">
 		<span class="label my-1">Old password</span>
 		<input
