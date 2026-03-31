@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { config, GroupsApi, JobsApi, type CreateJobDetails, type DisplayGroup } from '@/api';
+	import {
+		config,
+		GroupsApi,
+		JobsApi,
+		type CreateJobDetails,
+		type PaginatedResponseDisplayGroup,
+	} from '@/api';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import { preventDefault } from '@/lib/event';
@@ -19,7 +25,7 @@
 		pingDetails = $state({ host: '' }),
 		httpDetails = $state({ url: '' });
 
-	let groupsPromise = $state(new Promise<DisplayGroup[]>(() => {}));
+	let groupsPromise = $state(new Promise<PaginatedResponseDisplayGroup>(() => {}));
 
 	onMount(() => {
 		id = new URLSearchParams(window.location.search).get('id') ?? '';
@@ -210,7 +216,7 @@
 			<Loading />
 		{:then groups}
 			<div class="flex flex-wrap gap-2">
-				{#each groups as g (g.id)}
+				{#each groups.data as g (g.id)}
 					<input
 						type="radio"
 						name="group"
