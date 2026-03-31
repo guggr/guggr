@@ -81,7 +81,7 @@
 		</ul>
 
 		{#snippet groupMember(member: DisplayGroupMember)}
-			<!-- nesting multiple `.list`s doesn't remove the last childs border-b -->
+			<!-- nesting multiple `.list`s doesn't remove the last child's border-b -->
 			<li
 				class="list-row items-center last:after:hidden @max-xs:grid-cols-[1fr] @max-xs:gap-2"
 			>
