@@ -40,6 +40,13 @@ repos:
         entry: pnpm run check
         pass_filenames: false
 
+      - id: pnpm-check-frontend
+        name: run pnpm check (frontend)
+        entry: bash -c 'cd frontend/web && pnpm check'
+        language: system
+        pass_filenames: false
+        files: ^frontend/web/
+
       - id: trufflehog
         name: run trufflehog
         entry: bash -c  'trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail'
