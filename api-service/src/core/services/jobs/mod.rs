@@ -6,8 +6,8 @@ use crate::core::{
     models::{
         auth::UserId,
         job::{
-            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateRequestJob,
-            UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
+            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, FilterJobQuery,
+            UpdateRequestJob, UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
             ping::detail::CreateJobDetailsPing,
         },
         pagination::{PaginatedResponse, PaginatedResponseMetadata, PaginationQuery},
@@ -62,10 +62,12 @@ impl ServiceJobPort for Service {
     fn list_jobs(
         &self,
         pagination: &PaginationQuery,
+        filter: &FilterJobQuery,
         user_id: UserId,
     ) -> Result<PaginatedResponse<DisplayJob>, DomainError> {
         let raw_jobs = self.db.list_jobs(
             &user_id.0,
+            filter,
             pagination.per_page.into(),
             pagination.page.into(),
         )?;
