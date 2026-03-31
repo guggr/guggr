@@ -34,6 +34,12 @@ nix --extra-experimental-features "nix-command flakes" develop
 
 If you also have [`direnv`](https://direnv.net/docs/installation.html) installed, the Nix development environment loads automatically when you enter the project directory.
 
+After entering the project directory for the first time, run:
+
+```sh
+direnv allow
+```
+
 ### Without `direnv`
 
 Load the environment manually with:
