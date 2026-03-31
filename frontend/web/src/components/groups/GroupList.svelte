@@ -4,11 +4,17 @@
 	import auth from '@/stores/auth.svelte';
 	import { UsersIcon } from '@lucide/svelte';
 
-	let { groups }: { groups: DisplayGroup[] } = $props();
+	let { groups = $bindable() }: { groups: DisplayGroup[] } = $props();
+
+	const updateGroup = (group: DisplayGroup) => {
+		const i = groups.findIndex(x => x.id === group.id);
+		groups.splice(i, 1, group);
+		groups = groups;
+	};
 </script>
 
 <ul class="list">
-	{#each groups as g}
+	{#each groups as g (g.id)}
 		{@render group(g)}
 	{:else}
 		<li class="font-bold text-base-content/70 text-center my-4">
@@ -45,7 +51,7 @@
 			</summary>
 
 			<div class="collapse-content">
-				<EditGroupForm {group} />
+				<EditGroupForm {group} {updateGroup} />
 			</div>
 		</details>
 	</li>

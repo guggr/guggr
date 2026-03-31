@@ -34,7 +34,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: dorny/paths-filter@v3.0.2
+      - uses: dorny/paths-filter@v4.0.1
         id: filter
         with:
           filters: |
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.3.0
+        uses: pnpm/action-setup@v5.0.0
         with:
           cache: true
       - name: Install node
@@ -89,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.3.0
+        uses: pnpm/action-setup@v5.0.0
         with:
           cache: true
       - name: Install node
@@ -127,7 +127,7 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - run: cargo clippy --all-features --all-targets -- -D warnings
@@ -139,11 +139,16 @@ jobs:
     if: ${{ needs.changes.outputs.helm == 'true' }}
     steps:
       - uses: actions/checkout@v6.0.2
-
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: 'v4.1.1'
+      - name: Build dependencies
+        run: helm dependency build charts/guggr
       - uses: igabaydulin/helm-check-action@0.2.1
         env:
-          CHART_LOCATION: ./charts
-          CHART_VALUES: ./charts/values.yaml
+          CHART_LOCATION: ./charts/guggr/
+          CHART_VALUES: ./charts/guggr/values.yaml
 
   cargo-nextest:
     name: 🧐 testing - cargo
@@ -159,9 +164,9 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: cargo-bins/cargo-binstall@v1.17.7
+      - uses: cargo-bins/cargo-binstall@v1.17.8
       - run: cargo binstall cargo-nextest
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - run: cargo nextest run --no-tests warn --all-features --all-targets -P ci
@@ -176,7 +181,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.3.0
+        uses: pnpm/action-setup@v5.0.0
         with:
           cache: true
       - name: Install node
@@ -185,7 +190,7 @@ jobs:
           node-version-file: 'package.json'
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
-      - uses: Swatinem/rust-cache@v2.8.2
+      - uses: Swatinem/rust-cache@v2.9.1
         with:
           cache-on-failure: true
       - name: Check openapi spec
@@ -228,6 +233,6 @@ jobs:
           ref: ${{needs.fetch-depth.outputs.branch}}
           fetch-depth: ${{needs.fetch-depth.outputs.depth}}
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@v3.93.8
+        uses: trufflesecurity/trufflehog@v3.94.1
         with:
           extra_args: --results=verified,unknown

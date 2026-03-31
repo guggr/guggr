@@ -1,0 +1,8 @@
+Your release is named {{ .Release.Name }}.
+
+{{- if .Values.frontend.ingress.enabled }}
+Access guggr at:
+{{ include "guggr.url" . }}
+{{- end }}
+
+Happy Monitoring!

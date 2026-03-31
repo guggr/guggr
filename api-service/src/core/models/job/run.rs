@@ -17,7 +17,7 @@ pub struct DisplayJobRun {
     pub triggered_notification: bool,
     pub batch_id: String,
     pub reachable: bool,
-    pub details: DisplayJobRunDetails,
+    pub details: Option<DisplayJobRunDetails>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, Serialize, ToSchema)]
@@ -27,8 +27,6 @@ pub enum DisplayJobRunDetails {
     Http(DisplayJobResultHttp),
     #[serde(rename = "ping")]
     Ping(DisplayJobResultPing),
-    #[serde(rename = "undefined")]
-    Undefined,
 }
 
 impl From<JobRun> for DisplayJobRun {
@@ -40,7 +38,7 @@ impl From<JobRun> for DisplayJobRun {
             triggered_notification: value.triggered_notification,
             batch_id: value.batch_id,
             reachable: value.reachable,
-            details: DisplayJobRunDetails::Undefined,
+            details: None,
         }
     }
 }

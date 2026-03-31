@@ -1,10 +1,11 @@
 use database_client::models::UserGroupMapping;
+use tracing::debug;
 
 use crate::core::{
     domain::errors::DomainError,
     models::{
         auth::UserId,
-        group::{CreateGroup, DisplayGroup},
+        group::{CreateGroup, DisplayGroup, DisplayGroupMember, UpdateRequestGroup},
     },
     ports::service::ServiceGroupPort,
     services::Service,
@@ -63,5 +64,70 @@ impl ServiceGroupPort for Service {
             .collect();
 
         Ok(display_groups)
+    }
+
+    fn update_group(
+        &self,
+        user_id: UserId,
+        id: &str,
+        request: UpdateRequestGroup,
+    ) -> Result<DisplayGroup, DomainError> {
+        let request_owner: Vec<&DisplayGroupMember> = request
+            .members
+            .iter()
+            .filter(|m| m.role == "owner")
+            .collect();
+
+        // There may only be one group owner
+        if request_owner.len() != 1 {
+            debug!("Owner length wrong");
+            return Err(DomainError::BadRequest);
+        }
+
+        // User is neither owner nor admin
+        if !self.db.check_user_can_update_group(id, &user_id.0)? {
+            debug!("User {} cannot update group", user_id.0);
+            return Err(DomainError::BadRequest);
+        }
+
+        let request_owner_id = &request_owner
+            .first()
+            .expect("Expected there to be one owner after check")
+            .id;
+
+        let db_group_members = self
+            .db
+            .get_members_for_multiple_groups(&[id])?
+            .get(id)
+            .ok_or(DomainError::BadRequest)?
+            .to_owned();
+
+        let db_owner = db_group_members
+            .iter()
+            .filter(|m| m.role == "owner")
+            .collect::<Vec<&DisplayGroupMember>>()
+            .first()
+            .ok_or(DomainError::BadRequest)?
+            .to_owned();
+
+        let db_requesting_user = db_group_members
+            .iter()
+            .filter(|m| m.id == user_id.0)
+            .collect::<Vec<&DisplayGroupMember>>()
+            .first()
+            .ok_or(DomainError::BadRequest)?
+            .to_owned();
+
+        // If user is not group owner but group owner is modified, return Bad Request
+        if db_requesting_user.role != "owner" && request_owner_id != &db_owner.id {
+            debug!("Non-owner {} tried to modify owner", user_id.0);
+            return Err(DomainError::BadRequest);
+        }
+
+        let (group, members) = self.db.update_group(id, request)?;
+
+        debug!("Group id {} updated successfully", id);
+
+        Ok(DisplayGroup::from_group(group, members))
     }
 }
