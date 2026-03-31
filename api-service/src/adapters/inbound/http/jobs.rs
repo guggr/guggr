@@ -12,7 +12,7 @@ use crate::{
         domain::{errors::DomainError, openapi_helper},
         models::{
             auth::UserId,
-            job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
+            job::{CreateJob, DisplayJob, FilterJobQuery, UpdateRequestJob, run::DisplayJobRun},
             pagination::{PaginatedResponse, PaginationQuery},
         },
         ports::service::ServicePort,
@@ -131,7 +131,7 @@ pub async fn get(
 }
 
 #[utoipa::path(
-    params(PaginationQuery),
+    params(PaginationQuery, FilterJobQuery),
     operation_id = "list_job",
     responses(
         (status = 200, description = "Jobs", body = PaginatedResponse<DisplayJob>),
@@ -146,6 +146,7 @@ pub async fn get(
 pub async fn list(
     svc: web::Data<Arc<dyn ServicePort>>,
     query: web::Query<PaginationQuery>,
+    filter: web::Query<FilterJobQuery>,
     req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
     let auth_user = req
@@ -154,8 +155,9 @@ pub async fn list(
         .cloned()
         .ok_or(DomainError::Unauthorized)?;
     let params = query.into_inner();
+    let filter = filter.into_inner();
 
-    let job = web::block(move || svc.list_jobs(&params, auth_user))
+    let job = web::block(move || svc.list_jobs(&params, &filter, auth_user))
         .await
         .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(job))

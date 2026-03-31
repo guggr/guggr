@@ -9,7 +9,7 @@ use crate::core::{
     models::{
         group::{DisplayGroupMember, UpdateRequestGroup},
         job::{
-            JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
+            FilterJobQuery, JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
             ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
         },
     },
@@ -116,6 +116,7 @@ pub trait RepositoryJobPort: Send + Sync {
     fn list_jobs(
         &self,
         user_id: &str,
+        filter: &FilterJobQuery,
         limit: i64,
         offset: i64,
     ) -> Result<Vec<JobWithRawDetails>, DomainError>;

@@ -350,6 +350,38 @@
 							"maximum": 4294967295,
 							"minimum": 0
 						}
+					},
+					{
+						"name": "job_type_id",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["string", "null"]
+						}
+					},
+					{
+						"name": "notify_users",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["boolean", "null"]
+						}
+					},
+					{
+						"name": "run_every",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["string", "null"]
+						}
+					},
+					{
+						"name": "reachable",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": ["boolean", "null"]
+						}
 					}
 				],
 				"responses": {
@@ -1243,15 +1275,21 @@
 								"timestamp",
 								"triggered_notification",
 								"batch_id",
-								"reachable",
-								"details"
+								"reachable"
 							],
 							"properties": {
 								"batch_id": {
 									"type": "string"
 								},
 								"details": {
-									"$ref": "#/components/schemas/DisplayJobRunDetails"
+									"oneOf": [
+										{
+											"type": "null"
+										},
+										{
+											"$ref": "#/components/schemas/DisplayJobRunDetails"
+										}
+									]
 								},
 								"id": {
 									"type": "string"

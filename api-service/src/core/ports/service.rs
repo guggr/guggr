@@ -6,7 +6,7 @@ use crate::core::{
             UserId,
         },
         group::{CreateGroup, DisplayGroup, UpdateRequestGroup},
-        job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
+        job::{CreateJob, DisplayJob, FilterJobQuery, UpdateRequestJob, run::DisplayJobRun},
         pagination::{PaginatedResponse, PaginationQuery},
         user::{CreateUser, DisplayUser},
     },
@@ -80,6 +80,7 @@ pub trait ServiceJobPort: Send + Sync {
     fn list_jobs(
         &self,
         pagination: &PaginationQuery,
+        filter: &FilterJobQuery,
         user_id: UserId,
     ) -> Result<PaginatedResponse<DisplayJob>, DomainError>;
     fn update_job(

@@ -6,7 +6,7 @@ use database_client::{
 use diesel::prelude::AsChangeset;
 use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::core::models::job::{
     http::detail::{CreateJobDetailsHttp, DisplayJobDetailsHttp, UpdateJobDetailsHttp},
@@ -64,6 +64,18 @@ pub struct DisplayJob {
     pub last_scheduled: Option<DateTime<Utc>>,
     pub reachable: bool,
     pub details: DisplayJobDetails,
+}
+
+#[serde_with::serde_as]
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, IntoParams)]
+/// Filter Query for Jobs
+pub struct FilterJobQuery {
+    pub job_type_id: Option<String>,
+    pub notify_users: Option<bool>,
+    #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
+    #[schema(value_type = i64)]
+    pub run_every: Option<Duration>,
+    pub reachable: Option<bool>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
