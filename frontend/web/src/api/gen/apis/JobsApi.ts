@@ -51,6 +51,10 @@ export interface GetJobRequest {
 export interface ListJobRequest {
 	page?: number;
 	perPage?: number;
+	jobTypeId?: string | null;
+	notifyUsers?: boolean | null;
+	runEvery?: string | null;
+	reachable?: boolean | null;
 }
 
 export interface ListJobRunsRequest {
@@ -258,6 +262,22 @@ export class JobsApi extends runtime.BaseAPI {
 
 		if (requestParameters['perPage'] != null) {
 			queryParameters['per_page'] = requestParameters['perPage'];
+		}
+
+		if (requestParameters['jobTypeId'] != null) {
+			queryParameters['job_type_id'] = requestParameters['jobTypeId'];
+		}
+
+		if (requestParameters['notifyUsers'] != null) {
+			queryParameters['notify_users'] = requestParameters['notifyUsers'];
+		}
+
+		if (requestParameters['runEvery'] != null) {
+			queryParameters['run_every'] = requestParameters['runEvery'];
+		}
+
+		if (requestParameters['reachable'] != null) {
+			queryParameters['reachable'] = requestParameters['reachable'];
 		}
 
 		const headerParameters: runtime.HTTPHeaders = {};

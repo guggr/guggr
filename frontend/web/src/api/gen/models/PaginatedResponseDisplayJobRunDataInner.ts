@@ -38,7 +38,7 @@ export interface PaginatedResponseDisplayJobRunDataInner {
 	 * @type {DisplayJobRunDetails}
 	 * @memberof PaginatedResponseDisplayJobRunDataInner
 	 */
-	details: DisplayJobRunDetails;
+	details?: DisplayJobRunDetails | null;
 	/**
 	 *
 	 * @type {string}
@@ -78,7 +78,6 @@ export function instanceOfPaginatedResponseDisplayJobRunDataInner(
 	value: object,
 ): value is PaginatedResponseDisplayJobRunDataInner {
 	if (!('batchId' in value) || value['batchId'] === undefined) return false;
-	if (!('details' in value) || value['details'] === undefined) return false;
 	if (!('id' in value) || value['id'] === undefined) return false;
 	if (!('jobId' in value) || value['jobId'] === undefined) return false;
 	if (!('reachable' in value) || value['reachable'] === undefined) return false;
@@ -103,7 +102,8 @@ export function PaginatedResponseDisplayJobRunDataInnerFromJSONTyped(
 	}
 	return {
 		batchId: json['batch_id'],
-		details: DisplayJobRunDetailsFromJSON(json['details']),
+		details:
+			json['details'] == null ? undefined : DisplayJobRunDetailsFromJSON(json['details']),
 		id: json['id'],
 		jobId: json['job_id'],
 		reachable: json['reachable'],
