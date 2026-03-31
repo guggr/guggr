@@ -19,6 +19,7 @@ repos:
     rev: v1.42.3
     hooks:
       - id: typos
+        exclude: CHANGELOG.md # Recognized commit SHAs as typos
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.3.0
