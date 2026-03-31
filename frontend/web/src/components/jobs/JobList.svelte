@@ -4,6 +4,7 @@
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import LogoEyeRotate from '@/components/shared/LogoEyeRotate.svelte';
+	import Cache from '@/lib/cache';
 	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
@@ -14,6 +15,7 @@
 	let filterOfflineOnly = $state(false);
 
 	const groupsApi = new GroupsApi(config);
+	const groupsCache = new Cache((id: string) => groupsApi.getGroup({ id }));
 
 	onMount(() => {
 		const api = new JobsApi(config);
@@ -78,7 +80,7 @@
 					>
 						<li>
 							<span class="sr-only">Group: </span>
-							{#await groupsApi.getGroup({ id: j.groupId })}
+							{#await groupsCache.get(j.groupId)}
 								<a href="/groups" class="link link-hover">{j.groupId}</a>
 							{:then group}
 								<a href="/groups" class="link link-hover">{group.name}</a>
