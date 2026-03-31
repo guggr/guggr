@@ -31,6 +31,11 @@ models/DisplayJobRunDetailsOneOf1.ts
 models/DisplayUser.ts
 models/LoginRequest.ts
 models/LogoutRequest.ts
+models/PaginatedResponseDisplayJob.ts
+models/PaginatedResponseDisplayJobDataInner.ts
+models/PaginatedResponseDisplayJobRun.ts
+models/PaginatedResponseDisplayJobRunDataInner.ts
+models/PaginatedResponseMetadata.ts
 models/TokenRefreshRequest.ts
 models/TokenResponse.ts
 models/UpdateJobDetailsHttp.ts
