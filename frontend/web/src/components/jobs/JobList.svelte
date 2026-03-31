@@ -13,7 +13,6 @@
 	import { duration, relativeTime } from '@/lib/formatter';
 	import { getJobName } from '@/lib/jobs';
 	import { ActivityIcon, ChevronRightIcon } from '@lucide/svelte';
-	import { onMount } from 'svelte';
 
 	let jobsPromise = $state(new Promise<PaginatedResponseDisplayJob>(() => {}));
 
@@ -21,10 +20,10 @@
 
 	const groupsApi = new GroupsApi(config);
 
-	onMount(() => {
-		const api = new JobsApi(config);
+	const api = new JobsApi(config);
 
-		jobsPromise = api.listJob();
+	$effect(() => {
+		jobsPromise = api.listJob({ reachable: filterOfflineOnly ? false : null });
 	});
 </script>
 
@@ -41,7 +40,7 @@
 	<Loading />
 {:then jobs}
 	<ul class="*:not-last:mb-6">
-		{#each jobs.data.filter(x => !filterOfflineOnly || (filterOfflineOnly && !x.reachable)) as j (j.id)}
+		{#each jobs.data as j (j.id)}
 			{@render job(j)}
 		{:else}
 			<div class="p-8">
