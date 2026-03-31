@@ -75,6 +75,9 @@ docker compose up -d
 
 The RabbitMQ management UI is available at: http://localhost:15672
 
+> [!NOTE]
+> If you run into issues with the RabbitMQ or Postgres containers, try running `docker compose down -v` to remove existing volumes
+
 ### Common Commands
 
 A `justfile` is included with frequently used commands. Run `just` to list all available recipes.
