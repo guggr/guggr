@@ -2,6 +2,7 @@ pub mod detail;
 pub mod run;
 
 use database_client::{
+    coalesce_bool,
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::{
         job, job_details_http, job_details_ping,
@@ -156,7 +157,7 @@ impl RepositoryJobPort for Postgres {
             .into_boxed();
 
         if let Some(reachable) = filter.reachable {
-            query = query.filter(is_reachable_subselect.eq(Some(reachable)));
+            query = query.filter(coalesce_bool(is_reachable_subselect, false).eq(reachable));
         }
 
         if let Some(job_type_id) = &filter.job_type_id {
