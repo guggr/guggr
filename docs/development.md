@@ -82,6 +82,12 @@ The RabbitMQ management UI is available at: http://localhost:15672
 
 A `justfile` is included with frequently used commands. Run `just` to list all available recipes.
 
+### Codestyle
+
+Please follow the official Rust style guidelines. For the frontend, use the Prettier formatting rules.
+
+These are also enforced by the pre-commit hooks.
+
 ## Helm Chart Development
 
 ### Requirements
