@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { config, GroupsApi, type DisplayGroup } from '@/api';
+	import { config, GroupsApi, type PaginatedResponseDisplayGroup } from '@/api';
 	import GroupList from '@/components/groups/GroupList.svelte';
 	import CopyMyUserId from '@/components/shared/CopyMyUserId.svelte';
 	import Error from '@/components/shared/Error.svelte';
@@ -7,7 +7,7 @@
 	import alerts from '@/stores/alerts.svelte';
 	import { onMount } from 'svelte';
 
-	let groupsPromise = $state(new Promise<DisplayGroup[]>(() => {}));
+	let groupsPromise = $state(new Promise<PaginatedResponseDisplayGroup>(() => {}));
 
 	onMount(() => {
 		const api = new GroupsApi(config);
@@ -27,7 +27,7 @@
 		const groups = await groupsPromise;
 
 		groupsPromise = new Promise(res => {
-			res([...groups, group]);
+			res({ ...groups, data: [...groups.data, group] });
 		});
 	};
 </script>
@@ -49,7 +49,7 @@
 {#await groupsPromise}
 	<Loading />
 {:then groups}
-	<GroupList {groups} />
+	<GroupList groups={groups.data} />
 {:catch}
 	<Error />
 {/await}

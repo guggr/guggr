@@ -17,7 +17,8 @@ import type {
 	BadRequestErrorBody,
 	CreateJob,
 	DisplayJob,
-	DisplayJobRun,
+	PaginatedResponseDisplayJob,
+	PaginatedResponseDisplayJobRun,
 	UpdateRequestJob,
 } from '../models/index';
 import {
@@ -27,8 +28,10 @@ import {
 	CreateJobToJSON,
 	DisplayJobFromJSON,
 	DisplayJobToJSON,
-	DisplayJobRunFromJSON,
-	DisplayJobRunToJSON,
+	PaginatedResponseDisplayJobFromJSON,
+	PaginatedResponseDisplayJobToJSON,
+	PaginatedResponseDisplayJobRunFromJSON,
+	PaginatedResponseDisplayJobRunToJSON,
 	UpdateRequestJobFromJSON,
 	UpdateRequestJobToJSON,
 } from '../models/index';
@@ -45,8 +48,19 @@ export interface GetJobRequest {
 	id: string;
 }
 
+export interface ListJobRequest {
+	page?: number;
+	perPage?: number;
+	jobTypeId?: string | null;
+	notifyUsers?: boolean | null;
+	runEvery?: string | null;
+	reachable?: boolean | null;
+}
+
 export interface ListJobRunsRequest {
 	id: string;
+	page?: number;
+	perPage?: number;
 }
 
 export interface UpdateJobRequest {
@@ -239,8 +253,32 @@ export class JobsApi extends runtime.BaseAPI {
 	/**
 	 * Creates request options for listJob without sending the request
 	 */
-	async listJobRequestOpts(): Promise<runtime.RequestOpts> {
+	async listJobRequestOpts(requestParameters: ListJobRequest): Promise<runtime.RequestOpts> {
 		const queryParameters: any = {};
+
+		if (requestParameters['page'] != null) {
+			queryParameters['page'] = requestParameters['page'];
+		}
+
+		if (requestParameters['perPage'] != null) {
+			queryParameters['per_page'] = requestParameters['perPage'];
+		}
+
+		if (requestParameters['jobTypeId'] != null) {
+			queryParameters['job_type_id'] = requestParameters['jobTypeId'];
+		}
+
+		if (requestParameters['notifyUsers'] != null) {
+			queryParameters['notify_users'] = requestParameters['notifyUsers'];
+		}
+
+		if (requestParameters['runEvery'] != null) {
+			queryParameters['run_every'] = requestParameters['runEvery'];
+		}
+
+		if (requestParameters['reachable'] != null) {
+			queryParameters['reachable'] = requestParameters['reachable'];
+		}
 
 		const headerParameters: runtime.HTTPHeaders = {};
 
@@ -267,13 +305,14 @@ export class JobsApi extends runtime.BaseAPI {
 	 * List Jobs
 	 */
 	async listJobRaw(
+		requestParameters: ListJobRequest,
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<runtime.ApiResponse<Array<DisplayJob>>> {
-		const requestOptions = await this.listJobRequestOpts();
+	): Promise<runtime.ApiResponse<PaginatedResponseDisplayJob>> {
+		const requestOptions = await this.listJobRequestOpts(requestParameters);
 		const response = await this.request(requestOptions, initOverrides);
 
 		return new runtime.JSONApiResponse(response, jsonValue =>
-			jsonValue.map(DisplayJobFromJSON),
+			PaginatedResponseDisplayJobFromJSON(jsonValue),
 		);
 	}
 
@@ -281,9 +320,10 @@ export class JobsApi extends runtime.BaseAPI {
 	 * List Jobs
 	 */
 	async listJob(
+		requestParameters: ListJobRequest = {},
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<Array<DisplayJob>> {
-		const response = await this.listJobRaw(initOverrides);
+	): Promise<PaginatedResponseDisplayJob> {
+		const response = await this.listJobRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
 
@@ -301,6 +341,14 @@ export class JobsApi extends runtime.BaseAPI {
 		}
 
 		const queryParameters: any = {};
+
+		if (requestParameters['page'] != null) {
+			queryParameters['page'] = requestParameters['page'];
+		}
+
+		if (requestParameters['perPage'] != null) {
+			queryParameters['per_page'] = requestParameters['perPage'];
+		}
 
 		const headerParameters: runtime.HTTPHeaders = {};
 
@@ -330,12 +378,12 @@ export class JobsApi extends runtime.BaseAPI {
 	async listJobRunsRaw(
 		requestParameters: ListJobRunsRequest,
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<runtime.ApiResponse<Array<DisplayJobRun>>> {
+	): Promise<runtime.ApiResponse<PaginatedResponseDisplayJobRun>> {
 		const requestOptions = await this.listJobRunsRequestOpts(requestParameters);
 		const response = await this.request(requestOptions, initOverrides);
 
 		return new runtime.JSONApiResponse(response, jsonValue =>
-			jsonValue.map(DisplayJobRunFromJSON),
+			PaginatedResponseDisplayJobRunFromJSON(jsonValue),
 		);
 	}
 
@@ -345,7 +393,7 @@ export class JobsApi extends runtime.BaseAPI {
 	async listJobRuns(
 		requestParameters: ListJobRunsRequest,
 		initOverrides?: RequestInit | runtime.InitOverrideFunction,
-	): Promise<Array<DisplayJobRun>> {
+	): Promise<PaginatedResponseDisplayJobRun> {
 		const response = await this.listJobRunsRaw(requestParameters, initOverrides);
 		return await response.value();
 	}
