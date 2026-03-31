@@ -1,8 +1,84 @@
 # Development
 
-## Helm Chart
+This project uses [Nix](https://github.com/NixOS/nixpkgs) to keep tool versions consistent. Therefore, you'll need to Nix installed before you start.
+
+## Prerequisites
+
+You'll need:
+
+- **Nix** with flakes enabled
+- **direnv** (optional, but recommended)
+
+### Install Nix
+
+Follow the official guide: https://nixos.org/download/
+
+**Enabling flakes**
+
+Persistent option:
+
+```sh
+# ~/.config/nix/nix.conf
+experimental-features = nix-command flakes
+```
+
+One-time option (does **not** work with `direnv` since it requires flakes to be enabled globally):
+
+```
+nix --extra-experimental-features "nix-command flakes" develop
+```
+
+## Development Environment
+
+### Using `direnv` (recommended)
+
+If you also have [`direnv`](https://direnv.net/docs/installation.html) installed, the Nix development environment loads automatically when you enter the project directory.
+
+### Without `direnv`
+
+Load the environment manually with:
+
+```sh
+nix develop
+```
+
+## Development Workflow
+
+### Setup
+
+Install required tooling and hooks:
+
+```sh
+pnpm i
+prek install
+```
+
+> [!NOTE]
+> `pnpm` is used to manage some development tooling (e.g. OpenAPI generator, Prettier, Helm Readme generator)
+
+> [!NOTE]
+> `prek` is a fast Rust-based alternative to the python based pre-commit
+
+### Local testing
+
+A `compose.yaml` file is available in the project root for running and testing the services locally. Start the local stack with:
+
+```sh
+docker compose up -d
+```
+
+The RabbitMQ management UI is available at: http://localhost:15672
+
+### Common Commands
+
+A `justfile` is included with frequently used commands. Run `just` to list all available recipes.
+
+## Helm Chart Development
 
 ### Requirements
+
+> [!NOTE]
+> These dependencies are not included in the Nix flake to keep it more portable
 
 If you want to develop the helm chart, you should probably have a local cluster running with e.g [kind](https://kind.sigs.k8s.io/) and [cloud-provider-for-KIND](https://github.com/kubernetes-sigs/cloud-provider-kind) (handles e.g ingress). Besides that, you also should have `kubectl` installed.
 
