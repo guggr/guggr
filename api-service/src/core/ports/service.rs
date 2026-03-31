@@ -52,7 +52,11 @@ pub trait ServiceGroupPort: Send + Sync {
     // Gets group by group ID
     fn get_group(&self, user_id: UserId, id: &str) -> Result<DisplayGroup, DomainError>;
     /// List groups by the supplied user ID
-    fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError>;
+    fn list_groups_by_user(
+        &self,
+        pagination: &PaginationQuery,
+        user_id: UserId,
+    ) -> Result<PaginatedResponse<DisplayGroup>, DomainError>;
     /// Update group with supplied data
     fn update_group(
         &self,

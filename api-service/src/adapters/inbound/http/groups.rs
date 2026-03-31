@@ -14,6 +14,7 @@ use crate::{
         models::{
             auth::UserId,
             group::{CreateGroup, DisplayGroup, UpdateRequestGroup},
+            pagination::{PaginatedResponse, PaginationQuery},
         },
         ports::service::ServicePort,
     },
@@ -62,9 +63,10 @@ pub async fn create(
 }
 
 #[utoipa::path(
+    params(PaginationQuery),
     operation_id = "list_groups",
     responses(
-        (status = 200, description = "User", body = [DisplayGroup]),
+        (status = 200, description = "User", body = PaginatedResponse<DisplayGroup>),
         openapi_helper::ResUnauthorized,
         openapi_helper::ResNotFound,
         openapi_helper::ResInternalServerError,
@@ -76,6 +78,7 @@ pub async fn create(
 /// List groups visible by the logged in user
 pub async fn list(
     svc: web::Data<Arc<dyn ServicePort>>,
+    query: web::Query<PaginationQuery>,
     req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
     let auth_user = req
@@ -83,8 +86,9 @@ pub async fn list(
         .get::<UserId>()
         .cloned()
         .ok_or(DomainError::Unauthorized)?;
+    let params = query.into_inner();
 
-    let groups = web::block(move || svc.list_groups_by_user(auth_user))
+    let groups = web::block(move || svc.list_groups_by_user(&params, auth_user))
         .await
         .map_err(ErrorInternalServerError)??;
 

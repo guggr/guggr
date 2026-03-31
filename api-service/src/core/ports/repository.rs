@@ -57,7 +57,12 @@ pub trait RepositoryGroupPort: Send + Sync {
     fn get_group(&self, id: &str) -> Result<Group, DomainError>;
 
     /// Returns the groups from the repository by the user ID.
-    fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
+    fn list_groups_by_user_id(
+        &self,
+        user_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<Group>, DomainError>;
 
     /// Returns group members from the repository by group ids.
     fn get_members_for_multiple_groups(
@@ -67,6 +72,9 @@ pub trait RepositoryGroupPort: Send + Sync {
 
     /// Check user permissions for group updates.
     fn check_user_can_update_group(&self, id: &str, user_id: &str) -> Result<bool, DomainError>;
+
+    /// Count all jobs the user can view
+    fn count_groups(&self, user_id: &str) -> Result<i64, DomainError>;
 
     /// Update group
     fn update_group(
