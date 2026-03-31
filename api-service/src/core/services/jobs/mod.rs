@@ -90,7 +90,7 @@ impl ServiceJobPort for Service {
                 display_job
             })
             .collect();
-        let count = self.db.count_jobs(&user_id.0)?;
+        let count = self.db.count_jobs(&user_id.0, filter)?;
         Ok(PaginatedResponse::new(
             jobs,
             PaginatedResponseMetadata::build(pagination, count),

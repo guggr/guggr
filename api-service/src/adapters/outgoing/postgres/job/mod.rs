@@ -216,13 +216,38 @@ impl RepositoryJobPort for Postgres {
             .map_err(PostgresError::from)?;
         Ok(())
     }
-    fn count_jobs(&self, user_id: &str) -> Result<i64, DomainError> {
+    fn count_jobs(&self, user_id: &str, filter: &FilterJobQuery) -> Result<i64, DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
-        let count: i64 = job::table
+        let is_reachable_subselect = job_runs::table
+            .filter(job_runs::job_id.eq(job::id))
+            .select(job_runs::reachable)
+            // Select latest reachable only
+            .order(job_runs::timestamp.desc())
+            .single_value();
+        let mut query = job::table
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
             .filter(user_group_mapping::user_id.eq(user_id))
+            .into_boxed();
+
+        if let Some(reachable) = filter.reachable {
+            query = query.filter(coalesce_bool(is_reachable_subselect, false).eq(reachable));
+        }
+
+        if let Some(job_type_id) = &filter.job_type_id {
+            query = query.filter(job::job_type_id.eq(job_type_id));
+        }
+
+        if let Some(notify_users) = &filter.notify_users {
+            query = query.filter(job::notify_users.eq(notify_users));
+        }
+
+        if let Some(run_every) = &filter.run_every {
+            query = query.filter(job::run_every.eq(run_every));
+        }
+
+        let count: i64 = query
             .count()
             .get_result(&mut conn)
             .map_err(PostgresError::from)?;
