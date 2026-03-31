@@ -137,16 +137,41 @@
 				"tags": ["groups"],
 				"summary": "List groups visible by the logged in user",
 				"operationId": "list_groups",
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"description": "Current Page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "Items per page",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 40,
+							"maximum": 4294967295,
+							"minimum": 0
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "User",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/DisplayGroup"
-									}
+									"$ref": "#/components/schemas/PaginatedResponse_DisplayGroup"
 								}
 							}
 						}
@@ -1194,6 +1219,38 @@
 						"type": "integer",
 						"format": "int64",
 						"example": 4
+					}
+				}
+			},
+			"PaginatedResponse_DisplayGroup": {
+				"type": "object",
+				"description": "Returned paginated response",
+				"required": ["data", "meta"],
+				"properties": {
+					"data": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"description": "Returned Group",
+							"required": ["id", "name", "members"],
+							"properties": {
+								"id": {
+									"type": "string"
+								},
+								"members": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/DisplayGroupMember"
+									}
+								},
+								"name": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"meta": {
+						"$ref": "#/components/schemas/PaginatedResponseMetadata"
 					}
 				}
 			},
