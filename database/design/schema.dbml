@@ -1,5 +1,5 @@
 Table job [headercolor: #175e7a] {
-	id text [ not null, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 	job_type_id text [ not null ]
 	group_id text [ not null ]
@@ -10,7 +10,7 @@ Table job [headercolor: #175e7a] {
 }
 
 Table user [headercolor: #175e7a] {
-	id text [ not null, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 	email text [ not null ]
 	password text [ not null ]
@@ -18,23 +18,23 @@ Table user [headercolor: #175e7a] {
 }
 
 Table group [headercolor: #175e7a] {
-	id text [ not null, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 }
 
 Table user_group_mapping [headercolor: #175e7a] {
-	user_id text [ not null ]
-	group_id text [ not null ]
+	user_id text [ pk, not null ]
+	group_id text [ pk, not null ]
 	role_id text [ not null, default: 'user' ]
 }
 
 Table role [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	name text [ not null ]
 }
 
 Table job_runs [headercolor: #175e7a] {
-	id text [ not null, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	job_id text [ not null ]
 	timestamp timestamp [ not null ]
 	triggered_notification boolean [ not null ]
@@ -43,28 +43,28 @@ Table job_runs [headercolor: #175e7a] {
 }
 
 Table job_type [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	name text
 }
 
 Table job_details_http [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	url text [ not null ]
 }
 
 Table job_details_ping [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	host text [ not null ]
 }
 
 Table job_result_ping [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	ip_address inet [ not null ]
 	latency integer [ not null ]
 }
 
 Table job_result_http [headercolor: #175e7a] {
-	id text [ not null ]
+	id text [ pk, not null ]
 	ip_address inet [ not null ]
 	status_code integer [ not null ]
 	latency integer [ not null ]
@@ -72,7 +72,7 @@ Table job_result_http [headercolor: #175e7a] {
 }
 
 Table refresh_token [headercolor: #175e7a] {
-	token text [ not null ]
+	token text [ pk, not null ]
 	user_id text [ not null ]
 	expires_on timestamp [ not null ]
 }
