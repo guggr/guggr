@@ -193,7 +193,7 @@
 </div>
 
 <div class="bg-base-100 rounded-box my-4 p-4 shadow-md">
-	<h2 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h2>
+	<h3 class="text-base-content/80 mb-2 text-lg font-bold">Timeline</h3>
 
 	<JobRuns {jobRunsPromise} />
 </div>
