@@ -2,7 +2,6 @@ pub mod detail;
 pub mod run;
 
 use database_client::{
-    coalesce_bool,
     models::{Job, JobDetailsHttp, JobDetailsPing},
     schema::{
         job, job_details_http, job_details_ping,
@@ -18,7 +17,7 @@ use crate::{
     adapters::outgoing::postgres::{Postgres, PostgresError},
     core::{
         domain::errors::DomainError,
-        models::job::{FilterJobQuery, JobWithRawDetails, UpdateJob},
+        models::job::{BaseQueryBuilder, FilterJobQuery, JobWithRawDetails, UpdateJob},
         ports::repository::RepositoryJobPort,
     },
 };
@@ -147,32 +146,15 @@ impl RepositoryJobPort for Postgres {
             // Select latest reachable only
             .order(job_runs::timestamp.desc())
             .single_value();
-        let mut query = job::table
+
+        let base_query = filter.build_base_query();
+        let jobs: Vec<JobListDatabaseType> = base_query
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
             .filter(user_group_mapping::user_id.eq(user_id))
             .left_join(job_details_http::table)
             .left_join(job_details_ping::table)
-            .into_boxed();
-
-        if let Some(reachable) = filter.reachable {
-            query = query.filter(coalesce_bool(is_reachable_subselect, false).eq(reachable));
-        }
-
-        if let Some(job_type_id) = &filter.job_type_id {
-            query = query.filter(job::job_type_id.eq(job_type_id));
-        }
-
-        if let Some(notify_users) = &filter.notify_users {
-            query = query.filter(job::notify_users.eq(notify_users));
-        }
-
-        if let Some(run_every) = &filter.run_every {
-            query = query.filter(job::run_every.eq(run_every));
-        }
-
-        let jobs: Vec<JobListDatabaseType> = query
             .select((
                 job::all_columns,
                 is_reachable_subselect,
@@ -218,36 +200,12 @@ impl RepositoryJobPort for Postgres {
     }
     fn count_jobs(&self, user_id: &str, filter: &FilterJobQuery) -> Result<i64, DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
-        let is_reachable_subselect = job_runs::table
-            .filter(job_runs::job_id.eq(job::id))
-            .select(job_runs::reachable)
-            // Select latest reachable only
-            .order(job_runs::timestamp.desc())
-            .single_value();
-        let mut query = job::table
+        let base_query = filter.build_base_query();
+        let count: i64 = base_query
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
             .filter(user_group_mapping::user_id.eq(user_id))
-            .into_boxed();
-
-        if let Some(reachable) = filter.reachable {
-            query = query.filter(coalesce_bool(is_reachable_subselect, false).eq(reachable));
-        }
-
-        if let Some(job_type_id) = &filter.job_type_id {
-            query = query.filter(job::job_type_id.eq(job_type_id));
-        }
-
-        if let Some(notify_users) = &filter.notify_users {
-            query = query.filter(job::notify_users.eq(notify_users));
-        }
-
-        if let Some(run_every) = &filter.run_every {
-            query = query.filter(job::run_every.eq(run_every));
-        }
-
-        let count: i64 = query
             .count()
             .get_result(&mut conn)
             .map_err(PostgresError::from)?;
