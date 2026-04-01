@@ -10,6 +10,9 @@
 
 To use guggr, an active account is necessary. Create one by clicking on "Register" or sign in to your account using the "Login" button instead. Once authenticated, your username is shown in the navigation bar, and by clicking on it, a dropdown opens, giving the option to log out or navigate to the account page or the groups overview.
 
+> [!TIP]
+> Unsure what these entities are? Take a look at our [concept overview](./concepts.md) first.
+
 ### Account
 
 The account page (`/account`) gives an overview of the currently signed-in account. At the current state, updates to the account or changing the password are not yet possible.
