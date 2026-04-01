@@ -2,17 +2,15 @@
 
 ## [0.2.0](https://github.com/guggr/guggr/compare/v0.1.0...v0.2.0) (2026-04-01)
 
-
 ### Features
 
-* **api-service:** add pagination to list endpoints ([#172](https://github.com/guggr/guggr/issues/172)) ([ba98ef3](https://github.com/guggr/guggr/commit/ba98ef3bcc86bfd5ce7d1995aec1f448cc5ecfe2))
-* **api-service:** configure CORS for release build ([#271](https://github.com/guggr/guggr/issues/271)) ([ce1bbcf](https://github.com/guggr/guggr/commit/ce1bbcf61cb2d204793d826526fbd691dd3bde85))
-* **ui:** use caching for group requests ([#261](https://github.com/guggr/guggr/issues/261)) ([84888cb](https://github.com/guggr/guggr/commit/84888cb792add1e991fe27b5755c11c8c494f4c8))
-
+- **api-service:** add pagination to list endpoints ([#172](https://github.com/guggr/guggr/issues/172)) ([ba98ef3](https://github.com/guggr/guggr/commit/ba98ef3bcc86bfd5ce7d1995aec1f448cc5ecfe2))
+- **api-service:** configure CORS for release build ([#271](https://github.com/guggr/guggr/issues/271)) ([ce1bbcf](https://github.com/guggr/guggr/commit/ce1bbcf61cb2d204793d826526fbd691dd3bde85))
+- **ui:** use caching for group requests ([#261](https://github.com/guggr/guggr/issues/261)) ([84888cb](https://github.com/guggr/guggr/commit/84888cb792add1e991fe27b5755c11c8c494f4c8))
 
 ### Bug Fixes
 
-* **ui:** change timeline to h3 ([#273](https://github.com/guggr/guggr/issues/273)) ([1db9777](https://github.com/guggr/guggr/commit/1db9777f9b9c26673317f80f4407fcc203d2ca5a))
+- **ui:** change timeline to h3 ([#273](https://github.com/guggr/guggr/issues/273)) ([1db9777](https://github.com/guggr/guggr/commit/1db9777f9b9c26673317f80f4407fcc203d2ca5a))
 
 ## [0.1.0](https://github.com/guggr/guggr/compare/v0.0.1...v0.1.0) (2026-03-30)
 
