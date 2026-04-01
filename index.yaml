@@ -2,6 +2,27 @@ apiVersion: v1
 entries:
   guggr-chart:
   - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2026-04-01T15:12:46.539711447Z"
+    dependencies:
+    - alias: postgres
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.18.3
+    - alias: rabbitmq
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.19.6
+    description: Helm chart for deploying guggr
+    digest: 08d4403a3b2949efa6b91b43c12be5edde793eac191f82f0c9b4ea67c859e8a6
+    home: https://github.com/guggr/guggr
+    icon: https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/assets/logo.svg
+    name: guggr-chart
+    type: application
+    urls:
+    - https://github.com/guggr/guggr/releases/download/guggr-chart-0.2.0/guggr-chart-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2026-03-30T20:21:50.509990311Z"
     dependencies:
@@ -22,4 +43,4 @@ entries:
     urls:
     - https://github.com/guggr/guggr/releases/download/guggr-chart-0.1.0/guggr-chart-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-30T20:21:50.51000033Z"
+generated: "2026-04-01T15:12:46.539726073Z"
