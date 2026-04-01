@@ -20,7 +20,9 @@ guggr (Swabian for "looker") is a high-availability solution that keeps a consta
 
 ## Quick Start
 
-TBD
+- Just want to learn how to use guggr? Take a look at our [user guide](./docs/user.md).
+- Being tasked with deploying guggr? Luckily we got some [deployment docs](./docs/deployment.md).
+- Want to learn what you need for development? Check out our [development docs](./docs/development.md).
 
 ## Architecture
 

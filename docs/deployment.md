@@ -2,14 +2,27 @@
 
 ## Quick Start
 
-Clone this repository and run `docker compose up -d`. This will build all containers and start them:
+Get a few configuration files and the compose file and then start the stack:
 
 ```sh
-git clone git@github.com:guggr/guggr.git && cd guggr
+wget -O compose.yaml https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/compose.prebuilt.yaml
+# Nginx config that proxies between backend and frontend
+wget -O nginx.conf https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/nginx.conf
+# RabbitMQ entrypoint that loads the definitions
+wget -O rabbitmq_entrypoint.sh https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/rabbitmq/entrypoint.sh
+# RabbitMQ definitions
+wget -O rabbitmq_definitions.json  https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/charts/guggr/files/rabbitmq_definitions.json
+# Example environment file. Replace the secrets before starting!
+wget -O .env https://raw.githubusercontent.com/guggr/guggr/refs/heads/main/.env.example
+chmod +x rabbitmq_entrypoint.sh
+
 docker compose up -d
 ```
 
 guggr will then be available under http://localhost:8080
+
+> [!WARNING]
+> This setup is intended for evaluation and local testing only. For production use, a Kubernetes deployment is recommended.
 
 ## Production Deployment
 
