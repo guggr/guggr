@@ -41,9 +41,15 @@ pub fn init_app(
     >,
     utoipa::openapi::OpenApi,
 ) {
+    let is_debug = cfg!(debug_assertions);
+
     let mut app = App::new()
         .wrap(TracingLogger::default())
-        .wrap(Cors::permissive())
+        .wrap(if is_debug {
+            Cors::permissive()
+        } else {
+            Cors::default()
+        })
         .into_utoipa_app()
         .openapi(ApiDoc::openapi())
         .app_data(garde_actix_web::web::JsonConfig::default().error_handler(json_error_handler))
