@@ -23,7 +23,7 @@
 				},
 				{
 					"type": "yaml",
-					"path": "charts/Chart.yaml",
+					"path": "charts/guggr/Chart.yaml",
 					"jsonpath": "$.appVersion"
 				},
 				{
