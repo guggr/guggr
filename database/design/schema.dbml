@@ -1,5 +1,5 @@
 Table job [headercolor: #175e7a] {
-	id text [ pk, not null, unique, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 	job_type_id text [ not null ]
 	group_id text [ not null ]
@@ -10,14 +10,15 @@ Table job [headercolor: #175e7a] {
 }
 
 Table user [headercolor: #175e7a] {
-	id text [ pk, not null, unique, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 	email text [ not null ]
 	password text [ not null ]
+	jwt_secret bytea [ not null ]
 }
 
 Table group [headercolor: #175e7a] {
-	id text [ pk, not null, unique, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	name text [ not null ]
 }
 
@@ -28,40 +29,56 @@ Table user_group_mapping [headercolor: #175e7a] {
 }
 
 Table role [headercolor: #175e7a] {
-	id text [ pk, not null, unique ]
+	id text [ pk, not null ]
 	name text [ not null ]
 }
 
 Table job_runs [headercolor: #175e7a] {
-	id text [ pk, not null, unique, note: 'Nano ID' ]
+	id text [ pk, not null, note: 'Nano ID' ]
 	job_id text [ not null ]
-	batch_id text [ not null ]
 	timestamp timestamp [ not null ]
 	triggered_notification boolean [ not null ]
+	batch_id text [ not null ]
 	reachable boolean [ not null ]
 }
 
 Table job_type [headercolor: #175e7a] {
-	id text [ pk, not null, unique ]
+	id text [ pk, not null ]
 	name text
 }
 
-Table job_result_ping [headercolor: #1ba406] {
-	id text [ pk, not null, unique ]
+Table job_details_http [headercolor: #175e7a] {
+	id text [ pk, not null ]
+	url text [ not null ]
+}
+
+Table job_details_ping [headercolor: #175e7a] {
+	id text [ pk, not null ]
+	host text [ not null ]
+}
+
+Table job_result_ping [headercolor: #175e7a] {
+	id text [ pk, not null ]
 	ip_address inet [ not null ]
 	latency integer [ not null ]
 }
 
-Table job_result_http [headercolor: #1ba406] {
-	id text [ pk, not null, unique ]
+Table job_result_http [headercolor: #175e7a] {
+	id text [ pk, not null ]
 	ip_address inet [ not null ]
 	status_code integer [ not null ]
 	latency integer [ not null ]
 	payload bytea [ not null ]
 }
 
-Ref fk_user_group_mapping_role_id_role {
-	user_group_mapping.role_id > role.id [ delete: set default, update: set default ]
+Table refresh_token [headercolor: #175e7a] {
+	token text [ pk, not null ]
+	user_id text [ not null ]
+	expires_on timestamp [ not null ]
+}
+
+Ref fk_job_group_id_group {
+	job.group_id > group.id [ delete: cascade, update: cascade ]
 }
 
 Ref fk_user_group_mapping_group_id_group {
@@ -72,22 +89,42 @@ Ref fk_user_group_mapping_user_id_user {
 	user_group_mapping.user_id > user.id [ delete: restrict, update: cascade ]
 }
 
+Ref fk_user_group_mapping_role_id_role {
+	user_group_mapping.role_id > role.id [ delete: set default, update: cascade ]
+}
+
 Ref fk_job_runs_job_id_job {
 	job_runs.job_id > job.id [ delete: cascade, update: cascade ]
 }
 
-Ref fk_job_group_id_group {
-	job.group_id > group.id [ delete: cascade, update: cascade ]
-}
-
 Ref fk_job_job_type_id_job_type {
-	job.job_type_id > job_type.id [ delete: cascade, update: restrict ]
+	job.job_type_id > job_type.id [ delete: restrict, update: cascade ]
 }
 
-Ref fk_result_ping_id_job_runs {
-	job_result_ping.id - job_runs.id [ delete: cascade, update: cascade ]
+Ref fk_job_details_http_id_job {
+	job_details_http.id > job.id [ delete: no action, update: no action ]
 }
 
-Ref fk_result_http_id_job_runs {
-	job_result_http.id - job_runs.id [ delete: cascade, update: cascade ]
+Ref fk_job_details_http_id_job {
+	job_details_http.id > job.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_job_details_ping_id_job {
+	job_details_ping.id > job.id [ delete: no action, update: no action ]
+}
+
+Ref fk_job_details_ping_id_job {
+	job_details_ping.id > job.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_job_result_ping_id_job_runs {
+	job_result_ping.id > job_runs.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_job_result_http_id_job_runs {
+	job_result_http.id > job_runs.id [ delete: cascade, update: cascade ]
+}
+
+Ref fk_refresh_token_user_id_user {
+	refresh_token.user_id > user.id [ delete: cascade, update: cascade ]
 }
