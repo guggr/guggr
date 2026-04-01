@@ -26,11 +26,11 @@ pub struct PaginatedResponseMetadata {
 #[allow(unused)]
 pub struct PaginationQuery {
     /// Current Page
-    #[param(default = 0, minimum = 0, maximum = 4294967295u32)]
+    #[param(default = default_page, minimum = 0, maximum = 4294967295u32)]
     #[serde(default = "default_page")]
     pub page: u32,
     /// Items per page
-    #[param(default = 40, minimum = 0, maximum = 4294967295u32)]
+    #[param(default = default_per_page, minimum = 0, maximum = 4294967295u32)]
     #[serde(default = "default_per_page")]
     pub per_page: u32,
 }
