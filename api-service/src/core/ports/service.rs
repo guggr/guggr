@@ -6,7 +6,8 @@ use crate::core::{
             UserId,
         },
         group::{CreateGroup, DisplayGroup, UpdateRequestGroup},
-        job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
+        job::{CreateJob, DisplayJob, FilterJobQuery, UpdateRequestJob, run::DisplayJobRun},
+        pagination::{PaginatedResponse, PaginationQuery},
         user::{CreateUser, DisplayUser},
     },
 };
@@ -51,7 +52,11 @@ pub trait ServiceGroupPort: Send + Sync {
     // Gets group by group ID
     fn get_group(&self, user_id: UserId, id: &str) -> Result<DisplayGroup, DomainError>;
     /// List groups by the supplied user ID
-    fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError>;
+    fn list_groups_by_user(
+        &self,
+        pagination: &PaginationQuery,
+        user_id: UserId,
+    ) -> Result<PaginatedResponse<DisplayGroup>, DomainError>;
     /// Update group with supplied data
     fn update_group(
         &self,
@@ -66,16 +71,22 @@ pub trait ServiceJobRunPort: Send + Sync {
     // List JobRuns the user is allowed to view
     fn list_job_runs(
         &self,
+        pagination: &PaginationQuery,
         user_id: UserId,
         job_id: &str,
-    ) -> Result<Vec<DisplayJobRun>, DomainError>;
+    ) -> Result<PaginatedResponse<DisplayJobRun>, DomainError>;
 }
 
 /// Service port for job interactions.
 pub trait ServiceJobPort: Send + Sync {
     fn create_job(&self, user_id: UserId, new_job: CreateJob) -> Result<DisplayJob, DomainError>;
     fn get_job_by_id(&self, user_id: UserId, job_id: &str) -> Result<DisplayJob, DomainError>;
-    fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError>;
+    fn list_jobs(
+        &self,
+        pagination: &PaginationQuery,
+        filter: &FilterJobQuery,
+        user_id: UserId,
+    ) -> Result<PaginatedResponse<DisplayJob>, DomainError>;
     fn update_job(
         &self,
         user_id: UserId,

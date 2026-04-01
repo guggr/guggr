@@ -9,7 +9,7 @@ use crate::core::{
     models::{
         group::{DisplayGroupMember, UpdateRequestGroup},
         job::{
-            JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
+            FilterJobQuery, JobWithRawDetails, UpdateJob, http::detail::UpdateJobDetailsHttp,
             ping::detail::UpdateJobDetailsPing, run::DisplayJobRun,
         },
     },
@@ -57,7 +57,12 @@ pub trait RepositoryGroupPort: Send + Sync {
     fn get_group(&self, id: &str) -> Result<Group, DomainError>;
 
     /// Returns the groups from the repository by the user ID.
-    fn list_groups_by_user_id(&self, user_id: &str) -> Result<Vec<Group>, DomainError>;
+    fn list_groups_by_user_id(
+        &self,
+        user_id: &str,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<Group>, DomainError>;
 
     /// Returns group members from the repository by group ids.
     fn get_members_for_multiple_groups(
@@ -67,6 +72,9 @@ pub trait RepositoryGroupPort: Send + Sync {
 
     /// Check user permissions for group updates.
     fn check_user_can_update_group(&self, id: &str, user_id: &str) -> Result<bool, DomainError>;
+
+    /// Count all jobs the user can view
+    fn count_groups(&self, user_id: &str) -> Result<i64, DomainError>;
 
     /// Update group
     fn update_group(
@@ -89,6 +97,9 @@ pub trait RepositoryJobRunPort: Send + Sync {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<DisplayJobRun>, DomainError>;
+
+    /// Returns the total amount of JobRuns from the repository.
+    fn count_job_run_results(&self, job_id: &str) -> Result<i64, DomainError>;
 }
 
 pub trait RepositoryJobPort: Send + Sync {
@@ -113,10 +124,12 @@ pub trait RepositoryJobPort: Send + Sync {
     fn list_jobs(
         &self,
         user_id: &str,
+        filter: &FilterJobQuery,
         limit: i64,
         offset: i64,
     ) -> Result<Vec<JobWithRawDetails>, DomainError>;
     fn delete_job(&self, job_id: &str) -> Result<(), DomainError>;
+    fn count_jobs(&self, user_id: &str, filter: &FilterJobQuery) -> Result<i64, DomainError>;
     fn update_job(&self, job_id: &str, updated_job: UpdateJob) -> Result<(Job, bool), DomainError>;
 }
 

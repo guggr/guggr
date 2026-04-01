@@ -1,15 +1,19 @@
 <script lang="ts">
-	import type { DisplayJobRun } from '@/api';
+	import type {
+		PaginatedResponseDisplayJobRun,
+		PaginatedResponseDisplayJobRunDataInner,
+	} from '@/api';
 	import Error from '@/components/shared/Error.svelte';
 	import Loading from '@/components/shared/Loading.svelte';
 	import { dateTime } from '@/lib/formatter';
 
-	let selected = $state<DisplayJobRun | null>(null);
+	let selected = $state<PaginatedResponseDisplayJobRunDataInner | null>(null);
 
-	let { jobRunsPromise = new Promise(() => {}) }: { jobRunsPromise?: Promise<DisplayJobRun[]> } =
-		$props();
+	let {
+		jobRunsPromise = new Promise(() => {}),
+	}: { jobRunsPromise?: Promise<PaginatedResponseDisplayJobRun> } = $props();
 
-	function showDetailsCreator(run: DisplayJobRun) {
+	function showDetailsCreator(run: PaginatedResponseDisplayJobRunDataInner) {
 		return () => {
 			selected = run;
 		};
@@ -20,7 +24,7 @@
 	<Loading />
 {:then jobRuns}
 	<ul class="flex flex-row-reverse gap-1 overflow-x-auto p-1">
-		{#each jobRuns as jobRun (jobRun.id)}
+		{#each jobRuns.data as jobRun (jobRun.id)}
 			{@render run(jobRun)}
 		{:else}
 			<li class="w-full text-base-content/80 font-bold">No job runs available yet.</li>
@@ -73,7 +77,7 @@
 	<Error />
 {/await}
 
-{#snippet run(r: DisplayJobRun)}
+{#snippet run(r: PaginatedResponseDisplayJobRunDataInner)}
 	<li
 		class={{
 			'bg-success': r.reachable,

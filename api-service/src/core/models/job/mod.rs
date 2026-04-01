@@ -1,12 +1,16 @@
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use database_client::{
+    coalesce_bool,
     models::{Job, JobDetailsHttp, JobDetailsPing},
-    schema::job,
+    schema::{
+        job,
+        job_runs::{self},
+    },
 };
-use diesel::prelude::AsChangeset;
+use diesel::{ExpressionMethods, QueryDsl, pg::Pg, prelude::AsChangeset};
 use frunk::LabelledGeneric;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::core::models::job::{
     http::detail::{CreateJobDetailsHttp, DisplayJobDetailsHttp, UpdateJobDetailsHttp},
@@ -64,6 +68,18 @@ pub struct DisplayJob {
     pub last_scheduled: Option<DateTime<Utc>>,
     pub reachable: bool,
     pub details: DisplayJobDetails,
+}
+
+#[serde_with::serde_as]
+#[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, IntoParams)]
+/// Filter Query for Jobs
+pub struct FilterJobQuery {
+    pub job_type_id: Option<String>,
+    pub notify_users: Option<bool>,
+    #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
+    #[schema(value_type = i64)]
+    pub run_every: Option<Duration>,
+    pub reachable: Option<bool>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, LabelledGeneric, Deserialize, ToSchema, Serialize)]
@@ -158,5 +174,42 @@ impl From<DisplayJobDetailsHttp> for DisplayJobDetails {
 impl From<DisplayJobDetailsPing> for DisplayJobDetails {
     fn from(value: DisplayJobDetailsPing) -> Self {
         Self::Ping(value)
+    }
+}
+pub trait BaseQueryBuilder {
+    fn build_base_query<'a>(self) -> job::BoxedQuery<'a, Pg>
+    where
+        Self: 'a;
+}
+
+impl BaseQueryBuilder for &FilterJobQuery {
+    fn build_base_query<'a>(self) -> job::BoxedQuery<'a, Pg>
+    where
+        Self: 'a,
+    {
+        let mut query = job::table.into_boxed();
+        if let Some(reachable) = self.reachable {
+            let latest_reachable = job_runs::table
+                .filter(job_runs::job_id.eq(job::id))
+                .select(job_runs::reachable)
+                .order(job_runs::timestamp.desc())
+                .single_value();
+
+            query = query.filter(coalesce_bool(latest_reachable, false).eq(reachable));
+        }
+
+        if let Some(job_type_id) = self.job_type_id.as_deref() {
+            query = query.filter(job::job_type_id.eq(job_type_id));
+        }
+
+        if let Some(notify_users) = self.notify_users {
+            query = query.filter(job::notify_users.eq(notify_users));
+        }
+
+        if let Some(run_every) = self.run_every {
+            query = query.filter(job::run_every.eq(run_every));
+        }
+
+        query
     }
 }

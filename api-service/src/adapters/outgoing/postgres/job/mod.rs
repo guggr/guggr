@@ -3,7 +3,11 @@ pub mod run;
 
 use database_client::{
     models::{Job, JobDetailsHttp, JobDetailsPing},
-    schema::{job, job_details_http, job_details_ping, job_runs, user_group_mapping},
+    schema::{
+        job, job_details_http, job_details_ping,
+        job_runs::{self},
+        user_group_mapping,
+    },
 };
 use diesel::{
     ExpressionMethods, JoinOnDsl, NullableExpressionMethods, QueryDsl, RunQueryDsl, dsl::exists,
@@ -13,7 +17,7 @@ use crate::{
     adapters::outgoing::postgres::{Postgres, PostgresError},
     core::{
         domain::errors::DomainError,
-        models::job::{JobWithRawDetails, UpdateJob},
+        models::job::{BaseQueryBuilder, FilterJobQuery, JobWithRawDetails, UpdateJob},
         ports::repository::RepositoryJobPort,
     },
 };
@@ -123,6 +127,7 @@ impl RepositoryJobPort for Postgres {
     fn list_jobs(
         &self,
         user_id: &str,
+        filter: &FilterJobQuery,
         limit: i64,
         offset: i64,
     ) -> Result<Vec<JobWithRawDetails>, DomainError> {
@@ -142,7 +147,8 @@ impl RepositoryJobPort for Postgres {
             .order(job_runs::timestamp.desc())
             .single_value();
 
-        let jobs: Vec<JobListDatabaseType> = job::table
+        let base_query = filter.build_base_query();
+        let jobs: Vec<JobListDatabaseType> = base_query
             .inner_join(
                 user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
             )
@@ -191,5 +197,18 @@ impl RepositoryJobPort for Postgres {
             .execute(&mut conn)
             .map_err(PostgresError::from)?;
         Ok(())
+    }
+    fn count_jobs(&self, user_id: &str, filter: &FilterJobQuery) -> Result<i64, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+        let base_query = filter.build_base_query();
+        let count: i64 = base_query
+            .inner_join(
+                user_group_mapping::table.on(job::group_id.eq(user_group_mapping::group_id)),
+            )
+            .filter(user_group_mapping::user_id.eq(user_id))
+            .count()
+            .get_result(&mut conn)
+            .map_err(PostgresError::from)?;
+        Ok(count)
     }
 }

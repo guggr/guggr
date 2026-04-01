@@ -12,7 +12,8 @@ use crate::{
         domain::{errors::DomainError, openapi_helper},
         models::{
             auth::UserId,
-            job::{CreateJob, DisplayJob, UpdateRequestJob, run::DisplayJobRun},
+            job::{CreateJob, DisplayJob, FilterJobQuery, UpdateRequestJob, run::DisplayJobRun},
+            pagination::{PaginatedResponse, PaginationQuery},
         },
         ports::service::ServicePort,
     },
@@ -130,9 +131,10 @@ pub async fn get(
 }
 
 #[utoipa::path(
+    params(PaginationQuery, FilterJobQuery),
     operation_id = "list_job",
     responses(
-        (status = 200, description = "Jobs", body = [DisplayJob]),
+        (status = 200, description = "Jobs", body = PaginatedResponse<DisplayJob>),
         openapi_helper::ResUnauthorized,
         openapi_helper::ResInternalServerError,
     ),
@@ -143,6 +145,8 @@ pub async fn get(
 /// List Jobs
 pub async fn list(
     svc: web::Data<Arc<dyn ServicePort>>,
+    query: web::Query<PaginationQuery>,
+    filter: web::Query<FilterJobQuery>,
     req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
     let auth_user = req
@@ -150,7 +154,10 @@ pub async fn list(
         .get::<UserId>()
         .cloned()
         .ok_or(DomainError::Unauthorized)?;
-    let job = web::block(move || svc.list_jobs(auth_user))
+    let params = query.into_inner();
+    let filter = filter.into_inner();
+
+    let job = web::block(move || svc.list_jobs(&params, &filter, auth_user))
         .await
         .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(job))
@@ -159,10 +166,10 @@ pub async fn list(
 #[utoipa::path(
     operation_id = "list_job_runs",
     params(
-        ("id" = String, Path, description = "Job ID")
+        ("id" = String, Path, description = "Job ID"), PaginationQuery
     ),
     responses(
-        (status = 200, description = "List jobs runs", body = [DisplayJobRun]),
+        (status = 200, description = "List jobs runs", body = PaginatedResponse<DisplayJobRun>),
         openapi_helper::ResUnauthorized,
         openapi_helper::ResNotFound,
         openapi_helper::ResInternalServerError,
@@ -175,6 +182,7 @@ pub async fn list(
 pub async fn list_runs(
     svc: web::Data<Arc<dyn ServicePort>>,
     path: web::Path<String>,
+    query: web::Query<PaginationQuery>,
     req: HttpRequest,
 ) -> actix_web::Result<impl Responder> {
     let auth_user = req
@@ -182,7 +190,9 @@ pub async fn list_runs(
         .get::<UserId>()
         .cloned()
         .ok_or(DomainError::Unauthorized)?;
-    let runs = web::block(move || svc.list_job_runs(auth_user, &path.into_inner()))
+    let params = query.into_inner();
+
+    let runs = web::block(move || svc.list_job_runs(&params, auth_user, &path.into_inner()))
         .await
         .map_err(ErrorInternalServerError)??;
     Ok(HttpResponse::Ok().json(runs))

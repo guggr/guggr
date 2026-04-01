@@ -45,6 +45,8 @@ impl RepositoryGroupPort for Postgres {
     fn list_groups_by_user_id(
         &self,
         user_id: &str,
+        limit: i64,
+        offset: i64,
     ) -> Result<Vec<database_client::models::Group>, DomainError> {
         let mut conn = self.pool.get().map_err(PostgresError::from)?;
 
@@ -54,6 +56,8 @@ impl RepositoryGroupPort for Postgres {
             .select((group::id, group::name))
             .distinct()
             .order(group::name.asc())
+            .limit(limit)
+            .offset(offset)
             .load::<Group>(&mut conn)
             .map_err(PostgresError::from)?;
 
@@ -182,5 +186,16 @@ impl RepositoryGroupPort for Postgres {
         debug!("Performed member mapping for display in result");
 
         Ok((new_group, new_members))
+    }
+
+    fn count_groups(&self, user_id: &str) -> Result<i64, DomainError> {
+        let mut conn = self.pool.get().map_err(PostgresError::from)?;
+        let count: i64 = group::table
+            .inner_join(user_group_mapping::table)
+            .filter(user_group_mapping::user_id.eq(user_id))
+            .count()
+            .get_result(&mut conn)
+            .map_err(PostgresError::from)?;
+        Ok(count)
     }
 }

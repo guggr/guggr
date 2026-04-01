@@ -6,6 +6,7 @@ use crate::core::{
     models::{
         auth::UserId,
         group::{CreateGroup, DisplayGroup, DisplayGroupMember, UpdateRequestGroup},
+        pagination::{PaginatedResponse, PaginatedResponseMetadata, PaginationQuery},
     },
     ports::service::ServiceGroupPort,
     services::Service,
@@ -48,8 +49,16 @@ impl ServiceGroupPort for Service {
         Ok(group)
     }
 
-    fn list_groups_by_user(&self, user_id: UserId) -> Result<Vec<DisplayGroup>, DomainError> {
-        let groups = self.db.list_groups_by_user_id(&user_id.0)?;
+    fn list_groups_by_user(
+        &self,
+        pagination: &PaginationQuery,
+        user_id: UserId,
+    ) -> Result<PaginatedResponse<DisplayGroup>, DomainError> {
+        let groups = self.db.list_groups_by_user_id(
+            &user_id.0,
+            pagination.per_page.into(),
+            pagination.page.into(),
+        )?;
 
         let group_ids: Vec<&str> = groups.iter().map(|g| g.id.as_str()).collect();
 
@@ -62,8 +71,12 @@ impl ServiceGroupPort for Service {
                 DisplayGroup::from_group(g, members)
             })
             .collect();
+        let count = self.db.count_groups(&user_id.0)?;
 
-        Ok(display_groups)
+        Ok(PaginatedResponse::new(
+            display_groups,
+            PaginatedResponseMetadata::build(pagination, count),
+        ))
     }
 
     fn update_group(

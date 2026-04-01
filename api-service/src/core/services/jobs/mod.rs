@@ -6,10 +6,11 @@ use crate::core::{
     models::{
         auth::UserId,
         job::{
-            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, UpdateRequestJob,
-            UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
+            CreateJob, CreateJobDetails, DisplayJob, DisplayJobDetails, FilterJobQuery,
+            UpdateRequestJob, UpdateRequestJobDetails, http::detail::CreateJobDetailsHttp,
             ping::detail::CreateJobDetailsPing,
         },
+        pagination::{PaginatedResponse, PaginatedResponseMetadata, PaginationQuery},
     },
     ports::service::ServiceJobPort,
     services::Service,
@@ -65,9 +66,19 @@ impl ServiceJobPort for Service {
         Ok(job)
     }
 
-    fn list_jobs(&self, user_id: UserId) -> Result<Vec<DisplayJob>, DomainError> {
-        let raw_jobs = self.db.list_jobs(&user_id.0, 10, 0)?;
-        Ok(raw_jobs
+    fn list_jobs(
+        &self,
+        pagination: &PaginationQuery,
+        filter: &FilterJobQuery,
+        user_id: UserId,
+    ) -> Result<PaginatedResponse<DisplayJob>, DomainError> {
+        let raw_jobs = self.db.list_jobs(
+            &user_id.0,
+            filter,
+            pagination.per_page.into(),
+            pagination.page.into(),
+        )?;
+        let jobs = raw_jobs
             .into_iter()
             .map(|(job, reachable, http, ping)| {
                 let mut display_job = DisplayJob::from_job(job, reachable.unwrap_or_default());
@@ -75,10 +86,15 @@ impl ServiceJobPort for Service {
                     display_job.details = DisplayJobDetails::Http(detail.transmogrify());
                 } else if let Some(detail) = ping {
                     display_job.details = DisplayJobDetails::Ping(detail.transmogrify());
-                };
+                }
                 display_job
             })
-            .collect())
+            .collect();
+        let count = self.db.count_jobs(&user_id.0, filter)?;
+        Ok(PaginatedResponse::new(
+            jobs,
+            PaginatedResponseMetadata::build(pagination, count),
+        ))
     }
 
     fn update_job(
