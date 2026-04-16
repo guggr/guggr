@@ -18,7 +18,7 @@ COPY assets assets
 RUN cd frontend/web && pnpm build
 
 
-FROM docker.io/nginxinc/nginx-unprivileged:1.29.5-alpine-slim
+FROM docker.io/nginxinc/nginx-unprivileged:1.29.8-alpine-slim
 
 COPY frontend/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/frontend/web/dist /usr/share/nginx/html
