@@ -39,7 +39,7 @@ hostname = "0.4.2"
 futures-util = "0.3.32"
 validator = { version = "0.20", features = ["derive"] }
 database-client = { path = "database/database-client" }
-tokio = "1.50.0"
+tokio = "1.51.1"
 rand = "0.10.0"
 anyhow = "1.0.102"
 nanoid = "0.4.0"
