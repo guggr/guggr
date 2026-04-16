@@ -164,7 +164,7 @@ jobs:
         with:
           packages: protobuf-compiler
       - run: rustup update stable && rustup default stable
-      - uses: cargo-bins/cargo-binstall@v1.17.8
+      - uses: cargo-bins/cargo-binstall@v1.18.1
       - run: cargo binstall cargo-nextest
       - uses: Swatinem/rust-cache@v2.9.1
         with:
