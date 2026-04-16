@@ -36,7 +36,7 @@ jobs:
         uses: docker/setup-buildx-action@v4.0.0
       - name: Build and push buildcache
         id: push
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: Dockerfile.rust
@@ -99,7 +99,7 @@ jobs:
 
       - name: Build and push
         id: push
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: ${{ matrix.dockerfile }}
