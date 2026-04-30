@@ -18,7 +18,7 @@
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-sql": "^0.20.0",
 		"prettier-plugin-svelte": "^3.5.1",
-		"prettier-plugin-tailwindcss": "^0.7.2"
+		"prettier-plugin-tailwindcss": "^0.8.0"
 	},
 	"engines": {
 		"node": "^24"
