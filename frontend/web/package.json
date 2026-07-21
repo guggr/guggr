@@ -18,7 +18,7 @@
 		"@astrojs/svelte": "^7.2.5",
 		"@lucide/svelte": "^0.564.0",
 		"@tailwindcss/vite": "^4.2.2",
-		"astro": "^5.18.1",
+		"astro": "^7.1.0",
 		"daisyui": "^5.5.19",
 		"svelte": "^5.55.4",
 		"svelte-check": "^4.4.6",
